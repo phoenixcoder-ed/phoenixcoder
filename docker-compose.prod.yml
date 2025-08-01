@@ -1,0 +1,138 @@
+version: '3.8'
+
+services:
+  # OIDC 认证服务
+  oidc-server:
+    image: ${CI_REGISTRY_IMAGE}/oidc-server:${CI_COMMIT_SHA}
+    container_name: phoenixcoder-oidc-server
+    ports:
+      - "8001:8001"
+    environment:
+      - OIDC_ISSUER=https://oidc.phoenixcoder.com
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - phoenixcoder-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  # 主服务端
+  server:
+    image: ${CI_REGISTRY_IMAGE}/server:${CI_COMMIT_SHA}
+    container_name: phoenixcoder-server
+    ports:
+      - "8000:8000"
+    environment:
+      - OIDC_ISSUER=https://oidc.phoenixcoder.com
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OIDC_REDIRECT_URI=https://admin.phoenixcoder.com/auth/callback
+      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+    depends_on:
+      - oidc-server
+      - postgres
+      - redis
+    networks:
+      - phoenixcoder-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  # 管理端
+  admin:
+    image: ${CI_REGISTRY_IMAGE}/admin:${CI_COMMIT_SHA}
+    container_name: phoenixcoder-admin
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=https://api.phoenixcoder.com
+      - REACT_APP_OIDC_ISSUER=https://oidc.phoenixcoder.com
+      - REACT_APP_CLIENT_ID=${ADMIN_CLIENT_ID}
+    depends_on:
+      - server
+      - oidc-server
+    networks:
+      - phoenixcoder-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: phoenixcoder-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    networks:
+      - phoenixcoder-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: phoenixcoder-postgres
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - phoenixcoder-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  # Nginx 反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: phoenixcoder-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - server
+      - oidc-server
+      - admin
+    networks:
+      - phoenixcoder-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
+volumes:
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
+
+networks:
+  phoenixcoder-network:
+    driver: bridge 
