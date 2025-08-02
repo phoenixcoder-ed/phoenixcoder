@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="750" viewBox="0 0 1000 750">
+  <!-- 背景 -->
+  <rect width="1000" height="750" fill="#f8f9fa"/>
+
+  <!-- 标题 -->
+  <text x="500" y="40" font-family="Arial" font-size="24" text-anchor="middle" font-weight="bold">PhoenixCoder 系统架构图</text>
+
+  <!-- 客户端层 -->
+  <rect x="450" y="70" width="100" height="60" rx="8" fill="#4285f4"/>
+  <text x="500" y="110" font-family="Arial" font-size="16" text-anchor="middle" fill="white" font-weight="bold">客户端</text>
+
+  <!-- 负载均衡层 -->
+  <rect x="425" y="150" width="150" height="60" rx="8" fill="#2196f3"/>
+  <text x="500" y="190" font-family="Arial" font-size="16" text-anchor="middle" fill="white" font-weight="bold">Nginx
+反向代理</text>
+
+  <!-- 连接线: 客户端到Nginx -->
+  <line x1="500" y1="130" x2="500" y2="150" stroke="#333" stroke-width="2"/>
+  <polygon points="500,150 495,140 505,140" fill="#333"/>
+
+  <!-- 前端服务层 -->
+  <rect x="250" y="230" width="180" height="60" rx="8" fill="#673ab7"/>
+  <text x="340" y="270" font-family="Arial" font-size="16" text-anchor="middle" fill="white" font-weight="bold">管理前端
+(React)</text>
+
+  <!-- API服务层 -->
+  <rect x="450" y="230" width="180" height="60" rx="8" fill="#4caf50"/>
+  <text x="540" y="270" font-family="Arial" font-size="16" text-anchor="middle" fill="white" font-weight="bold">API服务
+(FastAPI)</text>
+
+  <!-- 认证服务层 -->
+  <rect x="650" y="230" width="180" height="60" rx="8" fill="#ff9800"/>
+  <text x="740" y="270" font-family="Arial" font-size="16" text-anchor="middle" fill="white" font-weight="bold">认证服务
+(OIDC Server)</text>
+
+  <!-- 连接线: Nginx到各服务 -->
+  <line x1="450" y1="210" x2="340" y2="230" stroke="#333" stroke-width="2"/>
+  <polygon points="340,230 350,220 330,220" fill="#333"/>
+  <text x="390" y="215" font-family="Arial" font-size="12" text-anchor="middle">/</text>
+
+  <line x1="500" y1="210" x2="540" y2="230" stroke="#333" stroke-width="2"/>
+  <polygon points="540,230 550,220 530,220" fill="#333"/>
+  <text x="515" y="210" font-family="Arial" font-size="12" text-anchor="middle">/api/</text>
+
+  <line x1="550" y1="210" x2="740" y2="230" stroke="#333" stroke-width="2"/>
+  <polygon points="740,230 750,220 730,220" fill="#333"/>
+  <text x="640" y="215" font-family="Arial" font-size="12" text-anchor="middle">/oidc/</text>
+
+  <!-- 数据存储层标题 -->
+  <text x="500" y="320" font-family="Arial" font-size="18" text-anchor="middle" font-weight="bold">数据存储层</text>
+
+  <!-- 数据库服务 -->
+  <rect x="200" y="350" width="180" height="60" rx="8" fill="#3f51b5"/>
+  <text x="290" y="390" font-family="Arial" font-size="16" text-anchor="middle" fill="white" font-weight="bold">PostgreSQL
+数据库</text>
+
+  <!-- 缓存服务 -->
+  <rect x="450" y="350" width="180" height="60" rx="8" fill="#e91e63"/>
+  <text x="540" y="390" font-family="Arial" font-size="16" text-anchor="middle" fill="white" font-weight="bold">Redis
+缓存</text>
+
+  <!-- 消息队列服务 -->
+  <rect x="700" y="350" width="180" height="60" rx="8" fill="#00bcd4"/>
+  <text x="790" y="390" font-family="Arial" font-size="16" text-anchor="middle" fill="white" font-weight="bold">RabbitMQ
+消息队列</text>
+
+  <!-- 服务间连接线 -->
+  <!-- 管理前端到API服务 -->
+  <line x1="430" y1="260" x2="450" y2="260" stroke="#333" stroke-width="2"/>
+  <polygon points="450,260 440,255 440,265" fill="#333"/>
+
+  <!-- 管理前端到认证服务 -->
+  <line x1="430" y1="260" x2="430" y2="300" stroke="#333" stroke-width="2" stroke-dasharray="5,5"/>
+  <line x1="430" y1="300" x2="650" y2="300" stroke="#333" stroke-width="2" stroke-dasharray="5,5"/>
+  <line x1="650" y1="300" x2="650" y2="260" stroke="#333" stroke-width="2" stroke-dasharray="5,5"/>
+  <polygon points="650,260 660,255 660,265" fill="#333"/>
+
+  <!-- API服务到认证服务 -->
+  <line x1="630" y1="260" x2="650" y2="260" stroke="#333" stroke-width="2"/>
+  <polygon points="650,260 640,255 640,265" fill="#333"/>
+
+  <!-- API服务到数据库 -->
+  <line x1="450" y1="290" x2="290" y2="350" stroke="#333" stroke-width="2"/>
+  <polygon points="290,350 300,360 280,360" fill="#333"/>
+
+  <!-- API服务到缓存 -->
+  <line x1="540" y1="290" x2="540" y2="350" stroke="#333" stroke-width="2"/>
+  <polygon points="540,350 535,340 545,340" fill="#333"/>
+
+  <!-- API服务到消息队列 -->
+  <line x1="630" y1="290" x2="700" y2="350" stroke="#333" stroke-width="2"/>
+  <polygon points="700,350 710,360 690,360" fill="#333"/>
+
+  <!-- 认证服务到数据库 -->
+  <line x1="740" y1="290" x2="290" y2="350" stroke="#333" stroke-width="2"/>
+  <polygon points="290,350 300,360 280,360" fill="#333"/>
+
+  <!-- 认证服务到缓存 -->
+  <line x1="740" y1="290" x2="540" y2="350" stroke="#333" stroke-width="2"/>
+  <polygon points="540,350 550,360 530,360" fill="#333"/>
+
+  <!-- 健康检查 -->
+  <rect x="425" y="440" width="150" height="50" rx="8" fill="#8bc34a"/>
+  <text x="500" y="470" font-family="Arial" font-size="14" text-anchor="middle" fill="white" font-weight="bold">健康检查
+/health</text>
+
+  <!-- Nginx到健康检查 -->
+  <line x1="500" y1="210" x2="500" y2="440" stroke="#333" stroke-width="2"/>
+  <polygon points="500,440 495,430 505,430" fill="#333"/>
+
+  <!-- 部署层标题 -->
+  <text x="500" y="520" font-family="Arial" font-size="18" text-anchor="middle" font-weight="bold">部署与网络层</text>
+
+  <!-- Docker容器 -->
+  <rect x="150" y="550" width="120" height="40" rx="8" fill="#9e9e9e"/>
+  <text x="210" y="575" font-family="Arial" font-size="14" text-anchor="middle" fill="white" font-weight="bold">Docker</text>
+
+  <rect x="300" y="550" width="120" height="40" rx="8" fill="#9e9e9e"/>
+  <text x="360" y="575" font-family="Arial" font-size="14" text-anchor="middle" fill="white" font-weight="bold">Docker</text>
+
+  <rect x="450" y="550" width="120" height="40" rx="8" fill="#9e9e9e"/>
+  <text x="510" y="575" font-family="Arial" font-size="14" text-anchor="middle" fill="white" font-weight="bold">Docker</text>
+
+  <rect x="600" y="550" width="120" height="40" rx="8" fill="#9e9e9e"/>
+  <text x="660" y="575" font-family="Arial" font-size="14" text-anchor="middle" fill="white" font-weight="bold">Docker</text>
+
+  <rect x="750" y="550" width="120" height="40" rx="8" fill="#9e9e9e"/>
+  <text x="810" y="575" font-family="Arial" font-size="14" text-anchor="middle" fill="white" font-weight="bold">Docker</text>
+
+  <!-- 网络层 -->
+  <rect x="100" y="620" width="800" height="40" rx="8" fill="#607d8b"/>
+  <text x="500" y="645" font-family="Arial" font-size="16" text-anchor="middle" fill="white" font-weight="bold">phoenixcoder-network 桥接网络</text>
+
+  <!-- 容器到网络连接线 -->
+  <line x1="210" y1="590" x2="210" y2="620" stroke="#333" stroke-width="2"/>
+  <line x1="360" y1="590" x2="360" y2="620" stroke="#333" stroke-width="2"/>
+  <line x1="510" y1="590" x2="510" y2="620" stroke="#333" stroke-width="2"/>
+  <line x1="660" y1="590" x2="660" y2="620" stroke="#333" stroke-width="2"/>
+  <line x1="810" y1="590" x2="810" y2="620" stroke="#333" stroke-width="2"/>
+
+  <!-- 服务到容器的虚线连接 -->
+  <line x1="340" y1="290" x2="210" y2="550" stroke="#333" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="540" y1="290" x2="360" y2="550" stroke="#333" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="740" y1="290" x2="510" y2="550" stroke="#333" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="290" y1="410" x2="660" y2="550" stroke="#333" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="540" y1="410" x2="660" y2="550" stroke="#333" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="790" y1="410" x2="810" y2="550" stroke="#333" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="500" y1="490" x2="360" y2="550" stroke="#333" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <!-- 图例 -->
+  <rect x="750" y="690" width="200" height="40" rx="8" fill="#f0f0f0" stroke="#ccc"/>
+  <text x="850" y="710" font-family="Arial" font-size="12" text-anchor="middle" fill="#333">箭头方向表示数据流方向</text>
+</svg>

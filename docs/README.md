@@ -52,28 +52,60 @@ phoenixcoder/
 
 ## 快速开始
 
-### 1. 启动 OIDC 认证服务
+### 使用启动脚本 (推荐)
+我们提供了一个便捷的启动脚本来管理项目的启动、停止和重启。
+
+```bash
+# 启动开发环境所有服务
+./start.sh start
+
+# 启动生产环境所有服务
+./start.sh start -e prod
+
+# 启动特定服务
+./start.sh start -s server
+
+# 停止所有服务
+./start.sh stop
+
+# 重启所有服务
+./start.sh restart
+
+# 查看服务日志
+./start.sh logs
+./start.sh logs -s server  # 查看特定服务日志
+
+# 查看服务状态
+./start.sh status
+
+# 显示帮助信息
+./start.sh help
+```
+
+### 手动启动 (不推荐)
+
+#### 1. 启动 OIDC 认证服务
 ```bash
 cd phoenixcoder-oidc-server
 source venv/bin/activate
 python main.py
 ```
 
-### 2. 启动主服务端
+#### 2. 启动主服务端
 ```bash
 cd phoenixcoder-server
 source venv/bin/activate
 python main.py
 ```
 
-### 3. 启动小程序端
+#### 3. 启动小程序端
 ```bash
 cd phoenixcoder-miniapp
 npm install
 npm run dev:weapp
 ```
 
-### 4. 启动管理端
+#### 4. 启动管理端
 ```bash
 cd phoenixcoder-admin
 npm install

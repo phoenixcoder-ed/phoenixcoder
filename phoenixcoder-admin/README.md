@@ -26,7 +26,7 @@ PhoenixCoder 项目的管理端，基于 React Admin + Tailwind CSS 构建，提
 
 ### 1. 环境要求
 
-- Node.js 18+
+- Node.js 22.18.0
 - npm 或 yarn
 
 ### 2. 安装依赖

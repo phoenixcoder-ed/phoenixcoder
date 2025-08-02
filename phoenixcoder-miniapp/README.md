@@ -24,7 +24,7 @@ PhoenixCoder 项目的小程序端，基于 Taro 4 + React + TypeScript 构建�
 
 ### 1. 环境要求
 
-- Node.js 18+
+- Node.js 22.18.0
 - npm 或 yarn
 - 微信开发者工具（微信小程序）
 - 支付宝小程序开发者工具（支付宝小程序）
