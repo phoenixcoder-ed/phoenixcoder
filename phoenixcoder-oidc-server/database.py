@@ -7,7 +7,12 @@ from models import User, UserCreate, UserUpdate, WechatLoginRequest
 from typing import List, Optional, Dict, Any
 from dotenv import load_dotenv
 
+# Load environment variables from .env file
 load_dotenv()
+
+# Also try to load from config.env if it exists
+if os.path.exists('config.env'):
+    load_dotenv('config.env', override=True)
 
 class DatabaseService:
     def __init__(self):
@@ -16,7 +21,7 @@ class DatabaseService:
             host=os.getenv('POSTGRES_HOST', 'localhost'),
             port=os.getenv('POSTGRES_PORT', '5432'),
             dbname=os.getenv('POSTGRES_DB', 'phoenixcoder'),
-            user=os.getenv('POSTGRES_USER', 'postgres'),
+            user=os.getenv('POSTGRES_USER', 'phoenixcoder'),
             password=os.getenv('POSTGRES_PASSWORD', 'password')
         )
         # 初始化Redis客户端
