@@ -1,0 +1,6 @@
+Login请求数据: {'auth_code': 'onwYUmNS7kNYYXvdrpREqT_NvIKXZwAJjDEdGQuqwgo', 'redirect_uri': 'http://localhost:3000/callback', 'state': 'admin_test_state', 'email': 'admin_login@example.com'}
+Login响应状态: 401
+Login响应头: Headers({'content-length': '32', 'content-type': 'application/json'})
+Login响应JSON: {'detail': 'Invalid credentials'}
+使用的授权码: onwYUmNS7kNYYXvdrpREqT_NvIKXZwAJjDEdGQuqwgo
+授权码长度: 43

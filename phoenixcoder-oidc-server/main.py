@@ -7,9 +7,11 @@ import secrets
 import time
 import os
 from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, Request, Form
 from database import DatabaseService
 from models import UserCreate, WechatLoginRequest
 from wechat_service import WechatService
+from logging_config import logger
 
 load_dotenv()
 
@@ -84,10 +86,21 @@ def authorize(
     # 验证应用
     app = db_service.get_application_by_client_id(client_id)
     if not app:
+        # 记录所有可用的client_id
+        with db_service.pg_conn.cursor() as cursor:
+            cursor.execute("SELECT client_id FROM applications")
+            client_ids = cursor.fetchall()
+            logger.debug(f"数据库中可用的client_id: {client_ids}")
         raise HTTPException(status_code=400, detail="Invalid client_id")
     
+    # 添加调试信息
+    logger.debug(f"接收到的client_id: {client_id}")
+    logger.debug(f"接收到的redirect_uri: {redirect_uri}")
+    logger.debug(f"数据库中的应用配置: {app}")
+    logger.debug(f"比较结果: {app['redirect_uri'] != redirect_uri}")
+    
     if app["redirect_uri"] != redirect_uri:
-        raise HTTPException(status_code=400, detail="Invalid redirect_uri")
+        raise HTTPException(status_code=400, detail=f"Invalid redirect_uri. Expected: {app['redirect_uri']}, Received: {redirect_uri}")
     
     # 生成授权码
     auth_code = secrets.token_urlsafe(32)

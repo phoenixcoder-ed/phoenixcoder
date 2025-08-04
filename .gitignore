@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+venv/
+env/
+.venv/
+.env
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+
+# Logs
+*.log
+logs/
+
+# Docker
+.dockerignore
+
+# Coverage reports
+coverage/
+
+# Environment files
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+.pytest_cache/
+
+# Trae AI
+.trae/
+
+# NPM
+package-lock.json
+yarn.lock
+
+# Docs
+docs/*.svg

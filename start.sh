@@ -12,6 +12,8 @@ NC='\033[0m' # 无颜色
 
 # 默认环境为开发环境
 ENVIRONMENT="dev"
+# 默认不单独启动基础环境服务
+BASIC_ONLY=false
 
 # 显示帮助信息
 show_help() {
@@ -27,6 +29,7 @@ show_help() {
     echo -e "\n选项:\n"
     echo -e "  -e, --env  指定环境 (dev/prod)，默认为 dev"
     echo -e "  -s, --service  指定服务名称，如 'server', 'admin' 等"
+    echo -e "  --basic        只启动基础环境服务(postgresql, redis, rabbitmq)"
     echo -e "\n示例:\n"
     echo -e "  $0 start                       # 启动开发环境所有服务"
     echo -e "  $0 start -e prod               # 启动生产环境所有服务"
@@ -54,6 +57,10 @@ parse_args() {
             -s|--service)
                 SERVICE="$2"
                 shift 2
+                ;;
+            --basic)
+                BASIC_ONLY=true
+                shift
                 ;;
             *)
                 echo -e "${RED}错误: 未知选项 '$1'${NC}"
@@ -90,7 +97,10 @@ start_services() {
     fi
 
     # 启动服务
-    if [[ -n "$SERVICE" ]]; then
+    if [[ "$BASIC_ONLY" == true ]]; then
+        echo -e "${BLUE}只启动基础环境服务: postgres, redis, rabbitmq${NC}"
+        docker-compose -f $COMPOSE_FILE up -d postgres redis rabbitmq
+    elif [[ -n "$SERVICE" ]]; then
         docker-compose -f $COMPOSE_FILE up -d $SERVICE
     else
         docker-compose -f $COMPOSE_FILE up -d

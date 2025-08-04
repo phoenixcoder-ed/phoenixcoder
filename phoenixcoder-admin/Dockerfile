@@ -1,6 +1,9 @@
 # 构建阶段
 FROM node:24.4.1-alpine AS builder
 
+# 使用国内镜像源加速依赖安装
+RUN npm config set registry https://registry.npmmirror.com
+
 # 设置工作目录
 WORKDIR /app
 
