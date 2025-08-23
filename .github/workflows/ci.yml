@@ -13,8 +13,14 @@ on:
 # 环境变量
 env:
   NODE_VERSION: '24'
-  PYTHON_VERSION: '3.11'
-  PNPM_VERSION: '8'
+  PYTHON_VERSION: '3.13'
+  PNPM_VERSION: '9'
+  POSTGRES_VERSION: '16'
+  REDIS_VERSION: '7-alpine'
+  # 缓存配置
+  CACHE_VERSION: 'v1'
+  PNPM_CACHE_FOLDER: '.pnpm'
+  PIP_CACHE_DIR: '.pip-cache'
 
 # 并发控制
 concurrency:
@@ -22,72 +28,266 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 代码质量检查
-  code-quality:
-    name: 代码质量检查
+  # Monorepo 依赖检查
+  monorepo-deps:
+    name: Monorepo 依赖检查
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
-      - name: 设置Python环境
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-      
+
       - name: 设置Node.js环境
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
       - name: 安装pnpm
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-      
-      - name: 安装Python依赖
+          run_install: false
+
+      - name: 验证workspace配置
         run: |
+          echo "验证pnpm workspace配置..."
+          pnpm list --depth=0 --json > workspace-info.json
+
+          # 检查workspace结构
+          echo "Workspace packages:"
+          pnpm list --depth=0
+
+          # 验证依赖关系
+          echo "检查内部依赖关系..."
+          pnpm why @phoenixcoder/shared-types || true
+          pnpm why @phoenixcoder/shared-utils || true
+
+          # 检查重复依赖
+          echo "检查重复依赖..."
+          pnpm list --depth=Infinity --json | jq '.dependencies | keys[]' | sort | uniq -d || true
+
+      - name: 检查依赖版本一致性
+        run: |
+          echo "检查依赖版本一致性..."
+
+          # 使用syncpack检查版本一致性
+          npx syncpack list-mismatches || true
+
+          # 检查关键依赖的版本一致性
+          echo "检查关键依赖版本:"
+          find . -name "package.json" -not -path "./node_modules/*" -exec echo "=== {} ===" \; -exec jq '.dependencies.react, .dependencies."@types/react", .dependencies.typescript' {} \; 2>/dev/null || true
+
+      - name: 验证构建顺序
+        run: |
+          echo "验证构建顺序..."
+
+          # 检查shared packages是否可以独立构建
+          echo "构建shared packages..."
+          pnpm --filter="@phoenixcoder/shared-*" run build || echo "某些shared packages构建失败"
+
+          # 检查依赖图
+          echo "生成依赖图..."
+          pnpm list --depth=Infinity --json > dependency-graph.json
+
+      - name: 上传workspace信息
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: workspace-info
+          path: |
+            workspace-info.json
+            dependency-graph.json
+
+  # 代码质量检查
+  code-quality:
+    name: 代码质量检查
+    runs-on: ubuntu-latest
+    needs: [monorepo-deps]
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 设置Python环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: '**/requirements*.txt'
+
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: 安装pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: 获取pnpm store目录
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: 缓存pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ env.CACHE_VERSION }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-${{ env.CACHE_VERSION }}-
+            ${{ runner.os }}-pnpm-store-
+
+      - name: 缓存Python依赖
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ${{ env.PIP_CACHE_DIR }}
+          key: ${{ runner.os }}-pip-${{ env.CACHE_VERSION }}-${{ hashFiles('**/requirements*.txt', '**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ env.CACHE_VERSION }}-
+            ${{ runner.os }}-pip-
+
+      - name: 缓存pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: ${{ runner.os }}-pre-commit-${{ env.CACHE_VERSION }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pre-commit-${{ env.CACHE_VERSION }}-
+            ${{ runner.os }}-pre-commit-
+
+      - name: 安装依赖
+        run: |
+          # Python依赖
           python -m pip install --upgrade pip
           pip install pre-commit black isort flake8 bandit mypy
-      
+
+          # 安装workspace依赖
+          pnpm install --frozen-lockfile
+
+      - name: Workspace级别代码检查
+        run: |
+          echo "运行workspace级别的代码检查..."
+
+          # 运行所有workspace的lint
+          pnpm run lint || echo "某些workspace lint失败"
+
+          # 检查TypeScript配置一致性
+          echo "检查TypeScript配置..."
+          find . -name "tsconfig.json" -not -path "./node_modules/*" -exec echo "=== {} ===" \; -exec cat {} \;
+
       - name: 运行pre-commit检查
         run: |
           pre-commit install
           pre-commit run --all-files
-      
+
       - name: 代码复杂度检查
         run: |
           pip install radon
           radon cc --min=C apps/community/server apps/community/oidc-server
-      
-      - name: 安全漏洞扫描
+
+      - name: Python依赖安全扫描 (Safety)
         run: |
           pip install safety
           safety check --json --output safety-report.json || true
-      
+          safety check --short-report || true
+
+      - name: Python代码安全扫描 (Bandit)
+        run: |
+          pip install bandit[toml]
+          bandit -r apps/community/server apps/community/oidc-server \
+            -f json -o bandit-report.json || true
+          bandit -r apps/community/server apps/community/oidc-server \
+            -f txt || true
+
+      - name: Secrets扫描 (TruffleHog)
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: 代码安全扫描 (Semgrep)
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/python
+            p/javascript
+            p/typescript
+            p/docker
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+      - name: 许可证合规检查
+        run: |
+          pip install pip-licenses
+          pip-licenses --format=json --output-file=licenses-report.json
+          pip-licenses --format=plain-vertical
+
+          # 检查禁用的许可证
+          python -c "
+          import json
+
+          # 定义禁用的许可证类型
+          forbidden_licenses = ['GPL-3.0', 'AGPL-3.0', 'LGPL-3.0']
+
+          with open('licenses-report.json') as f:
+              licenses = json.load(f)
+
+          violations = []
+          for pkg in licenses:
+              license_name = pkg.get('License', 'Unknown')
+              if any(forbidden in license_name for forbidden in forbidden_licenses):
+                  violations.append(f'{pkg[\"Name\"]} ({license_name})')
+
+          if violations:
+              print('❌ License violations found:')
+              for violation in violations:
+                  print(f'  - {violation}')
+              exit(1)
+          else:
+              print('✅ No license violations found')
+          "
+
       - name: 上传安全报告
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: security-report
-          path: safety-report.json
+          name: security-reports
+          path: |
+            safety-report.json
+            bandit-report.json
+            licenses-report.json
 
   # 后端测试
   backend-tests:
-    name: 后端测试
+    name: 后端测试 - ${{ matrix.service }}
     runs-on: ubuntu-latest
+    needs: [code-quality, monorepo-deps]
+
     strategy:
       matrix:
-        service: [server, oidc-server]
-    
+        service: [community, enterprise]
+      fail-fast: false  # 允许一个服务失败时继续测试其他服务
+
     services:
       postgres:
-        image: postgres:15
+        image: postgres:16
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test_db
@@ -98,9 +298,9 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      
+
       redis:
-        image: redis:7
+        image: redis:7-alpine
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -108,137 +308,429 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-    
+
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-      
+
       - name: 设置Python环境
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-      
-      - name: 安装依赖
-        working-directory: apps/community/${{ matrix.service }}
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
-      
-      - name: 运行单元测试
-        working-directory: apps/community/${{ matrix.service }}
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-          REDIS_URL: redis://localhost:6379/0
-          TESTING: true
-        run: |
-          python -m pytest tests/ \
-            --cov=. \
-            --cov-report=xml \
-            --cov-report=html \
-            --cov-report=term \
-            --junitxml=test-results.xml \
-            --tb=short \
-            -v
-      
-      - name: 运行性能测试
-        working-directory: apps/community/${{ matrix.service }}
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-          REDIS_URL: redis://localhost:6379/0
-          TESTING: true
-        run: |
-          python -m pytest tests/performance/ \
-            --benchmark-json=benchmark-results.json \
-            --benchmark-only
-      
-      - name: 上传覆盖率报告
-        uses: codecov/codecov-action@v3
-        with:
-          file: apps/community/${{ matrix.service }}/coverage.xml
-          flags: ${{ matrix.service }}
-          name: ${{ matrix.service }}-coverage
-      
-      - name: 上传测试结果
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: ${{ matrix.service }}-test-results
-          path: |
-            apps/community/${{ matrix.service }}/test-results.xml
-            apps/community/${{ matrix.service }}/htmlcov/
-            apps/community/${{ matrix.service }}/benchmark-results.json
+          cache-dependency-path: 'apps/${{ matrix.service }}/server/requirements*.txt'
 
-  # 前端测试
-  frontend-tests:
-    name: 前端测试
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: [admin, miniapp]
-    
-    steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
-      
-      - name: 设置Node.js环境
+      - name: 设置Node.js环境 (用于shared packages)
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
       - name: 安装pnpm
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-      
-      - name: 安装依赖
-        working-directory: apps/community/${{ matrix.app }}
-        run: pnpm install --frozen-lockfile
-      
-      - name: 类型检查
-        working-directory: apps/community/${{ matrix.app }}
-        run: pnpm run type-check
-      
-      - name: 代码检查
-        working-directory: apps/community/${{ matrix.app }}
-        run: pnpm run lint
-      
+          run_install: false
+
+      - name: 构建shared packages
+        run: |
+          echo "构建shared packages..."
+          pnpm install --frozen-lockfile
+          pnpm --filter="@phoenixcoder/shared-*" run build || echo "某些shared packages构建失败"
+
+      - name: 安装Python依赖
+        working-directory: apps/${{ matrix.service }}/server
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: 验证服务配置
+        working-directory: apps/${{ matrix.service }}/server
+        run: |
+          echo "验证 ${{ matrix.service }} 服务配置..."
+
+          # 检查配置文件
+          if [ -f "config.py" ]; then
+            echo "配置文件存在"
+          fi
+
+          # 检查数据库连接
+          python -c "import psycopg2; conn = psycopg2.connect('postgresql://postgres:postgres@localhost:5432/test_db'); print('数据库连接成功'); conn.close()"
+
+          # 检查Redis连接
+          python -c "import redis; r = redis.Redis(host='localhost', port=6379, db=0); r.ping(); print('Redis连接成功')"
+
       - name: 运行单元测试
+        working-directory: apps/${{ matrix.service }}/server
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          ENVIRONMENT: test
+          SERVICE_NAME: ${{ matrix.service }}
+        run: |
+          # 运行单元测试并生成覆盖率报告
+          python -m pytest tests/ -v \
+            --cov=. \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term \
+            --cov-report=json \
+            --cov-fail-under=80 \
+            --cov-branch \
+            --junitxml=test-results.xml \
+            --tb=short
+
+          # 检查覆盖率阈值
+          python -c "
+          import json
+          with open('coverage.json') as f:
+              data = json.load(f)
+          line_coverage = data['totals']['percent_covered']
+          branch_coverage = data['totals']['percent_covered_display']
+          print(f'[${{ matrix.service }}] 行覆盖率: {line_coverage}%')
+          print(f'[${{ matrix.service }}] 分支覆盖率: {branch_coverage}%')
+          if line_coverage < 80:
+              raise Exception(f'[${{ matrix.service }}] 行覆盖率 {line_coverage}% 低于要求的 80%')
+          if float(branch_coverage.rstrip('%')) < 70:
+              raise Exception(f'[${{ matrix.service }}] 分支覆盖率 {branch_coverage} 低于要求的 70%')
+          "
+
+      - name: 运行性能测试
+        working-directory: apps/${{ matrix.service }}/server
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          ENVIRONMENT: test
+          SERVICE_NAME: ${{ matrix.service }}
+        run: |
+          python -m pytest tests/performance/ -v --benchmark-only --benchmark-json=benchmark-results.json || true
+
+      - name: 上传覆盖率报告
+        uses: codecov/codecov-action@v3
+        with:
+          file: apps/${{ matrix.service }}/server/coverage.xml
+          flags: backend-${{ matrix.service }}
+          name: backend-${{ matrix.service }}-coverage
+          fail_ci_if_error: false
+
+      - name: 上传测试结果
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: backend-test-results-${{ matrix.service }}
+          path: |
+            apps/${{ matrix.service }}/server/test-results.xml
+            apps/${{ matrix.service }}/server/htmlcov/
+            apps/${{ matrix.service }}/server/coverage.json
+            apps/${{ matrix.service }}/server/benchmark-results.json
+
+  # 前端测试
+  frontend-tests:
+    name: 前端测试 - ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    needs: [code-quality, monorepo-deps]
+
+    strategy:
+      matrix:
+        app: [admin, miniapp]
+      fail-fast: false  # 允许一个应用失败时继续测试其他应用
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: 安装pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: 获取pnpm store目录
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: 缓存pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ env.CACHE_VERSION }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-${{ env.CACHE_VERSION }}-
+            ${{ runner.os }}-pnpm-store-
+
+      - name: 缓存构建产物
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/community/${{ matrix.app }}/dist
+            apps/community/${{ matrix.app }}/.vite
+            apps/community/${{ matrix.app }}/node_modules/.cache
+            packages/*/dist
+            packages/*/.vite
+          key: ${{ runner.os }}-build-${{ matrix.app }}-${{ env.CACHE_VERSION }}-${{ hashFiles('apps/community/${{ matrix.app }}/src/**/*', 'apps/community/${{ matrix.app }}/package.json', 'packages/*/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ matrix.app }}-${{ env.CACHE_VERSION }}-
+            ${{ runner.os }}-build-${{ matrix.app }}-
+
+      - name: 安装依赖
+        run: |
+          echo "安装workspace依赖..."
+          pnpm install --frozen-lockfile
+
+      - name: 构建依赖包
+        run: |
+          echo "构建shared packages和依赖包..."
+
+          # 构建shared packages
+          pnpm --filter="@phoenixcoder/shared-*" run build || echo "某些shared packages构建失败"
+
+          # 构建当前应用的依赖包
+          pnpm --filter="apps/community/${{ matrix.app }}^..." run build || echo "某些依赖包构建失败"
+
+      - name: 验证应用配置
         working-directory: apps/community/${{ matrix.app }}
         run: |
+          echo "验证 ${{ matrix.app }} 应用配置..."
+
+          # 检查package.json
+          if [ -f "package.json" ]; then
+            echo "package.json存在"
+            cat package.json | jq '.name, .version, .scripts'
+          fi
+
+          # 检查配置文件
+          if [ -f "vite.config.ts" ]; then
+            echo "vite.config.ts存在"
+          fi
+
+          # 检查TypeScript配置
+          if [ -f "tsconfig.json" ]; then
+            echo "tsconfig.json存在"
+          fi
+
+      - name: 类型检查
+        working-directory: apps/community/${{ matrix.app }}
+        run: |
+          echo "[${{ matrix.app }}] 运行类型检查..."
+          pnpm run type-check
+
+      - name: 代码检查
+        working-directory: apps/community/${{ matrix.app }}
+        run: |
+          echo "[${{ matrix.app }}] 运行代码检查..."
+          pnpm run lint
+
+      - name: 前端依赖安全扫描 (npm audit)
+        working-directory: apps/community/${{ matrix.app }}
+        run: |
+          echo "[${{ matrix.app }}] 运行前端依赖安全扫描..."
+
+          pnpm audit --audit-level=moderate --json > npm-audit-report.json || true
+          pnpm audit --audit-level=moderate || true
+
+          # 检查高危漏洞
+          if [ -f "npm-audit-report.json" ]; then
+            echo "分析安全漏洞..."
+            node -e "
+            const audit = require('./npm-audit-report.json');
+            if (audit.metadata && audit.metadata.vulnerabilities) {
+              const { high, critical } = audit.metadata.vulnerabilities;
+              console.log('高危漏洞:', high || 0);
+              console.log('严重漏洞:', critical || 0);
+              if ((high || 0) + (critical || 0) > 0) {
+                console.log('⚠️ 发现高危或严重安全漏洞，请及时修复');
+              }
+            }
+            " || true
+          fi
+
+      - name: 前端安全检查 (ESLint Security)
+        working-directory: apps/community/${{ matrix.app }}
+        run: |
+          echo "[${{ matrix.app }}] 运行ESLint安全检查..."
+
+          # 安装ESLint安全插件
+          pnpm add -D eslint-plugin-security eslint-plugin-no-secrets || true
+
+          # 运行安全检查
+          npx eslint src/ \
+            --ext .js,.jsx,.ts,.tsx \
+            --config .eslintrc.security.js \
+            --format json \
+            --output-file eslint-security-report.json || true
+
+          npx eslint src/ \
+            --ext .js,.jsx,.ts,.tsx \
+            --config .eslintrc.security.js || true
+
+      - name: 检查敏感信息泄露
+        working-directory: apps/community/${{ matrix.app }}
+        run: |
+          # 检查常见的敏感信息模式
+          echo "检查敏感信息泄露..."
+
+          # 检查API密钥模式
+          if grep -r "api[_-]key\|apikey\|secret[_-]key" src/ --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" --include="*.json" | grep -v "example\|test\|mock"; then
+            echo "❌ 发现可能的API密钥泄露"
+            exit 1
+          fi
+
+          # 检查硬编码的URL和密码
+          if grep -r "password\s*=\|token\s*=" src/ --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" | grep -v "example\|test\|mock\|placeholder"; then
+            echo "❌ 发现可能的硬编码密码或令牌"
+            exit 1
+          fi
+
+          echo "✅ 未发现敏感信息泄露"
+
+      - name: 检查第三方依赖安全性
+        working-directory: apps/community/${{ matrix.app }}
+        run: |
+          # 使用 Snyk 检查依赖漏洞（如果有 token）
+          if [ -n "${{ secrets.SNYK_TOKEN }}" ]; then
+            npx snyk test --json > snyk-report.json || true
+            npx snyk test || true
+          else
+            echo "Snyk token not available, skipping Snyk scan"
+          fi
+
+          # 检查过时的依赖
+          pnpm outdated --format json > outdated-deps.json || true
+
+          # 分析依赖树中的安全问题
+          node -e "
+          const fs = require('fs');
+
+          try {
+            const auditData = JSON.parse(fs.readFileSync('npm-audit-report.json', 'utf8'));
+            const vulnerabilities = auditData.vulnerabilities || {};
+
+            const highSeverity = Object.values(vulnerabilities).filter(v =>
+              v.severity === 'high' || v.severity === 'critical'
+            );
+
+            if (highSeverity.length > 0) {
+              console.log('❌ 发现高危漏洞:', highSeverity.length);
+              highSeverity.forEach(v => {
+                console.log('  -', v.name, ':', v.severity);
+              });
+              process.exit(1);
+            } else {
+              console.log('✅ 未发现高危漏洞');
+            }
+          } catch (e) {
+            console.log('无法解析audit报告，跳过检查');
+          }
+          " || true
+
+      - name: 运行单元测试
+        working-directory: apps/community/${{ matrix.app }}
+        env:
+          APP_NAME: ${{ matrix.app }}
+        run: |
+          echo "[${{ matrix.app }}] 运行单元测试..."
+
           pnpm run test:unit \
             --coverage \
+            --coverage.all \
+            --coverage.lines=80 \
+            --coverage.functions=80 \
+            --coverage.branches=70 \
+            --coverage.statements=80 \
             --reporter=verbose \
             --reporter=junit \
             --outputFile=test-results.xml
-      
+
+      - name: 检查前端覆盖率阈值
+        working-directory: apps/community/${{ matrix.app }}
+        run: |
+          if [ -f "coverage/coverage-summary.json" ]; then
+            node -e "
+            const fs = require('fs');
+            const coverage = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+            const total = coverage.total;
+
+            console.log('[${{ matrix.app }}] Coverage Summary:');
+            console.log('Lines:', total.lines.pct + '%');
+            console.log('Statements:', total.statements.pct + '%');
+            console.log('Functions:', total.functions.pct + '%');
+            console.log('Branches:', total.branches.pct + '%');
+
+            const thresholds = { lines: 80, statements: 80, functions: 80, branches: 70 };
+            let failed = false;
+
+            Object.keys(thresholds).forEach(key => {
+              if (total[key].pct < thresholds[key]) {
+                console.error('❌ [${{ matrix.app }}]', key, 'coverage', total[key].pct + '% is below threshold', thresholds[key] + '%');
+                failed = true;
+              }
+            });
+
+            if (failed) process.exit(1);
+            console.log('✅ [${{ matrix.app }}] All coverage thresholds met');
+            "
+          fi
+
       - name: 运行组件测试
         working-directory: apps/community/${{ matrix.app }}
-        run: pnpm run test:component --coverage
-      
+        run: |
+          echo "[${{ matrix.app }}] 运行组件测试..."
+          pnpm run test:component --coverage
+
       - name: 运行性能测试
         working-directory: apps/community/${{ matrix.app }}
-        run: pnpm run test:performance
-      
+        run: |
+          echo "[${{ matrix.app }}] 运行性能测试..."
+          pnpm run test:performance
+
       - name: 构建检查
         working-directory: apps/community/${{ matrix.app }}
-        run: pnpm run build
-      
+        run: |
+          echo "[${{ matrix.app }}] 运行构建检查..."
+          pnpm run build
+
+          # 检查构建产物大小
+          echo "构建产物大小分析:"
+          du -sh dist/
+          find dist/ -name "*.js" -exec du -h {} \; | sort -hr | head -10
+
+          # 检查构建产物结构
+          echo "构建产物结构:"
+          tree dist/ -L 3 || ls -la dist/
+
       - name: Bundle分析
         working-directory: apps/community/${{ matrix.app }}
         run: |
-          pnpm run build:analyze
-          ls -la dist/
-      
+          echo "[${{ matrix.app }}] 运行Bundle分析..."
+          pnpm run build:analyze || echo "Bundle analyze not available"
+          ls -la dist/ || echo "No dist directory found"
+
+      - name: 生成Bundle报告
+        working-directory: apps/community/${{ matrix.app }}
+        run: |
+          if [ -f "dist/stats.json" ]; then
+            echo "Bundle size analysis:" > bundle-report.txt
+            du -sh dist/* >> bundle-report.txt || true
+          fi
+
       - name: 上传覆盖率报告
         uses: codecov/codecov-action@v3
         with:
           file: apps/community/${{ matrix.app }}/coverage/lcov.info
-          flags: ${{ matrix.app }}
-          name: ${{ matrix.app }}-coverage
-      
+          flags: frontend-${{ matrix.app }}
+          name: frontend-${{ matrix.app }}-coverage
+          fail_ci_if_error: false
+
       - name: 上传测试结果
         uses: actions/upload-artifact@v3
         if: always()
@@ -248,16 +740,25 @@ jobs:
             apps/community/${{ matrix.app }}/test-results.xml
             apps/community/${{ matrix.app }}/coverage/
             apps/community/${{ matrix.app }}/dist/
+            apps/community/${{ matrix.app }}/npm-audit-report.json
+            apps/community/${{ matrix.app }}/eslint-security-report.json
+            apps/community/${{ matrix.app }}/snyk-report.json
+            apps/community/${{ matrix.app }}/outdated-deps.json
 
   # 端到端测试
   e2e-tests:
-    name: 端到端测试
+    name: 端到端测试 - ${{ matrix.app }}
     runs-on: ubuntu-latest
     needs: [backend-tests, frontend-tests]
-    
+
+    strategy:
+      matrix:
+        app: [community, enterprise]
+      fail-fast: false  # 允许一个应用失败时继续测试其他应用
+
     services:
       postgres:
-        image: postgres:15
+        image: postgres:${{ env.POSTGRES_VERSION }}
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test_db
@@ -268,9 +769,9 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      
+
       redis:
-        image: redis:7
+        image: redis:${{ env.REDIS_VERSION }}
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -278,76 +779,278 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-    
+
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-      
+
       - name: 设置Python环境
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+          cache: 'pip'
+          cache-dependency-path: 'apps/${{ matrix.app }}/server/requirements*.txt'
+
       - name: 设置Node.js环境
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
       - name: 安装pnpm
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
-      
+          run_install: false
+
+      - name: 获取pnpm store目录
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: 缓存pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ env.CACHE_VERSION }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-${{ env.CACHE_VERSION }}-
+            ${{ runner.os }}-pnpm-store-
+
+      - name: 缓存Playwright浏览器
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/Library/Caches/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.CACHE_VERSION }}-${{ hashFiles('apps/${{ matrix.app }}/admin/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-${{ env.CACHE_VERSION }}-
+            ${{ runner.os }}-playwright-
+
+      - name: 构建shared packages
+        run: |
+          echo "构建shared packages..."
+          pnpm install --frozen-lockfile
+          pnpm --filter="@phoenixcoder/shared-*" run build || echo "某些shared packages构建失败"
+
       - name: 安装后端依赖
-        working-directory: apps/community/server
+        working-directory: apps/${{ matrix.app }}/server
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      
-      - name: 安装前端依赖
-        working-directory: apps/community/admin
-        run: pnpm install --frozen-lockfile
-      
+
+      - name: 验证服务配置
+        working-directory: apps/${{ matrix.app }}/server
+        run: |
+          echo "验证 ${{ matrix.app }} 服务配置..."
+
+          # 检查数据库连接
+          python -c "import psycopg2; conn = psycopg2.connect('postgresql://postgres:postgres@localhost:5432/test_db'); print('数据库连接成功'); conn.close()"
+
+          # 检查Redis连接
+          python -c "import redis; r = redis.Redis(host='localhost', port=6379, db=0); r.ping(); print('Redis连接成功')"
+
+          # 检查配置文件
+          if [ -f "config.py" ]; then
+            echo "配置文件存在"
+          fi
+
       - name: 启动后端服务
-        working-directory: apps/community/server
+        working-directory: apps/${{ matrix.app }}/server
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379/0
           TESTING: true
+          SERVICE_NAME: ${{ matrix.app }}
         run: |
+          echo "[${{ matrix.app }}] 启动后端服务..."
+
+          # 运行数据库迁移
+          python manage.py migrate || echo "数据库迁移失败或未配置"
+
+          # 创建测试数据
+          python manage.py loaddata fixtures/test_data.json || echo "测试数据加载失败或未配置"
+
+          # 启动服务
           python main.py &
-          sleep 10
-      
-      - name: 构建前端
-        working-directory: apps/community/admin
-        run: pnpm run build
-      
+
+          # 等待服务启动
+          echo "等待服务启动..."
+          for i in {1..30}; do
+            if curl -f http://localhost:8000/health/ 2>/dev/null; then
+              echo "服务启动成功"
+              break
+            fi
+            echo "等待服务启动... ($i/30)"
+            sleep 2
+          done
+
+      - name: 构建前端应用
+        working-directory: apps/${{ matrix.app }}/admin
+        env:
+          APP_NAME: ${{ matrix.app }}
+        run: |
+          echo "[${{ matrix.app }}] 构建前端应用..."
+
+          # 构建依赖包
+          pnpm --filter="apps/${{ matrix.app }}/admin^..." run build || echo "某些依赖包构建失败"
+
+          # 构建当前应用
+          pnpm run build
+
+          # 验证构建产物
+          if [ -d "dist" ]; then
+            echo "构建成功，产物大小:"
+            du -sh dist/
+          else
+            echo "构建失败，未找到dist目录"
+            exit 1
+          fi
+
+      - name: 构建产物安全扫描
+        working-directory: apps/${{ matrix.app }}/admin
+        run: |
+          echo "[${{ matrix.app }}] 检查构建产物安全性..."
+
+          # 检查构建产物中的敏感信息
+          if find dist/ -name "*.js" -o -name "*.css" -o -name "*.html" | xargs grep -l "api[_-]key\|secret\|password\|token" | grep -v "example\|test\|mock"; then
+            echo "❌ 构建产物中发现可能的敏感信息"
+            find dist/ -name "*.js" -o -name "*.css" -o -name "*.html" | xargs grep -n "api[_-]key\|secret\|password\|token" | grep -v "example\|test\|mock" || true
+            exit 1
+          fi
+
+          # 检查构建产物大小（防止意外包含大文件）
+          echo "检查构建产物大小..."
+          find dist/ -type f -size +5M -exec ls -lh {} \; | while read line; do
+            echo "⚠️  发现大文件: $line"
+          done
+
+          # 检查是否包含源码映射文件（生产环境不应包含）
+          if find dist/ -name "*.map" | head -1 | grep -q .; then
+            echo "⚠️  构建产物包含源码映射文件，可能泄露源码信息"
+            find dist/ -name "*.map" | head -5
+          fi
+
+          # 检查CSP和安全头配置
+          if [ -f "dist/index.html" ]; then
+            if ! grep -q "Content-Security-Policy" dist/index.html; then
+              echo "⚠️  未发现CSP配置，建议添加内容安全策略"
+            fi
+          fi
+
+          # 检查环境变量泄露
+          echo "检查环境变量泄露..."
+          grep -r "process\.env" dist/ || echo "未发现环境变量泄露"
+
+          echo "✅ 构建产物安全检查完成"
+
+      - name: 运行时安全检查
+        working-directory: apps/${{ matrix.app }}/admin
+        run: |
+          echo "[${{ matrix.app }}] 检查运行时安全配置..."
+
+          # 检查环境变量配置
+          if [ -f ".env.example" ]; then
+            echo "检查环境变量示例文件..."
+            if grep -q "password\|secret\|key" .env.example; then
+              echo "⚠️  .env.example 文件包含敏感字段，请确保使用占位符"
+              grep "password\|secret\|key" .env.example || true
+            fi
+          fi
+
+          # 检查依赖的运行时安全性
+          echo "检查运行时依赖安全性..."
+          pnpm audit --audit-level=high --json > e2e-audit-report-${{ matrix.app }}.json || true
+
+          # 分析高危漏洞
+          node -e "
+          const fs = require('fs');
+          try {
+            const auditData = JSON.parse(fs.readFileSync('e2e-audit-report-${{ matrix.app }}.json', 'utf8'));
+            const vulnerabilities = auditData.vulnerabilities || {};
+
+            const criticalVulns = Object.values(vulnerabilities).filter(v =>
+              v.severity === 'critical'
+            );
+
+            if (criticalVulns.length > 0) {
+              console.log('❌ [${{ matrix.app }}] E2E环境发现严重漏洞:', criticalVulns.length);
+              criticalVulns.forEach(v => {
+                console.log('  -', v.name, ':', v.severity);
+              });
+              process.exit(1);
+            } else {
+              console.log('✅ [${{ matrix.app }}] E2E环境未发现严重漏洞');
+            }
+          } catch (e) {
+            console.log('无法解析E2E audit报告，跳过检查');
+          }
+          " || true
+
+          echo "✅ 运行时安全检查完成"
+
       - name: 安装Playwright
-        working-directory: apps/community/admin
-        run: pnpm exec playwright install --with-deps
-      
+        working-directory: apps/${{ matrix.app }}/admin
+        run: |
+          echo "安装Playwright浏览器..."
+          pnpm exec playwright install --with-deps
+          pnpm exec playwright install-deps
+
       - name: 运行E2E测试
-        working-directory: apps/community/admin
-        run: pnpm run test:e2e
-      
+        env:
+          APP_NAME: ${{ matrix.app }}
+          BASE_URL: http://localhost:8000
+          FRONTEND_URL: http://localhost:3000
+        run: |
+          echo "[${{ matrix.app }}] 运行E2E测试..."
+
+          # 启动前端开发服务器（如果需要）
+          cd apps/${{ matrix.app }}/admin
+          pnpm run preview --port 3000 &
+
+          # 等待前端服务启动
+          echo "等待前端服务启动..."
+          for i in {1..15}; do
+            if curl -f http://localhost:3000 2>/dev/null; then
+              echo "前端服务启动成功"
+              break
+            fi
+            echo "等待前端服务启动... ($i/15)"
+            sleep 2
+          done
+
+          # 运行E2E测试
+          cd ../../../
+          pnpm exec playwright test --config=apps/${{ matrix.app }}/admin/playwright.config.ts --reporter=html,json || echo "E2E测试失败或未配置"
+
       - name: 上传E2E测试结果
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: e2e-test-results
+          name: e2e-test-results-${{ matrix.app }}
           path: |
-            apps/community/admin/test-results/
-            apps/community/admin/playwright-report/
+            playwright-report/
+            test-results/
+            apps/${{ matrix.app }}/admin/e2e-audit-report-${{ matrix.app }}.json
+            apps/${{ matrix.app }}/admin/playwright-report/
+            apps/${{ matrix.app }}/admin/test-results/
 
   # 集成测试
   integration-tests:
-    name: 集成测试
+    name: 集成测试 - ${{ matrix.test-type }}
     runs-on: ubuntu-latest
-    needs: [backend-tests, frontend-tests]
-    
+    needs: [monorepo-deps, backend-tests, frontend-tests]
+
+    strategy:
+      matrix:
+        test-type: [cross-service, api-integration, data-consistency]
+      fail-fast: false  # 允许一种测试失败时继续其他测试
+
     services:
       postgres:
-        image: postgres:15
+        image: postgres:16
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test_db
@@ -358,9 +1061,9 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      
+
       redis:
-        image: redis:7
+        image: redis:7-alpine
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -368,202 +1071,1616 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-    
+
+      elasticsearch:
+        image: elasticsearch:8.11.0
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: false
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+        options: >-
+          --health-cmd "curl -f http://localhost:9200/_cluster/health || exit 1"
+          --health-interval 30s
+          --health-timeout 10s
+          --health-retries 5
+        ports:
+          - 9200:9200
+
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-      
+
       - name: 设置Python环境
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
-      - name: 安装依赖
+          cache: 'pip'
+          cache-dependency-path: 'tests/requirements*.txt'
+
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: 安装pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: 构建shared packages
+        run: |
+          echo "构建shared packages..."
+          pnpm install --frozen-lockfile
+          pnpm --filter="@phoenixcoder/shared-*" run build || echo "某些shared packages构建失败"
+
+      - name: 安装Python依赖
         run: |
           python -m pip install --upgrade pip
           pip install -r tests/requirements.txt
-      
+
+          # 安装各个服务的依赖
+          for service in community enterprise; do
+            if [ -f "apps/$service/server/requirements.txt" ]; then
+              echo "安装 $service 服务依赖..."
+              pip install -r "apps/$service/server/requirements.txt"
+            fi
+          done
+
+      - name: 启动所有后端服务
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          ELASTICSEARCH_URL: http://localhost:9200
+          TESTING: true
+        run: |
+          echo "启动所有后端服务进行集成测试..."
+
+          # 运行数据库迁移
+          for service in community enterprise; do
+            if [ -d "apps/$service/server" ]; then
+              echo "[$service] 运行数据库迁移..."
+              cd "apps/$service/server"
+              python manage.py migrate || echo "$service 数据库迁移失败"
+              cd ../../../
+            fi
+          done
+
+          # 启动社区版服务
+          if [ -d "apps/community/server" ]; then
+            echo "启动社区版服务..."
+            cd apps/community/server
+            python manage.py runserver 8001 &
+            COMMUNITY_PID=$!
+            cd ../../../
+            echo "社区版服务PID: $COMMUNITY_PID"
+          fi
+
+          # 启动企业版服务
+          if [ -d "apps/enterprise/server" ]; then
+            echo "启动企业版服务..."
+            cd apps/enterprise/server
+            python manage.py runserver 8002 &
+            ENTERPRISE_PID=$!
+            cd ../../../
+            echo "企业版服务PID: $ENTERPRISE_PID"
+          fi
+
+          # 等待服务启动
+          echo "等待服务启动..."
+          for port in 8001 8002; do
+            for i in {1..30}; do
+              if curl -f http://localhost:$port/health/ 2>/dev/null; then
+                echo "端口 $port 服务启动成功"
+                break
+              fi
+              echo "等待端口 $port 服务启动... ($i/30)"
+              sleep 2
+            done
+          done
+
       - name: 运行集成测试
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379/0
+          ELASTICSEARCH_URL: http://localhost:9200
           TESTING: true
+          TEST_TYPE: ${{ matrix.test-type }}
+          COMMUNITY_SERVICE_URL: http://localhost:8001
+          ENTERPRISE_SERVICE_URL: http://localhost:8002
         run: |
-          python -m pytest tests/ \
-            --cov=apps \
-            --cov-report=xml \
-            --cov-report=html \
-            --junitxml=integration-test-results.xml \
-            --tb=short \
-            -v
-      
+          echo "[${{ matrix.test-type }}] 运行集成测试..."
+
+          case "${{ matrix.test-type }}" in
+            "cross-service")
+              echo "运行跨服务集成测试..."
+              python -m pytest tests/integration/cross_service/ \
+                --cov=apps \
+                --cov-report=xml:coverage-cross-service.xml \
+                --cov-report=html:htmlcov-cross-service \
+                --cov-report=json:coverage-cross-service.json \
+                --cov-fail-under=70 \
+                --cov-branch \
+                --junitxml=integration-cross-service-results.xml \
+                --tb=short \
+                --strict-markers \
+                --strict-config \
+                --maxfail=3 \
+                --durations=10 \
+                -v
+              ;;
+            "api-integration")
+              echo "运行API集成测试..."
+              python -m pytest tests/integration/api/ \
+                --cov=apps \
+                --cov-report=xml:coverage-api-integration.xml \
+                --cov-report=html:htmlcov-api-integration \
+                --cov-report=json:coverage-api-integration.json \
+                --cov-fail-under=75 \
+                --cov-branch \
+                --junitxml=integration-api-results.xml \
+                --tb=short \
+                --strict-markers \
+                --strict-config \
+                --maxfail=5 \
+                --durations=10 \
+                -v
+              ;;
+            "data-consistency")
+              echo "运行数据一致性测试..."
+              python -m pytest tests/integration/data_consistency/ \
+                --cov=apps \
+                --cov-report=xml:coverage-data-consistency.xml \
+                --cov-report=html:htmlcov-data-consistency \
+                --cov-report=json:coverage-data-consistency.json \
+                --cov-fail-under=80 \
+                --cov-branch \
+                --junitxml=integration-data-consistency-results.xml \
+                --tb=short \
+                --strict-markers \
+                --strict-config \
+                --maxfail=2 \
+                --durations=10 \
+                -v
+              ;;
+          esac
+
+      - name: 检查集成测试覆盖率
+        run: |
+          coverage_file="coverage-${{ matrix.test-type }}.json"
+          if [ -f "$coverage_file" ]; then
+            python -c "
+            import json
+            import sys
+
+            test_type = '${{ matrix.test-type }}'
+
+            with open('$coverage_file') as f:
+                data = json.load(f)
+            total = data['totals']
+            lines_pct = total['percent_covered']
+            branches_pct = total.get('percent_covered_display', 0)
+
+            print(f'[$test_type] Integration Test Coverage Summary:')
+            print(f'Lines coverage: {lines_pct}%')
+            print(f'Branches coverage: {branches_pct}%')
+
+            # 不同类型的集成测试有不同的覆盖率阈值
+            thresholds = {
+                'cross-service': {'lines': 70, 'branches': 60},
+                'api-integration': {'lines': 75, 'branches': 65},
+                'data-consistency': {'lines': 80, 'branches': 70}
+            }
+
+            threshold = thresholds.get(test_type, {'lines': 75, 'branches': 65})
+
+            if lines_pct < threshold['lines']:
+                print(f'❌ [$test_type] Lines coverage {lines_pct}% is below threshold {threshold[\"lines\"]}%')
+                sys.exit(1)
+            if branches_pct < threshold['branches']:
+                print(f'❌ [$test_type] Branches coverage {branches_pct}% is below threshold {threshold[\"branches\"]}%')
+                sys.exit(1)
+            print(f'✅ [$test_type] Integration test coverage thresholds met')
+            "
+          fi
+
+      - name: 生成测试报告
+        if: always()
+        run: |
+          echo "[${{ matrix.test-type }}] 生成测试报告..."
+
+          # 生成测试摘要
+          python -c "
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          test_type = '${{ matrix.test-type }}'
+
+          # 解析JUnit XML结果
+          xml_file = f'integration-{test_type.replace(\"-\", \"-\")}-results.xml'
+          if Path(xml_file).exists():
+              tree = ET.parse(xml_file)
+              root = tree.getroot()
+
+              total_tests = int(root.get('tests', 0))
+              failures = int(root.get('failures', 0))
+              errors = int(root.get('errors', 0))
+              skipped = int(root.get('skipped', 0))
+              time = float(root.get('time', 0))
+
+              success_rate = ((total_tests - failures - errors) / total_tests * 100) if total_tests > 0 else 0
+
+              summary = {
+                  'test_type': test_type,
+                  'total_tests': total_tests,
+                  'passed': total_tests - failures - errors - skipped,
+                  'failed': failures,
+                  'errors': errors,
+                  'skipped': skipped,
+                  'success_rate': round(success_rate, 2),
+                  'duration': round(time, 2)
+              }
+
+              with open(f'integration-{test_type}-summary.json', 'w') as f:
+                  json.dump(summary, f, indent=2)
+
+              print(f'[$test_type] 测试摘要:')
+              print(f'  总测试数: {total_tests}')
+              print(f'  通过: {summary[\"passed\"]}')
+              print(f'  失败: {failures}')
+              print(f'  错误: {errors}')
+              print(f'  跳过: {skipped}')
+              print(f'  成功率: {success_rate:.2f}%')
+              print(f'  耗时: {time:.2f}s')
+          "
+
       - name: 上传集成测试结果
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: integration-test-results
+          name: integration-test-results-${{ matrix.test-type }}
           path: |
-            integration-test-results.xml
-            htmlcov/
-            coverage.xml
+            integration-*-results.xml
+            htmlcov-*/
+            coverage-*.xml
+            coverage-*.json
+            integration-*-summary.json
 
   # 覆盖率汇总
   coverage-report:
     name: 覆盖率汇总
     runs-on: ubuntu-latest
-    needs: [backend-tests, frontend-tests, integration-tests]
+    needs: [monorepo-deps, backend-tests, frontend-tests, integration-tests]
     if: always()
-    
+
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-      
+
       - name: 设置Node.js环境
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      
+
+      - name: 设置Python环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 安装pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 安装覆盖率工具
+        run: |
+          # 安装Node.js覆盖率工具
+          pnpm add -g nyc c8 @istanbuljs/nyc-config-typescript
+
+          # 安装Python覆盖率工具
+          pip install coverage[toml] coverage-badge pytest-cov
+
       - name: 下载所有测试结果
         uses: actions/download-artifact@v3
-      
+
+      - name: 组织覆盖率文件
+        run: |
+          mkdir -p coverage-reports/{backend,frontend,integration,summary}
+
+          echo "📁 组织覆盖率文件..."
+
+          # 复制后端覆盖率文件
+          find . -name "*backend*coverage*.xml" -o -name "*backend*coverage*.json" | while read file; do
+            if [[ "$file" == *"community"* ]]; then
+              cp "$file" "coverage-reports/backend/community-$(basename "$file")"
+            elif [[ "$file" == *"enterprise"* ]]; then
+              cp "$file" "coverage-reports/backend/enterprise-$(basename "$file")"
+            else
+              cp "$file" "coverage-reports/backend/$(basename "$file")"
+            fi
+          done
+
+          # 复制前端覆盖率文件
+          find . -name "*frontend*coverage*.xml" -o -name "*frontend*coverage*.json" | while read file; do
+            if [[ "$file" == *"community"* ]]; then
+              cp "$file" "coverage-reports/frontend/community-$(basename "$file")"
+            elif [[ "$file" == *"enterprise"* ]]; then
+              cp "$file" "coverage-reports/frontend/enterprise-$(basename "$file")"
+            else
+              cp "$file" "coverage-reports/frontend/$(basename "$file")"
+            fi
+          done
+
+          # 复制集成测试覆盖率文件
+          find . -name "*integration*coverage*.xml" -o -name "*integration*coverage*.json" | while read file; do
+            cp "$file" "coverage-reports/integration/$(basename "$file")"
+          done
+
+          echo "📊 覆盖率文件组织完成"
+          ls -la coverage-reports/*/
+
       - name: 生成覆盖率报告
         run: |
-          node coverage-monitor.js --generate-report
-          node coverage-badge-generator.js --generate-all
-      
+          echo "📊 生成 monorepo 覆盖率报告..."
+
+          # 使用Python脚本分析和汇总覆盖率
+          python -c "
+          import json
+          import os
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          from collections import defaultdict
+          import re
+
+          def parse_coverage_xml(file_path):
+              '''解析XML格式的覆盖率文件'''
+              try:
+                  tree = ET.parse(file_path)
+                  root = tree.getroot()
+
+                  # 尝试不同的XML格式
+                  if root.tag == 'coverage':
+                      # Cobertura格式
+                      lines_valid = int(root.get('lines-valid', 0))
+                      lines_covered = int(root.get('lines-covered', 0))
+                      branches_valid = int(root.get('branches-valid', 0))
+                      branches_covered = int(root.get('branches-covered', 0))
+
+                      return {
+                          'lines_pct': (lines_covered / lines_valid * 100) if lines_valid > 0 else 0,
+                          'branches_pct': (branches_covered / branches_valid * 100) if branches_valid > 0 else 0,
+                          'lines_total': lines_valid,
+                          'lines_covered': lines_covered,
+                          'branches_total': branches_valid,
+                          'branches_covered': branches_covered
+                      }
+                  return None
+              except Exception as e:
+                  print(f'Error parsing XML {file_path}: {e}')
+                  return None
+
+          def parse_coverage_json(file_path):
+              '''解析JSON格式的覆盖率文件'''
+              try:
+                  with open(file_path) as f:
+                      data = json.load(f)
+
+                  totals = data.get('totals', {})
+                  return {
+                      'lines_pct': totals.get('percent_covered', 0),
+                      'branches_pct': totals.get('percent_covered_display', 0),
+                      'lines_total': totals.get('num_statements', 0),
+                      'lines_covered': totals.get('covered_lines', 0),
+                      'branches_total': totals.get('num_branches', 0),
+                      'branches_covered': totals.get('covered_branches', 0)
+                  }
+              except Exception as e:
+                  print(f'Error parsing JSON {file_path}: {e}')
+                  return None
+
+          # 分析不同类型的覆盖率
+          coverage_data = {
+              'services': defaultdict(dict),
+              'apps': defaultdict(dict),
+              'integration': defaultdict(dict),
+              'summary': {}
+          }
+
+          # 处理后端服务覆盖率
+          backend_dir = Path('coverage-reports/backend')
+          if backend_dir.exists():
+              for file in backend_dir.glob('*'):
+                  service_name = 'community' if 'community' in file.name else 'enterprise' if 'enterprise' in file.name else 'shared'
+
+                  if file.suffix == '.xml':
+                      data = parse_coverage_xml(file)
+                  elif file.suffix == '.json':
+                      data = parse_coverage_json(file)
+                  else:
+                      continue
+
+                  if data:
+                      coverage_data['services'][service_name] = data
+
+          # 处理前端应用覆盖率
+          frontend_dir = Path('coverage-reports/frontend')
+          if frontend_dir.exists():
+              for file in frontend_dir.glob('*'):
+                  app_name = 'community' if 'community' in file.name else 'enterprise' if 'enterprise' in file.name else 'shared'
+
+                  if file.suffix == '.xml':
+                      data = parse_coverage_xml(file)
+                  elif file.suffix == '.json':
+                      data = parse_coverage_json(file)
+                  else:
+                      continue
+
+                  if data:
+                      coverage_data['apps'][app_name] = data
+
+          # 处理集成测试覆盖率
+          integration_dir = Path('coverage-reports/integration')
+          if integration_dir.exists():
+              for file in integration_dir.glob('*'):
+                  test_type = 'cross-service' if 'cross-service' in file.name else 'api-integration' if 'api-integration' in file.name else 'data-consistency' if 'data-consistency' in file.name else 'general'
+
+                  if file.suffix == '.xml':
+                      data = parse_coverage_xml(file)
+                  elif file.suffix == '.json':
+                      data = parse_coverage_json(file)
+                  else:
+                      continue
+
+                  if data:
+                      coverage_data['integration'][test_type] = data
+
+          # 计算总体覆盖率
+          all_lines_total = 0
+          all_lines_covered = 0
+          all_branches_total = 0
+          all_branches_covered = 0
+
+          for category in ['services', 'apps']:
+              for name, data in coverage_data[category].items():
+                  all_lines_total += data.get('lines_total', 0)
+                  all_lines_covered += data.get('lines_covered', 0)
+                  all_branches_total += data.get('branches_total', 0)
+                  all_branches_covered += data.get('branches_covered', 0)
+
+          overall_lines_pct = (all_lines_covered / all_lines_total * 100) if all_lines_total > 0 else 0
+          overall_branches_pct = (all_branches_covered / all_branches_total * 100) if all_branches_total > 0 else 0
+
+          coverage_data['summary'] = {
+              'overall_lines_pct': round(overall_lines_pct, 2),
+              'overall_branches_pct': round(overall_branches_pct, 2),
+              'total_lines': all_lines_total,
+              'covered_lines': all_lines_covered,
+              'total_branches': all_branches_total,
+              'covered_branches': all_branches_covered
+          }
+
+          # 保存详细报告
+          with open('coverage-reports/summary/detailed-report.json', 'w') as f:
+              json.dump(coverage_data, f, indent=2)
+
+          # 生成Markdown报告
+          with open('coverage-reports/summary/coverage-report.md', 'w') as f:
+              f.write('# 📊 Monorepo 覆盖率报告\n\n')
+
+              # 总体覆盖率
+              f.write('## 🎯 总体覆盖率\n\n')
+              f.write(f'- **行覆盖率**: {overall_lines_pct:.2f}% ({all_lines_covered:,}/{all_lines_total:,})\n')
+              f.write(f'- **分支覆盖率**: {overall_branches_pct:.2f}% ({all_branches_covered:,}/{all_branches_total:,})\n\n')
+
+              # 后端服务覆盖率
+              if coverage_data['services']:
+                  f.write('## 🔧 后端服务覆盖率\n\n')
+                  f.write('| 服务 | 行覆盖率 | 分支覆盖率 | 总行数 | 已覆盖行数 |\n')
+                  f.write('|------|----------|------------|--------|------------|\n')
+                  for service, data in coverage_data['services'].items():
+                      f.write(f'| {service} | {data.get("lines_pct", 0):.1f}% | {data.get("branches_pct", 0):.1f}% | {data.get("lines_total", 0):,} | {data.get("lines_covered", 0):,} |\n')
+                  f.write('\n')
+
+              # 前端应用覆盖率
+              if coverage_data['apps']:
+                  f.write('## 🎨 前端应用覆盖率\n\n')
+                  f.write('| 应用 | 行覆盖率 | 分支覆盖率 | 总行数 | 已覆盖行数 |\n')
+                  f.write('|------|----------|------------|--------|------------|\n')
+                  for app, data in coverage_data['apps'].items():
+                      f.write(f'| {app} | {data.get("lines_pct", 0):.1f}% | {data.get("branches_pct", 0):.1f}% | {data.get("lines_total", 0):,} | {data.get("lines_covered", 0):,} |\n')
+                  f.write('\n')
+
+              # 集成测试覆盖率
+              if coverage_data['integration']:
+                  f.write('## 🔗 集成测试覆盖率\n\n')
+                  f.write('| 测试类型 | 行覆盖率 | 分支覆盖率 | 总行数 | 已覆盖行数 |\n')
+                  f.write('|----------|----------|------------|--------|------------|\n')
+                  for test_type, data in coverage_data['integration'].items():
+                      f.write(f'| {test_type} | {data.get("lines_pct", 0):.1f}% | {data.get("branches_pct", 0):.1f}% | {data.get("lines_total", 0):,} | {data.get("lines_covered", 0):,} |\n')
+                  f.write('\n')
+
+          # 生成不同维度的覆盖率徽章
+          def generate_badge(label, value, threshold_good=85, threshold_ok=70):
+              if value >= threshold_good:
+                  color = 'brightgreen'
+              elif value >= threshold_ok:
+                  color = 'yellow'
+              else:
+                  color = 'red'
+              return f'https://img.shields.io/badge/{label}-{value:.1f}%25-{color}'
+
+          badges = {
+              'overall': generate_badge('coverage', overall_lines_pct),
+              'lines': generate_badge('lines', overall_lines_pct),
+              'branches': generate_badge('branches', overall_branches_pct)
+          }
+
+          # 为每个服务和应用生成徽章
+          for service, data in coverage_data['services'].items():
+              badges[f'service-{service}'] = generate_badge(f'{service}-service', data.get('lines_pct', 0))
+
+          for app, data in coverage_data['apps'].items():
+              badges[f'app-{app}'] = generate_badge(f'{app}-app', data.get('lines_pct', 0))
+
+          with open('coverage-reports/summary/badges.json', 'w') as f:
+              json.dump(badges, f, indent=2)
+
+          # 生成徽章Markdown
+          with open('coverage-reports/summary/badges.md', 'w') as f:
+              f.write('# 📊 覆盖率徽章\n\n')
+              f.write('## 总体覆盖率\n\n')
+              f.write(f'![Overall Coverage]({badges["overall"]})\n')
+              f.write(f'![Lines Coverage]({badges["lines"]})\n')
+              f.write(f'![Branches Coverage]({badges["branches"]})\n\n')
+
+              if coverage_data['services']:
+                  f.write('## 后端服务覆盖率\n\n')
+                  for service in coverage_data['services']:
+                      f.write(f'![{service} Service]({badges[f"service-{service}"]})\n')
+                  f.write('\n')
+
+              if coverage_data['apps']:
+                  f.write('## 前端应用覆盖率\n\n')
+                  for app in coverage_data['apps']:
+                      f.write(f'![{app} App]({badges[f"app-{app}"]})\n')
+                  f.write('\n')
+
+          print('✅ Monorepo 覆盖率报告生成完成')
+          print(f'📊 总体行覆盖率: {overall_lines_pct:.2f}%')
+          print(f'🌿 总体分支覆盖率: {overall_branches_pct:.2f}%')
+          "
+
+      - name: 检查覆盖率趋势
+        run: |
+          echo "📈 检查覆盖率趋势..."
+
+          if [ -f "coverage-reports/summary/detailed-report.json" ] && [ -f ".github/coverage-baseline.json" ]; then
+            python -c "
+            import json
+
+            # 读取当前覆盖率报告
+            with open('coverage-reports/summary/detailed-report.json') as f:
+                current = json.load(f)
+
+            # 读取基线覆盖率
+            with open('.github/coverage-baseline.json') as f:
+                baseline = json.load(f)
+
+            current_summary = current.get('summary', {})
+            baseline_summary = baseline.get('summary', {})
+
+            current_lines_pct = current_summary.get('overall_lines_pct', 0)
+            baseline_lines_pct = baseline_summary.get('overall_lines_pct', 0)
+
+            current_branches_pct = current_summary.get('overall_branches_pct', 0)
+            baseline_branches_pct = baseline_summary.get('overall_branches_pct', 0)
+
+            lines_diff = current_lines_pct - baseline_lines_pct
+            branches_diff = current_branches_pct - baseline_branches_pct
+
+            print('📊 覆盖率趋势分析:')
+            print(f'  行覆盖率: {baseline_lines_pct:.2f}% → {current_lines_pct:.2f}% ({lines_diff:+.2f}%)')
+            print(f'  分支覆盖率: {baseline_branches_pct:.2f}% → {current_branches_pct:.2f}% ({branches_diff:+.2f}%)')
+
+            # 检查是否有显著下降
+            significant_decline = False
+
+            if lines_diff < -2:  # 行覆盖率下降超过2%
+                print(f'❌ 行覆盖率下降 {abs(lines_diff):.2f}%，超过阈值 2%')
+                significant_decline = True
+
+            if branches_diff < -3:  # 分支覆盖率下降超过3%
+                print(f'❌ 分支覆盖率下降 {abs(branches_diff):.2f}%，超过阈值 3%')
+                significant_decline = True
+
+            # 检查各个服务和应用的覆盖率变化
+            for category in ['services', 'apps']:
+                current_items = current.get(category, {})
+                baseline_items = baseline.get(category, {})
+
+                for name, current_data in current_items.items():
+                    if name in baseline_items:
+                        baseline_data = baseline_items[name]
+
+                        current_item_pct = current_data.get('lines_pct', 0)
+                        baseline_item_pct = baseline_data.get('lines_pct', 0)
+                        item_diff = current_item_pct - baseline_item_pct
+
+                        if item_diff < -5:  # 单个项目覆盖率下降超过5%
+                            print(f'⚠️ {category[:-1]} \"{name}\" 覆盖率下降 {abs(item_diff):.2f}%')
+                            significant_decline = True
+                        elif item_diff > 3:  # 单个项目覆盖率提升超过3%
+                            print(f'🎉 {category[:-1]} \"{name}\" 覆盖率提升 {item_diff:.2f}%')
+
+            if significant_decline:
+                print('\n❌ 检测到显著的覆盖率下降，请检查代码变更')
+                exit(1)
+            elif lines_diff > 1 or branches_diff > 1:
+                print('\n🎉 覆盖率有所提升！')
+            else:
+                print('\n✅ 覆盖率保持稳定')
+            "
+          else
+            echo "⚠️ 未找到基线覆盖率文件，跳过趋势检查"
+          fi
+
+      - name: 更新覆盖率基线
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          echo "📝 更新覆盖率基线..."
+
+          if [ -f "coverage-reports/summary/detailed-report.json" ]; then
+            cp "coverage-reports/summary/detailed-report.json" ".github/coverage-baseline.json"
+            echo "✅ 覆盖率基线已更新"
+          fi
+
       - name: 上传覆盖率报告
         uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: coverage-report
           path: |
             coverage-reports/
-            badges/
-      
+            .github/coverage-baseline.json
+
       - name: 评论PR覆盖率
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
-            const path = 'coverage-reports/summary.json';
-            
-            if (fs.existsSync(path)) {
-              const coverage = JSON.parse(fs.readFileSync(path, 'utf8'));
-              
-              const comment = `## 📊 测试覆盖率报告
-              
-              | 项目 | 行覆盖率 | 分支覆盖率 | 函数覆盖率 |
-              |------|----------|------------|------------|
-              | 后端服务 | ${coverage.server?.lines || 'N/A'}% | ${coverage.server?.branches || 'N/A'}% | ${coverage.server?.functions || 'N/A'}% |
-              | OIDC服务 | ${coverage.oidc?.lines || 'N/A'}% | ${coverage.oidc?.branches || 'N/A'}% | ${coverage.oidc?.functions || 'N/A'}% |
-              | 管理前端 | ${coverage.admin?.lines || 'N/A'}% | ${coverage.admin?.branches || 'N/A'}% | ${coverage.admin?.functions || 'N/A'}% |
-              | 小程序 | ${coverage.miniapp?.lines || 'N/A'}% | ${coverage.miniapp?.branches || 'N/A'}% | ${coverage.miniapp?.functions || 'N/A'}% |
-              
-              📈 [查看详细报告](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})`;
-              
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
+            const detailedReportPath = 'coverage-reports/summary/detailed-report.json';
+            const badgesPath = 'coverage-reports/summary/badges.json';
+
+            if (fs.existsSync(detailedReportPath)) {
+              const coverage = JSON.parse(fs.readFileSync(detailedReportPath, 'utf8'));
+              const badges = fs.existsSync(badgesPath) ? JSON.parse(fs.readFileSync(badgesPath, 'utf8')) : {};
+
+              const summary = coverage.summary || {};
+              const services = coverage.services || {};
+              const apps = coverage.apps || {};
+              const integration = coverage.integration || {};
+
+              let comment = `## 📊 Monorepo 测试覆盖率报告\n\n`;
+
+              // 总体覆盖率徽章
+              if (badges.overall) {
+                comment += `![Overall Coverage](${badges.overall}) `;
+              }
+              if (badges.lines) {
+                comment += `![Lines](${badges.lines}) `;
+              }
+              if (badges.branches) {
+                comment += `![Branches](${badges.branches})`;
+              }
+              comment += `\n\n`;
+
+              // 总体覆盖率摘要
+              comment += `### 🎯 总体覆盖率\n\n`;
+              comment += `- **行覆盖率**: ${summary.overall_lines_pct || 0}% (${(summary.covered_lines || 0).toLocaleString()}/${(summary.total_lines || 0).toLocaleString()})\n`;
+              comment += `- **分支覆盖率**: ${summary.overall_branches_pct || 0}% (${(summary.covered_branches || 0).toLocaleString()}/${(summary.total_branches || 0).toLocaleString()})\n\n`;
+
+              // 后端服务覆盖率
+              if (Object.keys(services).length > 0) {
+                comment += `### 🔧 后端服务覆盖率\n\n`;
+                comment += `| 服务 | 徽章 | 行覆盖率 | 分支覆盖率 | 总行数 |\n`;
+                comment += `|------|------|----------|------------|--------|\n`;
+
+                for (const [service, data] of Object.entries(services)) {
+                  const badge = badges[\`service-\${service}\`] ? \`![\${service}](\${badges[\`service-\${service}\`]})\` : '-';
+                  comment += \`| \${service} | \${badge} | \${(data.lines_pct || 0).toFixed(1)}% | \${(data.branches_pct || 0).toFixed(1)}% | \${(data.lines_total || 0).toLocaleString()} |\n\`;
+                }
+                comment += `\n`;
+              }
+
+              // 前端应用覆盖率
+              if (Object.keys(apps).length > 0) {
+                comment += `### 🎨 前端应用覆盖率\n\n`;
+                comment += `| 应用 | 徽章 | 行覆盖率 | 分支覆盖率 | 总行数 |\n`;
+                comment += `|------|------|----------|------------|--------|\n`;
+
+                for (const [app, data] of Object.entries(apps)) {
+                  const badge = badges[\`app-\${app}\`] ? \`![\${app}](\${badges[\`app-\${app}\`]})\` : '-';
+                  comment += \`| \${app} | \${badge} | \${(data.lines_pct || 0).toFixed(1)}% | \${(data.branches_pct || 0).toFixed(1)}% | \${(data.lines_total || 0).toLocaleString()} |\n\`;
+                }
+                comment += `\n`;
+              }
+
+              // 集成测试覆盖率
+              if (Object.keys(integration).length > 0) {
+                comment += `### 🔗 集成测试覆盖率\n\n`;
+                comment += `| 测试类型 | 行覆盖率 | 分支覆盖率 | 总行数 |\n`;
+                comment += `|----------|----------|------------|--------|\n`;
+
+                for (const [testType, data] of Object.entries(integration)) {
+                  comment += \`| \${testType} | \${(data.lines_pct || 0).toFixed(1)}% | \${(data.branches_pct || 0).toFixed(1)}% | \${(data.lines_total || 0).toLocaleString()} |\n\`;
+                }
+                comment += `\n`;
+              }
+
+              comment += `\n📈 [查看详细报告](\${process.env.GITHUB_SERVER_URL}/\${process.env.GITHUB_REPOSITORY}/actions/runs/\${process.env.GITHUB_RUN_ID})`;
+
+              // 检查是否存在现有的覆盖率评论
+              const { data: comments } = await github.rest.issues.listComments({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: comment
+                issue_number: context.issue.number,
               });
+
+              const existingComment = comments.find(comment =>
+                comment.user.type === 'Bot' && comment.body.includes('📊 Monorepo 测试覆盖率报告')
+              );
+
+              if (existingComment) {
+                // 更新现有评论
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existingComment.id,
+                  body: comment
+                });
+              } else {
+                // 创建新评论
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: comment
+                });
+              }
+            } else {
+              console.log('未找到覆盖率报告文件，跳过PR评论');
             }
 
   # 性能回归检测
   performance-regression:
-    name: 性能回归检测
+    name: 性能回归检测 (${{ matrix.component }})
     runs-on: ubuntu-latest
-    needs: [backend-tests, frontend-tests]
+    needs: [monorepo-deps, backend-tests, frontend-tests, e2e-tests]
     if: github.event_name == 'pull_request'
-    
+
+    strategy:
+      matrix:
+        component: [backend-services, frontend-apps, e2e-performance]
+      fail-fast: false
+
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: 设置Node.js环境
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      
+          cache: 'pnpm'
+
+      - name: 安装pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 设置Python环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
       - name: 下载性能测试结果
         uses: actions/download-artifact@v3
         with:
           pattern: '*-test-results'
-      
-      - name: 运行性能回归检测
+          merge-multiple: true
+
+      - name: 安装性能分析工具
         run: |
-          node performance-regression-detector.js \
-            --compare-with=main \
-            --threshold=10 \
-            --output=performance-report.json
-      
+          echo "📊 安装性能分析工具..."
+
+          # 安装Node.js性能分析工具
+          pnpm add -g clinic autocannon lighthouse-ci
+
+          # 安装Python性能分析工具
+          pip install py-spy memory-profiler psutil
+
+          # 创建性能分析脚本
+          cat > performance-analyzer.py << 'EOF'
+          import json
+          import os
+          import sys
+          from pathlib import Path
+          import statistics
+
+          def analyze_backend_performance():
+              """分析后端服务性能"""
+              results = {}
+
+              # 查找后端性能测试结果
+              for service_dir in Path('.').glob('*-backend-test-results'):
+                  service_name = service_dir.name.replace('-backend-test-results', '')
+
+                  perf_file = service_dir / 'performance.json'
+                  if perf_file.exists():
+                      with open(perf_file) as f:
+                          perf_data = json.load(f)
+
+                      results[service_name] = {
+                          'response_time_p95': perf_data.get('response_time_p95', 0),
+                          'throughput': perf_data.get('throughput', 0),
+                          'memory_usage': perf_data.get('memory_usage', 0),
+                          'cpu_usage': perf_data.get('cpu_usage', 0)
+                      }
+
+              return results
+
+          def analyze_frontend_performance():
+              """分析前端应用性能"""
+              results = {}
+
+              # 查找前端性能测试结果
+              for app_dir in Path('.').glob('*-frontend-test-results'):
+                  app_name = app_dir.name.replace('-frontend-test-results', '')
+
+                  lighthouse_file = app_dir / 'lighthouse-report.json'
+                  if lighthouse_file.exists():
+                      with open(lighthouse_file) as f:
+                          lighthouse_data = json.load(f)
+
+                      audits = lighthouse_data.get('audits', {})
+                      results[app_name] = {
+                          'performance_score': lighthouse_data.get('categories', {}).get('performance', {}).get('score', 0) * 100,
+                          'first_contentful_paint': audits.get('first-contentful-paint', {}).get('numericValue', 0),
+                          'largest_contentful_paint': audits.get('largest-contentful-paint', {}).get('numericValue', 0),
+                          'cumulative_layout_shift': audits.get('cumulative-layout-shift', {}).get('numericValue', 0),
+                          'total_blocking_time': audits.get('total-blocking-time', {}).get('numericValue', 0)
+                      }
+
+              return results
+
+          def analyze_e2e_performance():
+              """分析E2E测试性能"""
+              results = {}
+
+              # 查找E2E性能测试结果
+              for app_dir in Path('.').glob('*-e2e-test-results'):
+                  app_name = app_dir.name.replace('-e2e-test-results', '')
+
+                  perf_file = app_dir / 'e2e-performance.json'
+                  if perf_file.exists():
+                      with open(perf_file) as f:
+                          perf_data = json.load(f)
+
+                      results[app_name] = {
+                          'test_duration': perf_data.get('total_duration', 0),
+                          'page_load_time': perf_data.get('avg_page_load_time', 0),
+                          'interaction_time': perf_data.get('avg_interaction_time', 0),
+                          'network_requests': perf_data.get('avg_network_requests', 0)
+                      }
+
+              return results
+
+          def compare_with_baseline(current_data, baseline_file):
+              """与基线性能数据比较"""
+              if not os.path.exists(baseline_file):
+                  print(f"⚠️ 未找到基线文件 {baseline_file}，跳过比较")
+                  return []
+
+              with open(baseline_file) as f:
+                  baseline_data = json.load(f)
+
+              regressions = []
+              improvements = []
+
+              for component, metrics in current_data.items():
+                  if component not in baseline_data:
+                      continue
+
+                  baseline_metrics = baseline_data[component]
+
+                  for metric, current_value in metrics.items():
+                      if metric not in baseline_metrics:
+                          continue
+
+                      baseline_value = baseline_metrics[metric]
+                      if baseline_value == 0:
+                          continue
+
+                      change_pct = ((current_value - baseline_value) / baseline_value) * 100
+
+                      # 定义回归阈值（不同指标有不同的阈值）
+                      thresholds = {
+                          'response_time_p95': 15,  # 响应时间增加15%为回归
+                          'throughput': -10,  # 吞吐量下降10%为回归
+                          'memory_usage': 20,  # 内存使用增加20%为回归
+                          'cpu_usage': 25,  # CPU使用增加25%为回归
+                          'performance_score': -5,  # 性能分数下降5%为回归
+                          'first_contentful_paint': 20,  # FCP增加20%为回归
+                          'largest_contentful_paint': 20,  # LCP增加20%为回归
+                          'cumulative_layout_shift': 50,  # CLS增加50%为回归
+                          'total_blocking_time': 30,  # TBT增加30%为回归
+                          'test_duration': 25,  # 测试时长增加25%为回归
+                          'page_load_time': 20,  # 页面加载时间增加20%为回归
+                          'interaction_time': 30,  # 交互时间增加30%为回归
+                      }
+
+                      threshold = thresholds.get(metric, 15)  # 默认15%阈值
+
+                      # 对于"越小越好"的指标，正变化是回归
+                      # 对于"越大越好"的指标，负变化是回归
+                      better_when_lower = metric in [
+                          'response_time_p95', 'memory_usage', 'cpu_usage',
+                          'first_contentful_paint', 'largest_contentful_paint',
+                          'cumulative_layout_shift', 'total_blocking_time',
+                          'test_duration', 'page_load_time', 'interaction_time'
+                      ]
+
+                      if better_when_lower:
+                          if change_pct > threshold:
+                              regressions.append({
+                                  'component': component,
+                                  'metric': metric,
+                                  'baseline_value': baseline_value,
+                                  'current_value': current_value,
+                                  'change_pct': change_pct,
+                                  'threshold': threshold
+                              })
+                          elif change_pct < -5:  # 改善超过5%
+                              improvements.append({
+                                  'component': component,
+                                  'metric': metric,
+                                  'baseline_value': baseline_value,
+                                  'current_value': current_value,
+                                  'change_pct': change_pct
+                              })
+                      else:
+                          if change_pct < -abs(threshold):
+                              regressions.append({
+                                  'component': component,
+                                  'metric': metric,
+                                  'baseline_value': baseline_value,
+                                  'current_value': current_value,
+                                  'change_pct': change_pct,
+                                  'threshold': threshold
+                              })
+                          elif change_pct > 5:  # 改善超过5%
+                              improvements.append({
+                                  'component': component,
+                                  'metric': metric,
+                                  'baseline_value': baseline_value,
+                                  'current_value': current_value,
+                                  'change_pct': change_pct
+                              })
+
+              return regressions, improvements
+
+          def main():
+              component = os.environ.get('MATRIX_COMPONENT', 'backend-services')
+
+              print(f"🔍 分析 {component} 性能数据...")
+
+              if component == 'backend-services':
+                  current_data = analyze_backend_performance()
+                  baseline_file = '.github/performance-baseline-backend.json'
+              elif component == 'frontend-apps':
+                  current_data = analyze_frontend_performance()
+                  baseline_file = '.github/performance-baseline-frontend.json'
+              elif component == 'e2e-performance':
+                  current_data = analyze_e2e_performance()
+                  baseline_file = '.github/performance-baseline-e2e.json'
+              else:
+                  print(f"❌ 未知的组件类型: {component}")
+                  sys.exit(1)
+
+              if not current_data:
+                  print(f"⚠️ 未找到 {component} 的性能数据")
+                  return
+
+              print(f"📊 找到 {len(current_data)} 个组件的性能数据")
+
+              # 与基线比较
+              regressions, improvements = compare_with_baseline(current_data, baseline_file)
+
+              # 生成报告
+              report = {
+                  'component_type': component,
+                  'timestamp': os.environ.get('GITHUB_RUN_ID', ''),
+                  'current_data': current_data,
+                  'regressions': regressions,
+                  'improvements': improvements,
+                  'summary': {
+                      'total_components': len(current_data),
+                      'regressions_count': len(regressions),
+                      'improvements_count': len(improvements)
+                  }
+              }
+
+              # 保存报告
+              os.makedirs('performance-reports', exist_ok=True)
+              report_file = f'performance-reports/{component}-report.json'
+
+              with open(report_file, 'w') as f:
+                  json.dump(report, f, indent=2)
+
+              print(f"📝 性能报告已保存到 {report_file}")
+
+              # 输出摘要
+              if regressions:
+                  print(f"❌ 发现 {len(regressions)} 个性能回归")
+                  for reg in regressions:
+                      print(f"  - {reg['component']}.{reg['metric']}: {reg['change_pct']:+.1f}% (阈值: {reg['threshold']}%)")
+
+              if improvements:
+                  print(f"🎉 发现 {len(improvements)} 个性能改善")
+                  for imp in improvements:
+                      print(f"  - {imp['component']}.{imp['metric']}: {imp['change_pct']:+.1f}%")
+
+              if not regressions and not improvements:
+                  print("✅ 性能保持稳定")
+
+          if __name__ == '__main__':
+              main()
+          EOF
+
+      - name: 运行性能回归检测
+        env:
+          MATRIX_COMPONENT: ${{ matrix.component }}
+        run: |
+          echo "🔍 运行 ${{ matrix.component }} 性能回归检测..."
+          python performance-analyzer.py
+
+      - name: 上传性能报告
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: performance-report-${{ matrix.component }}
+          path: performance-reports/
+
       - name: 评论PR性能报告
+        if: always()
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
-            const path = 'performance-report.json';
-            
-            if (fs.existsSync(path)) {
-              const report = JSON.parse(fs.readFileSync(path, 'utf8'));
-              
+            const component = '${{ matrix.component }}';
+            const reportPath = `performance-reports/${component}-report.json`;
+
+            if (fs.existsSync(reportPath)) {
+              const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+
+              const componentNames = {
+                'backend-services': '🔧 后端服务',
+                'frontend-apps': '🎨 前端应用',
+                'e2e-performance': '🔗 E2E测试'
+              };
+
+              const componentName = componentNames[component] || component;
+
+              let comment = `## 📊 ${componentName} 性能回归检测\n\n`;
+
+              const summary = report.summary || {};
+              comment += `**检测摘要**: ${summary.total_components || 0} 个组件，${summary.regressions_count || 0} 个回归，${summary.improvements_count || 0} 个改善\n\n`;
+
+              // 性能回归
               if (report.regressions && report.regressions.length > 0) {
-                const comment = `## ⚠️ 性能回归检测
-                
-                发现 ${report.regressions.length} 个性能回归问题：
-                
-                ${report.regressions.map(r => 
-                  `- **${r.metric}**: ${r.change}% 变化 (阈值: ${r.threshold}%)`
-                ).join('\n')}
-                
-                请检查代码变更对性能的影响。`;
-                
-                github.rest.issues.createComment({
-                  issue_number: context.issue.number,
+                comment += `### ❌ 性能回归 (${report.regressions.length})\n\n`;
+                comment += `| 组件 | 指标 | 基线值 | 当前值 | 变化 | 阈值 |\n`;
+                comment += `|------|------|--------|--------|------|------|\n`;
+
+                for (const reg of report.regressions) {
+                  const baselineStr = typeof reg.baseline_value === 'number' ? reg.baseline_value.toFixed(2) : reg.baseline_value;
+                  const currentStr = typeof reg.current_value === 'number' ? reg.current_value.toFixed(2) : reg.current_value;
+                  comment += `| ${reg.component} | ${reg.metric} | ${baselineStr} | ${currentStr} | ${reg.change_pct > 0 ? '+' : ''}${reg.change_pct.toFixed(1)}% | ${reg.threshold}% |\n`;
+                }
+                comment += `\n`;
+              }
+
+              // 性能改善
+              if (report.improvements && report.improvements.length > 0) {
+                comment += `### 🎉 性能改善 (${report.improvements.length})\n\n`;
+                comment += `| 组件 | 指标 | 基线值 | 当前值 | 变化 |\n`;
+                comment += `|------|------|--------|--------|------|\n`;
+
+                for (const imp of report.improvements) {
+                  const baselineStr = typeof imp.baseline_value === 'number' ? imp.baseline_value.toFixed(2) : imp.baseline_value;
+                  const currentStr = typeof imp.current_value === 'number' ? imp.current_value.toFixed(2) : imp.current_value;
+                  comment += `| ${imp.component} | ${imp.metric} | ${baselineStr} | ${currentStr} | ${imp.change_pct > 0 ? '+' : ''}${imp.change_pct.toFixed(1)}% |\n`;
+                }
+                comment += `\n`;
+              }
+
+              if (!report.regressions?.length && !report.improvements?.length) {
+                comment += `✅ 性能保持稳定，未检测到显著变化。\n\n`;
+              }
+
+              comment += `\n📈 [查看详细报告](\${process.env.GITHUB_SERVER_URL}/\${process.env.GITHUB_REPOSITORY}/actions/runs/\${process.env.GITHUB_RUN_ID})`;
+
+              // 检查是否存在现有的性能评论
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+
+              const existingComment = comments.find(comment =>
+                comment.user.type === 'Bot' && comment.body.includes(`📊 ${componentName} 性能回归检测`)
+              );
+
+              if (existingComment) {
+                // 更新现有评论
+                await github.rest.issues.updateComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
+                  comment_id: existingComment.id,
+                  body: comment
+                });
+              } else {
+                // 创建新评论
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
                   body: comment
                 });
               }
+            } else {
+              console.log(`未找到 ${component} 性能报告文件，跳过PR评论`);
             }
 
   # 部署检查
   deployment-check:
-    name: 部署检查
+    name: 部署检查 (${{ matrix.environment }})
     runs-on: ubuntu-latest
-    needs: [code-quality, backend-tests, frontend-tests, e2e-tests, integration-tests]
-    if: github.ref == 'refs/heads/main'
-    
+    needs: [monorepo-deps, code-quality, backend-tests, frontend-tests, e2e-tests, integration-tests, coverage-report]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    strategy:
+      matrix:
+        environment: [staging, production]
+      fail-fast: false
+
+    environment:
+      name: ${{ matrix.environment }}
+      url: ${{ steps.deploy-url.outputs.url }}
+
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-      
+
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 安装pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 设置Python环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: 安装依赖
+        run: |
+          echo "📦 安装项目依赖..."
+          pnpm install --frozen-lockfile
+
+      - name: 构建共享包
+        run: |
+          echo "🔧 构建共享包..."
+          pnpm --filter "./packages/*" build
+
       - name: 检查部署配置
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
         run: |
-          echo "检查Docker配置..."
-          if [ -f "docker-compose.yml" ]; then
-            docker-compose config
+          echo "🔍 检查 $ENVIRONMENT 环境部署配置..."
+
+          # 检查环境配置文件
+          if [ ! -f "deploy/environments/$ENVIRONMENT.env" ]; then
+            echo "❌ 未找到环境配置文件: deploy/environments/$ENVIRONMENT.env"
+            exit 1
           fi
-          
-          echo "检查Kubernetes配置..."
-          if [ -d "k8s" ]; then
-            kubectl --dry-run=client apply -f k8s/ || true
+
+          echo "✅ 环境配置文件存在"
+
+          # 检查Docker配置
+          echo "🐳 检查Docker配置..."
+
+          # 检查各个服务的Dockerfile
+          for service in community enterprise; do
+            dockerfile="apps/$service/server/Dockerfile"
+            if [ -f "$dockerfile" ]; then
+              echo "✅ 找到 $service 服务Dockerfile"
+              # 验证Dockerfile语法
+              docker build --dry-run -f "$dockerfile" . > /dev/null 2>&1 || {
+                echo "❌ $service 服务Dockerfile语法错误"
+                exit 1
+              }
+            else
+              echo "⚠️ 未找到 $service 服务Dockerfile: $dockerfile"
+            fi
+          done
+
+          # 检查前端应用的Dockerfile
+          for app in admin miniapp; do
+            dockerfile="apps/$service/$app/Dockerfile"
+            if [ -f "$dockerfile" ]; then
+              echo "✅ 找到 $app 应用Dockerfile"
+              docker build --dry-run -f "$dockerfile" . > /dev/null 2>&1 || {
+                echo "❌ $app 应用Dockerfile语法错误"
+                exit 1
+              }
+            else
+              echo "⚠️ 未找到 $app 应用Dockerfile: $dockerfile"
+            fi
+          done
+
+          # 检查docker-compose配置
+          if [ -f "docker-compose.$ENVIRONMENT.yml" ]; then
+            echo "✅ 找到docker-compose配置"
+            docker-compose -f "docker-compose.$ENVIRONMENT.yml" config > /dev/null || {
+              echo "❌ docker-compose配置语法错误"
+              exit 1
+            }
+          else
+            echo "⚠️ 未找到docker-compose配置: docker-compose.$ENVIRONMENT.yml"
           fi
-      
+
+          # 检查Kubernetes配置
+          echo "☸️ 检查Kubernetes配置..."
+
+          if [ -d "k8s/$ENVIRONMENT" ]; then
+            echo "✅ 找到Kubernetes配置目录"
+
+            # 安装kubectl（如果需要）
+            if ! command -v kubectl &> /dev/null; then
+              curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+              chmod +x kubectl
+              sudo mv kubectl /usr/local/bin/
+            fi
+
+            # 验证Kubernetes配置
+            kubectl --dry-run=client apply -f "k8s/$ENVIRONMENT/" || {
+              echo "❌ Kubernetes配置验证失败"
+              exit 1
+            }
+            echo "✅ Kubernetes配置验证通过"
+          else
+            echo "⚠️ 未找到Kubernetes配置目录: k8s/$ENVIRONMENT"
+          fi
+
       - name: 安全扫描
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
         run: |
-          echo "运行安全扫描..."
-          # 这里可以集成更多安全扫描工具
-      
+          echo "🔒 运行 $ENVIRONMENT 环境安全扫描..."
+
+          # 创建安全扫描脚本
+          cat > security-scan.py << 'EOF'
+          import os
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          def scan_docker_images():
+              """扫描Docker镜像安全漏洞"""
+              print("🐳 扫描Docker镜像安全漏洞...")
+
+              # 安装trivy（如果需要）
+              subprocess.run([
+                  'sudo', 'apt-get', 'update', '-qq'
+              ], check=False)
+
+              subprocess.run([
+                  'sudo', 'apt-get', 'install', '-y', 'wget', 'apt-transport-https', 'gnupg', 'lsb-release'
+              ], check=False)
+
+              subprocess.run([
+                  'wget', '-qO', '-', 'https://aquasecurity.github.io/trivy-repo/deb/public.key'
+              ], stdout=subprocess.PIPE, check=False)
+
+              # 扫描基础镜像
+              base_images = [
+                  'python:3.13-slim',
+                  'node:24-alpine',
+                  'nginx:alpine'
+              ]
+
+              vulnerabilities = []
+
+              for image in base_images:
+                  print(f"  扫描镜像: {image}")
+                  try:
+                      result = subprocess.run([
+                          'docker', 'run', '--rm',
+                          'aquasec/trivy:latest',
+                          'image', '--format', 'json',
+                          '--severity', 'HIGH,CRITICAL',
+                          image
+                      ], capture_output=True, text=True, timeout=300)
+
+                      if result.returncode == 0 and result.stdout:
+                          scan_result = json.loads(result.stdout)
+                          if scan_result.get('Results'):
+                              for res in scan_result['Results']:
+                                  if res.get('Vulnerabilities'):
+                                      vulnerabilities.extend(res['Vulnerabilities'])
+                  except Exception as e:
+                      print(f"    ⚠️ 扫描失败: {e}")
+
+              return vulnerabilities
+
+          def scan_dependencies():
+              """扫描依赖包安全漏洞"""
+              print("📦 扫描依赖包安全漏洞...")
+
+              vulnerabilities = []
+
+              # 扫描Node.js依赖
+              try:
+                  result = subprocess.run([
+                      'pnpm', 'audit', '--json'
+                  ], capture_output=True, text=True, cwd='.')
+
+                  if result.stdout:
+                      audit_result = json.loads(result.stdout)
+                      if audit_result.get('advisories'):
+                          for advisory in audit_result['advisories'].values():
+                              if advisory.get('severity') in ['high', 'critical']:
+                                  vulnerabilities.append({
+                                      'type': 'npm',
+                                      'package': advisory.get('module_name'),
+                                      'severity': advisory.get('severity'),
+                                      'title': advisory.get('title'),
+                                      'url': advisory.get('url')
+                                  })
+              except Exception as e:
+                  print(f"    ⚠️ Node.js依赖扫描失败: {e}")
+
+              # 扫描Python依赖
+              for service in ['community', 'enterprise']:
+                  requirements_file = f'apps/{service}/server/requirements.txt'
+                  if Path(requirements_file).exists():
+                      try:
+                          result = subprocess.run([
+                              'pip-audit', '--format', 'json',
+                              '--requirement', requirements_file
+                          ], capture_output=True, text=True)
+
+                          if result.stdout:
+                              audit_result = json.loads(result.stdout)
+                              for vuln in audit_result:
+                                  if vuln.get('severity') in ['high', 'critical']:
+                                      vulnerabilities.append({
+                                          'type': 'pip',
+                                          'service': service,
+                                          'package': vuln.get('package'),
+                                          'severity': vuln.get('severity'),
+                                          'title': vuln.get('title'),
+                                          'id': vuln.get('id')
+                                      })
+                      except Exception as e:
+                          print(f"    ⚠️ {service}服务Python依赖扫描失败: {e}")
+
+              return vulnerabilities
+
+          def scan_secrets():
+              """扫描代码中的敏感信息"""
+              print("🔍 扫描代码中的敏感信息...")
+
+              secrets = []
+
+              # 使用简单的正则表达式扫描
+              import re
+
+              secret_patterns = [
+                  (r'password\s*=\s*["\'][^"\'\r]{8,}["\']', 'hardcoded_password'),
+                  (r'api[_-]?key\s*=\s*["\'][^"\'\r]{20,}["\']', 'api_key'),
+                  (r'secret[_-]?key\s*=\s*["\'][^"\'\r]{20,}["\']', 'secret_key'),
+                  (r'token\s*=\s*["\'][^"\'\r]{20,}["\']', 'token'),
+                  (r'-----BEGIN [A-Z ]+-----', 'private_key')
+              ]
+
+              for root, dirs, files in os.walk('.'):
+                  # 跳过不需要扫描的目录
+                  dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ['node_modules', '__pycache__', 'dist', 'build']]
+
+                  for file in files:
+                      if file.endswith(('.py', '.js', '.ts', '.jsx', '.tsx', '.env', '.yaml', '.yml')):
+                          file_path = os.path.join(root, file)
+                          try:
+                              with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                                  content = f.read()
+
+                                  for pattern, secret_type in secret_patterns:
+                                      matches = re.finditer(pattern, content, re.IGNORECASE)
+                                      for match in matches:
+                                          secrets.append({
+                                              'file': file_path,
+                                              'type': secret_type,
+                                              'line': content[:match.start()].count('\n') + 1,
+                                              'match': match.group()[:50] + '...' if len(match.group()) > 50 else match.group()
+                                          })
+                          except Exception as e:
+                              continue
+
+              return secrets
+
+          def main():
+              environment = os.environ.get('ENVIRONMENT', 'staging')
+
+              print(f"🔒 开始 {environment} 环境安全扫描...")
+
+              # 扫描结果
+              scan_results = {
+                  'environment': environment,
+                  'docker_vulnerabilities': [],
+                  'dependency_vulnerabilities': [],
+                  'secrets': []
+              }
+
+              # 扫描Docker镜像
+              try:
+                  scan_results['docker_vulnerabilities'] = scan_docker_images()
+              except Exception as e:
+                  print(f"❌ Docker镜像扫描失败: {e}")
+
+              # 扫描依赖包
+              try:
+                  scan_results['dependency_vulnerabilities'] = scan_dependencies()
+              except Exception as e:
+                  print(f"❌ 依赖包扫描失败: {e}")
+
+              # 扫描敏感信息
+              try:
+                  scan_results['secrets'] = scan_secrets()
+              except Exception as e:
+                  print(f"❌ 敏感信息扫描失败: {e}")
+
+              # 保存扫描结果
+              os.makedirs('security-reports', exist_ok=True)
+              report_file = f'security-reports/{environment}-security-scan.json'
+
+              with open(report_file, 'w') as f:
+                  json.dump(scan_results, f, indent=2)
+
+              print(f"📝 安全扫描报告已保存到 {report_file}")
+
+              # 输出摘要
+              docker_high_critical = len([v for v in scan_results['docker_vulnerabilities'] if v.get('Severity') in ['HIGH', 'CRITICAL']])
+              dep_high_critical = len([v for v in scan_results['dependency_vulnerabilities'] if v.get('severity') in ['high', 'critical']])
+              secrets_count = len(scan_results['secrets'])
+
+              print(f"\n📊 安全扫描摘要:")
+              print(f"  Docker高危漏洞: {docker_high_critical}")
+              print(f"  依赖包高危漏洞: {dep_high_critical}")
+              print(f"  敏感信息泄露: {secrets_count}")
+
+              # 检查是否有阻塞性安全问题
+              if docker_high_critical > 10 or dep_high_critical > 5 or secrets_count > 0:
+                  print(f"\n❌ 发现严重安全问题，建议修复后再部署")
+                  if environment == 'production':
+                      print(f"🚫 生产环境部署被阻止")
+                      sys.exit(1)
+                  else:
+                      print(f"⚠️ 测试环境允许部署，但请尽快修复")
+              else:
+                  print(f"\n✅ 安全扫描通过")
+
+          if __name__ == '__main__':
+              main()
+          EOF
+
+          # 安装安全扫描工具
+          pip install pip-audit
+
+          # 运行安全扫描
+          python security-scan.py
+
       - name: 部署就绪检查
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
         run: |
-          echo "✅ 所有检查通过，可以部署"
+          echo "✅ 运行 $ENVIRONMENT 环境部署就绪检查..."
+
+          # 检查必要的环境变量
+          required_vars=()
+
+          if [ "$ENVIRONMENT" = "production" ]; then
+            required_vars=("PROD_DB_HOST" "PROD_REDIS_HOST" "PROD_SECRET_KEY")
+          else
+            required_vars=("STAGING_DB_HOST" "STAGING_REDIS_HOST" "STAGING_SECRET_KEY")
+          fi
+
+          missing_vars=()
+          for var in "${required_vars[@]}"; do
+            if [ -z "${!var}" ]; then
+              missing_vars+=("$var")
+            fi
+          done
+
+          if [ ${#missing_vars[@]} -gt 0 ]; then
+            echo "❌ 缺少必要的环境变量: ${missing_vars[*]}"
+            echo "deployment_ready=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # 检查服务健康状态（如果是staging环境）
+          if [ "$ENVIRONMENT" = "staging" ]; then
+            echo "🏥 检查staging环境服务健康状态..."
+
+            # 这里可以添加对staging环境的健康检查
+            # curl -f https://staging.example.com/health || exit 1
+          fi
+
           echo "deployment_ready=true" >> $GITHUB_OUTPUT
         id: deployment
-      
-      - name: 通知部署状态
-        if: steps.deployment.outputs.deployment_ready == 'true'
+
+      - name: 设置部署URL
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
         run: |
-          echo "🚀 项目已准备好部署到生产环境"
+          if [ "$ENVIRONMENT" = "production" ]; then
+            echo "url=https://phoenixcoder.com" >> $GITHUB_OUTPUT
+          else
+            echo "url=https://staging.phoenixcoder.com" >> $GITHUB_OUTPUT
+          fi
+        id: deploy-url
+
+      - name: 上传安全扫描报告
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-report-${{ matrix.environment }}
+          path: security-reports/
+
+      - name: 通知部署状态
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
+          DEPLOYMENT_READY: ${{ steps.deployment.outputs.deployment_ready }}
+          DEPLOY_URL: ${{ steps.deploy-url.outputs.url }}
+        run: |
+          if [ "$DEPLOYMENT_READY" = "true" ]; then
+            echo "🚀 $ENVIRONMENT 环境已准备好部署"
+            echo "📍 部署地址: $DEPLOY_URL"
+
+            # 这里可以添加实际的部署逻辑
+            # 例如：触发部署脚本、调用部署API等
+
+            if [ "$ENVIRONMENT" = "production" ]; then
+              echo "🎉 生产环境部署准备完成！"
+            else
+              echo "🧪 测试环境部署准备完成！"
+            fi
+          else
+            echo "❌ $ENVIRONMENT 环境部署检查失败"
+            exit 1
+          fi

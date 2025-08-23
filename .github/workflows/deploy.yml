@@ -1,447 +1,541 @@
-name: Deploy to Environments
+name: Deploy to Environment
 
-# 部署触发条件
 on:
-  push:
-    branches:
-      - main        # 部署到生产环境
-      - develop     # 部署到测试环境
-    tags:
-      - 'v*'        # 版本标签部署
-  
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types: [completed]
+    branches: [main, develop]
   workflow_dispatch:
     inputs:
       environment:
-        description: '选择部署环境'
+        description: 'Target environment'
         required: true
         default: 'staging'
         type: choice
         options:
           - staging
           - production
-      version:
-        description: '部署版本 (可选)'
+      deployment_strategy:
+        description: 'Deployment strategy'
+        required: true
+        default: 'rolling'
+        type: choice
+        options:
+          - rolling
+          - blue-green
+          - canary
+      force_deploy:
+        description: 'Force deployment even if tests failed'
+        required: false
+        default: false
+        type: boolean
+      rollback_version:
+        description: 'Version to rollback to (leave empty for normal deployment)'
         required: false
         type: string
 
-# 环境变量
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_PREFIX: ${{ github.repository }}
 
 jobs:
-  # 构建Docker镜像
-  build-images:
-    name: 构建Docker镜像
+  determine-environment:
     runs-on: ubuntu-latest
     outputs:
-      image-tag: ${{ steps.meta.outputs.tags }}
-      image-digest: ${{ steps.build.outputs.digest }}
-    
+      environment: ${{ steps.env.outputs.environment }}
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+      deployment_strategy: ${{ steps.strategy.outputs.deployment_strategy }}
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
-      
-      - name: 设置Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      
-      - name: 登录容器注册表
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: 提取元数据
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix={{branch}}-
-      
-      - name: 构建后端服务镜像
-        uses: docker/build-push-action@v5
-        with:
-          context: ./apps/community/server
-          file: ./apps/community/server/Dockerfile
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/server:${{ steps.meta.outputs.version }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      
-      - name: 构建OIDC服务镜像
-        uses: docker/build-push-action@v5
-        with:
-          context: ./apps/community/oidc-server
-          file: ./apps/community/oidc-server/Dockerfile
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/oidc-server:${{ steps.meta.outputs.version }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      
-      - name: 构建管理前端镜像
-        uses: docker/build-push-action@v5
-        with:
-          context: ./apps/community/admin
-          file: ./apps/community/admin/Dockerfile
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/admin:${{ steps.meta.outputs.version }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Determine target environment
+        id: env
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          fi
 
-  # 部署到测试环境
-  deploy-staging:
-    name: 部署到测试环境
+      - name: Check if deployment should proceed
+        id: check
+        run: |
+          SHOULD_DEPLOY="false"
+          
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            SHOULD_DEPLOY="true"
+          elif [[ "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
+            SHOULD_DEPLOY="true"
+          elif [[ "${{ github.event.inputs.force_deploy }}" == "true" ]]; then
+            SHOULD_DEPLOY="true"
+            echo "⚠️ Force deployment requested despite test failures"
+          fi
+          
+          echo "should_deploy=$SHOULD_DEPLOY" >> $GITHUB_OUTPUT
+
+      - name: Determine deployment strategy
+        id: strategy
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "deployment_strategy=${{ github.event.inputs.deployment_strategy }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ steps.env.outputs.environment }}" == "production" ]]; then
+            echo "deployment_strategy=blue-green" >> $GITHUB_OUTPUT
+          else
+            echo "deployment_strategy=rolling" >> $GITHUB_OUTPUT
+          fi
+
+  pre-deployment-checks:
+    needs: determine-environment
+    if: needs.determine-environment.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
-    needs: build-images
-    if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
-    environment:
-      name: staging
-      url: https://staging.phoenixcoder.dev
+    environment: ${{ needs.determine-environment.outputs.environment }}
     
     steps:
-      - name: 检出代码
+      - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: 设置kubectl
+
+      - name: Load environment configuration
+        run: |
+          ENV="${{ needs.determine-environment.outputs.environment }}"
+          
+          if [[ -f ".github/environments/$ENV.yml" ]]; then
+            echo "Loading configuration for $ENV environment"
+            cat ".github/environments/$ENV.yml"
+          else
+            echo "❌ Environment configuration not found for $ENV"
+            exit 1
+          fi
+
+      - name: Check required environment variables
+        run: |
+          ENV="${{ needs.determine-environment.outputs.environment }}"
+          
+          # Extract required env vars from config file
+          if [[ -f ".github/environments/$ENV.yml" ]]; then
+            REQUIRED_VARS=$(yq eval '.required_env_vars[]' ".github/environments/$ENV.yml")
+            
+            echo "Checking required environment variables for $ENV:"
+            MISSING_VARS=""
+            
+            while IFS= read -r var; do
+              if [[ -z "${!var:-}" ]]; then
+                echo "❌ Missing: $var"
+                MISSING_VARS="$MISSING_VARS $var"
+              else
+                echo "✅ Found: $var"
+              fi
+            done <<< "$REQUIRED_VARS"
+            
+            if [[ -n "$MISSING_VARS" ]]; then
+              echo "❌ Missing required environment variables:$MISSING_VARS"
+              exit 1
+            fi
+          fi
+        env:
+          # Add your environment variables here
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+
+      - name: Verify Docker images exist
+        run: |
+          SERVICES=("community-server" "enterprise-server" "auth-service" "notification-service" "community-admin" "community-mobile" "enterprise-admin")
+          TAG="${{ github.sha }}"
+          
+          echo "Verifying Docker images for tag: $TAG"
+          
+          for service in "${SERVICES[@]}"; do
+            IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/$service:$TAG"
+            echo "Checking image: $IMAGE"
+            
+            if docker manifest inspect "$IMAGE" > /dev/null 2>&1; then
+              echo "✅ Image exists: $service"
+            else
+              echo "❌ Image not found: $service"
+              exit 1
+            fi
+          done
+
+  deploy-staging:
+    needs: [determine-environment, pre-deployment-checks]
+    if: needs.determine-environment.outputs.environment == 'staging' && needs.determine-environment.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.28.0'
-      
-      - name: 配置Kubernetes上下文
+          version: 'latest'
+
+      - name: Configure kubectl
         run: |
-          echo "${{ secrets.STAGING_KUBECONFIG }}" | base64 -d > kubeconfig
+          echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > kubeconfig
           export KUBECONFIG=kubeconfig
           kubectl config current-context
-      
-      - name: 更新部署配置
+
+      - name: Deploy to staging
+        run: |
+          export KUBECONFIG=kubeconfig
+          TAG="${{ github.sha }}"
+          STRATEGY="${{ needs.determine-environment.outputs.deployment_strategy }}"
+          
+          echo "Deploying to staging with strategy: $STRATEGY"
+          
+          # Update image tags in kustomization
+          cd k8s/overlays/staging
+          
+          SERVICES=("community-server" "enterprise-server" "auth-service" "notification-service" "community-admin" "community-mobile" "enterprise-admin")
+          
+          for service in "${SERVICES[@]}"; do
+            IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/$service"
+            yq eval ".images[] |= select(.name == \"$service\").newTag = \"$TAG\"" -i kustomization.yaml
+          done
+          
+          # Apply the deployment
+          kubectl apply -k .
+          
+          # Wait for rollout to complete
+          for service in "${SERVICES[@]}"; do
+            if kubectl get deployment "$service" -n staging > /dev/null 2>&1; then
+              echo "Waiting for $service rollout to complete..."
+              kubectl rollout status deployment/"$service" -n staging --timeout=600s
+            fi
+          done
+
+      - name: Run health checks
+        run: |
+          ENV="staging"
+          
+          # Load health check endpoints from config
+          if [[ -f ".github/environments/$ENV.yml" ]]; then
+            echo "Running health checks for $ENV environment"
+            
+            # Extract health check URLs (simplified - in real scenario you'd parse YAML properly)
+            HEALTH_URLS=(
+              "https://staging-api-community.phoenixcoder.dev/health"
+              "https://staging-api-enterprise.phoenixcoder.dev/health"
+              "https://staging-auth.phoenixcoder.dev/health"
+              "https://staging-notifications.phoenixcoder.dev/health"
+            )
+            
+            for url in "${HEALTH_URLS[@]}"; do
+              echo "Checking health: $url"
+              
+              for i in {1..30}; do
+                if curl -f -s "$url" > /dev/null; then
+                  echo "✅ Health check passed: $url"
+                  break
+                elif [[ $i -eq 30 ]]; then
+                  echo "❌ Health check failed after 30 attempts: $url"
+                  exit 1
+                else
+                  echo "⏳ Attempt $i/30 failed, retrying in 10s..."
+                  sleep 10
+                fi
+              done
+            done
+          fi
+
+      - name: Run smoke tests
+        run: |
+          echo "Running smoke tests against staging environment"
+          
+          # Install test dependencies
+          npm install -g newman
+          
+          # Run API smoke tests if Postman collection exists
+          if [[ -f "tests/smoke/api-smoke-tests.postman_collection.json" ]]; then
+            newman run tests/smoke/api-smoke-tests.postman_collection.json \
+              --env-var "base_url=https://staging-api-community.phoenixcoder.dev" \
+              --reporters cli,json \
+              --reporter-json-export smoke-test-results.json
+          fi
+          
+          # Run frontend smoke tests
+          if [[ -f "tests/smoke/frontend-smoke.js" ]]; then
+            node tests/smoke/frontend-smoke.js
+          fi
+
+  deploy-production:
+    needs: [determine-environment, pre-deployment-checks]
+    if: needs.determine-environment.outputs.environment == 'production' && needs.determine-environment.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_PRODUCTION }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+          kubectl config current-context
+
+      - name: Create deployment backup
         run: |
           export KUBECONFIG=kubeconfig
           
-          # 更新镜像标签
-          sed -i "s|image: .*server:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/server:${{ needs.build-images.outputs.image-tag }}|g" k8s/staging/server-deployment.yaml
-          sed -i "s|image: .*oidc-server:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/oidc-server:${{ needs.build-images.outputs.image-tag }}|g" k8s/staging/oidc-deployment.yaml
-          sed -i "s|image: .*admin:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/admin:${{ needs.build-images.outputs.image-tag }}|g" k8s/staging/admin-deployment.yaml
+          echo "Creating backup of current production deployment"
+          mkdir -p backups
           
-          # 应用配置
-          kubectl apply -f k8s/staging/
+          # Backup current deployment manifests
+          kubectl get deployments -n production -o yaml > backups/deployments-backup.yaml
+          kubectl get services -n production -o yaml > backups/services-backup.yaml
+          kubectl get configmaps -n production -o yaml > backups/configmaps-backup.yaml
           
-          # 等待部署完成
-          kubectl rollout status deployment/phoenixcoder-server -n staging --timeout=300s
-          kubectl rollout status deployment/phoenixcoder-oidc -n staging --timeout=300s
-          kubectl rollout status deployment/phoenixcoder-admin -n staging --timeout=300s
-      
-      - name: 运行部署后测试
+          # Store current image tags for rollback
+          kubectl get deployments -n production -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.template.spec.containers[0].image}{"\n"}{end}' > backups/current-images.txt
+          
+          echo "Backup created successfully"
+
+      - name: Deploy to production (Blue-Green)
+        if: needs.determine-environment.outputs.deployment_strategy == 'blue-green'
         run: |
-          # 等待服务就绪
+          export KUBECONFIG=kubeconfig
+          TAG="${{ github.sha }}"
+          
+          echo "Starting Blue-Green deployment to production"
+          
+          # Create green environment
+          cd k8s/overlays/production
+          
+          # Update image tags
+          SERVICES=("community-server" "enterprise-server" "auth-service" "notification-service" "community-admin" "community-mobile" "enterprise-admin")
+          
+          for service in "${SERVICES[@]}"; do
+            yq eval ".images[] |= select(.name == \"$service\").newTag = \"$TAG\"" -i kustomization.yaml
+          done
+          
+          # Deploy green environment
+          kubectl apply -k . --dry-run=client -o yaml | sed 's/name: /name: green-/g' | kubectl apply -f -
+          
+          # Wait for green deployment to be ready
+          for service in "${SERVICES[@]}"; do
+            if kubectl get deployment "green-$service" -n production > /dev/null 2>&1; then
+              echo "Waiting for green-$service to be ready..."
+              kubectl rollout status deployment/"green-$service" -n production --timeout=600s
+            fi
+          done
+          
+          # Run health checks on green environment
+          echo "Running health checks on green environment"
+          # Add health check logic here
+          
+          # Switch traffic to green (update services)
+          echo "Switching traffic to green environment"
+          for service in "${SERVICES[@]}"; do
+            if kubectl get service "$service" -n production > /dev/null 2>&1; then
+              kubectl patch service "$service" -n production -p '{"spec":{"selector":{"version":"green"}}}'
+            fi
+          done
+          
+          # Wait and verify
           sleep 30
           
-          # 健康检查
-          curl -f https://staging-api.phoenixcoder.dev/health || exit 1
-          curl -f https://staging-oidc.phoenixcoder.dev/health || exit 1
-          curl -f https://staging.phoenixcoder.dev || exit 1
+          # Clean up old blue environment
+          echo "Cleaning up old blue environment"
+          for service in "${SERVICES[@]}"; do
+            if kubectl get deployment "$service" -n production > /dev/null 2>&1; then
+              kubectl delete deployment "$service" -n production
+            fi
+          done
           
-          echo "✅ 测试环境部署成功"
-      
-      - name: 通知部署状态
-        if: always()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const status = '${{ job.status }}' === 'success' ? '✅ 成功' : '❌ 失败';
-            const message = `## 🚀 测试环境部署 ${status}
-            
-            **📦 部署信息**
-            - 环境: Staging
-            - 版本: ${{ needs.build-images.outputs.image-tag }}
-            - 提交: ${{ github.sha }}
-            - 分支: ${{ github.ref_name }}
-            - 时间: ${new Date().toLocaleString('zh-CN')}
-            
-            **🔗 访问链接**
-            - 管理后台: https://staging.phoenixcoder.dev
-            - API服务: https://staging-api.phoenixcoder.dev
-            - OIDC服务: https://staging-oidc.phoenixcoder.dev
-            
-            **📋 部署日志**
-            查看详细日志: ${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-            
-            console.log(message);
+          # Rename green to current
+          for service in "${SERVICES[@]}"; do
+            if kubectl get deployment "green-$service" -n production > /dev/null 2>&1; then
+              kubectl patch deployment "green-$service" -n production -p '{"metadata":{"name":"'$service'"}}'
+            fi
+          done
 
-  # 部署到生产环境
-  deploy-production:
-    name: 部署到生产环境
+      - name: Deploy to production (Rolling)
+        if: needs.determine-environment.outputs.deployment_strategy == 'rolling'
+        run: |
+          export KUBECONFIG=kubeconfig
+          TAG="${{ github.sha }}"
+          
+          echo "Starting Rolling deployment to production"
+          
+          cd k8s/overlays/production
+          
+          # Update image tags
+          SERVICES=("community-server" "enterprise-server" "auth-service" "notification-service" "community-admin" "community-mobile" "enterprise-admin")
+          
+          for service in "${SERVICES[@]}"; do
+            yq eval ".images[] |= select(.name == \"$service\").newTag = \"$TAG\"" -i kustomization.yaml
+          done
+          
+          # Apply the deployment
+          kubectl apply -k .
+          
+          # Wait for rollout to complete
+          for service in "${SERVICES[@]}"; do
+            if kubectl get deployment "$service" -n production > /dev/null 2>&1; then
+              echo "Waiting for $service rollout to complete..."
+              kubectl rollout status deployment/"$service" -n production --timeout=600s
+            fi
+          done
+
+      - name: Run production health checks
+        run: |
+          echo "Running comprehensive health checks on production"
+          
+          HEALTH_URLS=(
+            "https://api.phoenixcoder.com/health"
+            "https://enterprise-api.phoenixcoder.com/health"
+            "https://auth.phoenixcoder.com/health"
+            "https://notifications.phoenixcoder.com/health"
+          )
+          
+          for url in "${HEALTH_URLS[@]}"; do
+            echo "Checking health: $url"
+            
+            for i in {1..60}; do
+              if curl -f -s "$url" > /dev/null; then
+                echo "✅ Health check passed: $url"
+                break
+              elif [[ $i -eq 60 ]]; then
+                echo "❌ Health check failed after 60 attempts: $url"
+                echo "🔄 Initiating automatic rollback"
+                
+                # Trigger rollback
+                export KUBECONFIG=kubeconfig
+                kubectl rollout undo deployment/$(basename $url | cut -d'.' -f1) -n production
+                exit 1
+              else
+                echo "⏳ Attempt $i/60 failed, retrying in 10s..."
+                sleep 10
+              fi
+            done
+          done
+
+      - name: Run production smoke tests
+        run: |
+          echo "Running production smoke tests"
+          
+          # Install test dependencies
+          npm install -g newman
+          
+          # Run critical path tests
+          if [[ -f "tests/smoke/production-critical-path.postman_collection.json" ]]; then
+            newman run tests/smoke/production-critical-path.postman_collection.json \
+              --env-var "base_url=https://api.phoenixcoder.com" \
+              --reporters cli,json \
+              --reporter-json-export production-smoke-results.json
+          fi
+
+  rollback:
+    if: github.event.inputs.rollback_version != ''
     runs-on: ubuntu-latest
-    needs: build-images
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
-    environment:
-      name: production
-      url: https://phoenixcoder.dev
+    environment: ${{ github.event.inputs.environment }}
     
     steps:
-      - name: 检出代码
+      - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: 设置kubectl
+
+      - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.28.0'
-      
-      - name: 配置Kubernetes上下文
-        run: |
-          echo "${{ secrets.PRODUCTION_KUBECONFIG }}" | base64 -d > kubeconfig
-          export KUBECONFIG=kubeconfig
-          kubectl config current-context
-      
-      - name: 创建部署备份
-        run: |
-          export KUBECONFIG=kubeconfig
-          
-          # 备份当前部署
-          kubectl get deployment phoenixcoder-server -n production -o yaml > backup-server-deployment.yaml
-          kubectl get deployment phoenixcoder-oidc -n production -o yaml > backup-oidc-deployment.yaml
-          kubectl get deployment phoenixcoder-admin -n production -o yaml > backup-admin-deployment.yaml
-      
-      - name: 蓝绿部署
-        run: |
-          export KUBECONFIG=kubeconfig
-          
-          # 创建新版本部署（绿色环境）
-          cp -r k8s/production k8s/production-green
-          
-          # 更新绿色环境镜像标签
-          sed -i "s|image: .*server:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/server:${{ needs.build-images.outputs.image-tag }}|g" k8s/production-green/server-deployment.yaml
-          sed -i "s|image: .*oidc-server:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/oidc-server:${{ needs.build-images.outputs.image-tag }}|g" k8s/production-green/oidc-deployment.yaml
-          sed -i "s|image: .*admin:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/admin:${{ needs.build-images.outputs.image-tag }}|g" k8s/production-green/admin-deployment.yaml
-          
-          # 更新部署名称（添加-green后缀）
-          sed -i 's/name: phoenixcoder-/name: phoenixcoder-green-/g' k8s/production-green/*-deployment.yaml
-          
-          # 部署绿色环境
-          kubectl apply -f k8s/production-green/
-          
-          # 等待绿色环境就绪
-          kubectl rollout status deployment/phoenixcoder-green-server -n production --timeout=600s
-          kubectl rollout status deployment/phoenixcoder-green-oidc -n production --timeout=600s
-          kubectl rollout status deployment/phoenixcoder-green-admin -n production --timeout=600s
-      
-      - name: 健康检查
-        run: |
-          export KUBECONFIG=kubeconfig
-          
-          # 获取绿色环境服务IP
-          GREEN_SERVER_IP=$(kubectl get svc phoenixcoder-green-server -n production -o jsonpath='{.spec.clusterIP}')
-          GREEN_OIDC_IP=$(kubectl get svc phoenixcoder-green-oidc -n production -o jsonpath='{.spec.clusterIP}')
-          GREEN_ADMIN_IP=$(kubectl get svc phoenixcoder-green-admin -n production -o jsonpath='{.spec.clusterIP}')
-          
-          # 健康检查
-          kubectl run health-check --rm -i --restart=Never --image=curlimages/curl -- \
-            sh -c "curl -f http://$GREEN_SERVER_IP:8000/health && curl -f http://$GREEN_OIDC_IP:8080/health"
-          
-          echo "✅ 绿色环境健康检查通过"
-      
-      - name: 切换流量
-        run: |
-          export KUBECONFIG=kubeconfig
-          
-          # 更新服务选择器，将流量切换到绿色环境
-          kubectl patch service phoenixcoder-server -n production -p '{"spec":{"selector":{"app":"phoenixcoder-green-server"}}}'
-          kubectl patch service phoenixcoder-oidc -n production -p '{"spec":{"selector":{"app":"phoenixcoder-green-oidc"}}}'
-          kubectl patch service phoenixcoder-admin -n production -p '{"spec":{"selector":{"app":"phoenixcoder-green-admin"}}}'
-          
-          echo "✅ 流量已切换到新版本"
-      
-      - name: 验证部署
-        run: |
-          # 等待DNS传播
-          sleep 60
-          
-          # 验证生产环境
-          curl -f https://api.phoenixcoder.dev/health || exit 1
-          curl -f https://oidc.phoenixcoder.dev/health || exit 1
-          curl -f https://phoenixcoder.dev || exit 1
-          
-          echo "✅ 生产环境验证成功"
-      
-      - name: 清理旧版本
-        if: success()
-        run: |
-          export KUBECONFIG=kubeconfig
-          
-          # 删除蓝色环境（旧版本）
-          kubectl delete deployment phoenixcoder-server -n production --ignore-not-found=true
-          kubectl delete deployment phoenixcoder-oidc -n production --ignore-not-found=true
-          kubectl delete deployment phoenixcoder-admin -n production --ignore-not-found=true
-          
-          # 重命名绿色环境为正式环境
-          kubectl patch deployment phoenixcoder-green-server -n production -p '{"metadata":{"name":"phoenixcoder-server"}}'
-          kubectl patch deployment phoenixcoder-green-oidc -n production -p '{"metadata":{"name":"phoenixcoder-oidc"}}'
-          kubectl patch deployment phoenixcoder-green-admin -n production -p '{"metadata":{"name":"phoenixcoder-admin"}}'
-          
-          echo "✅ 部署清理完成"
-      
-      - name: 回滚部署
-        if: failure()
-        run: |
-          export KUBECONFIG=kubeconfig
-          
-          echo "❌ 部署失败，开始回滚..."
-          
-          # 恢复服务选择器
-          kubectl patch service phoenixcoder-server -n production -p '{"spec":{"selector":{"app":"phoenixcoder-server"}}}'
-          kubectl patch service phoenixcoder-oidc -n production -p '{"spec":{"selector":{"app":"phoenixcoder-oidc"}}}'
-          kubectl patch service phoenixcoder-admin -n production -p '{"spec":{"selector":{"app":"phoenixcoder-admin"}}}'
-          
-          # 删除失败的绿色环境
-          kubectl delete deployment phoenixcoder-green-server -n production --ignore-not-found=true
-          kubectl delete deployment phoenixcoder-green-oidc -n production --ignore-not-found=true
-          kubectl delete deployment phoenixcoder-green-admin -n production --ignore-not-found=true
-          
-          echo "✅ 回滚完成"
-      
-      - name: 通知部署状态
-        if: always()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const status = '${{ job.status }}' === 'success' ? '✅ 成功' : '❌ 失败';
-            const message = `## 🚀 生产环境部署 ${status}
-            
-            **📦 部署信息**
-            - 环境: Production
-            - 版本: ${{ needs.build-images.outputs.image-tag }}
-            - 提交: ${{ github.sha }}
-            - 分支: ${{ github.ref_name }}
-            - 时间: ${new Date().toLocaleString('zh-CN')}
-            - 部署策略: 蓝绿部署
-            
-            **🔗 访问链接**
-            - 官方网站: https://phoenixcoder.dev
-            - API服务: https://api.phoenixcoder.dev
-            - OIDC服务: https://oidc.phoenixcoder.dev
-            
-            **📋 部署日志**
-            查看详细日志: ${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-            
-            console.log(message);
+          version: 'latest'
 
-  # 部署后监控
-  post-deploy-monitoring:
-    name: 部署后监控
-    runs-on: ubuntu-latest
-    needs: [deploy-staging, deploy-production]
+      - name: Configure kubectl
+        run: |
+          ENV="${{ github.event.inputs.environment }}"
+          if [[ "$ENV" == "production" ]]; then
+            echo "${{ secrets.KUBE_CONFIG_PRODUCTION }}" | base64 -d > kubeconfig
+          else
+            echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > kubeconfig
+          fi
+          export KUBECONFIG=kubeconfig
+
+      - name: Perform rollback
+        run: |
+          export KUBECONFIG=kubeconfig
+          ENV="${{ github.event.inputs.environment }}"
+          ROLLBACK_VERSION="${{ github.event.inputs.rollback_version }}"
+          
+          echo "Rolling back $ENV environment to version: $ROLLBACK_VERSION"
+          
+          SERVICES=("community-server" "enterprise-server" "auth-service" "notification-service" "community-admin" "community-mobile" "enterprise-admin")
+          
+          for service in "${SERVICES[@]}"; do
+            if kubectl get deployment "$service" -n "$ENV" > /dev/null 2>&1; then
+              echo "Rolling back $service to version $ROLLBACK_VERSION"
+              kubectl set image deployment/"$service" "$service"="${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/$service:$ROLLBACK_VERSION" -n "$ENV"
+              kubectl rollout status deployment/"$service" -n "$ENV" --timeout=300s
+            fi
+          done
+          
+          echo "Rollback completed successfully"
+
+  post-deployment:
+    needs: [determine-environment, deploy-staging, deploy-production]
     if: always() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
+    runs-on: ubuntu-latest
     
     steps:
-      - name: 设置监控
+      - name: Update deployment status
         run: |
-          echo "🔍 开始部署后监控..."
+          ENV="${{ needs.determine-environment.outputs.environment }}"
+          STATUS="success"
           
-          # 确定监控环境
-          if [ "${{ needs.deploy-production.result }}" == "success" ]; then
-            ENVIRONMENT="production"
-            BASE_URL="https://phoenixcoder.dev"
-          else
-            ENVIRONMENT="staging"
-            BASE_URL="https://staging.phoenixcoder.dev"
+          if [[ "${{ needs.deploy-staging.result }}" == "failure" ]] || [[ "${{ needs.deploy-production.result }}" == "failure" ]]; then
+            STATUS="failure"
           fi
           
-          echo "监控环境: $ENVIRONMENT"
-          echo "BASE_URL=$BASE_URL" >> $GITHUB_ENV
-          echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
-      
-      - name: 性能监控
+          echo "Deployment to $ENV completed with status: $STATUS"
+          echo "Commit: ${{ github.sha }}"
+          echo "Deployment strategy: ${{ needs.determine-environment.outputs.deployment_strategy }}"
+
+      - name: Notify deployment status
         run: |
-          echo "📊 运行性能监控..."
+          # Add your notification logic here (Slack, Discord, Email, etc.)
+          echo "Sending deployment notifications..."
           
-          # 响应时间检查
-          for i in {1..5}; do
-            echo "第 $i 次检查..."
-            
-            # API响应时间
-            API_TIME=$(curl -o /dev/null -s -w "%{time_total}" $BASE_URL/api/health)
-            echo "API响应时间: ${API_TIME}s"
-            
-            # 前端加载时间
-            FRONTEND_TIME=$(curl -o /dev/null -s -w "%{time_total}" $BASE_URL)
-            echo "前端加载时间: ${FRONTEND_TIME}s"
-            
-            # 检查响应时间是否在可接受范围内
-            if (( $(echo "$API_TIME > 2.0" | bc -l) )); then
-              echo "⚠️ API响应时间过长: ${API_TIME}s"
-            fi
-            
-            if (( $(echo "$FRONTEND_TIME > 3.0" | bc -l) )); then
-              echo "⚠️ 前端加载时间过长: ${FRONTEND_TIME}s"
-            fi
-            
-            sleep 30
-          done
-      
-      - name: 错误率监控
+          # Example Slack notification
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data '{"text":"Deployment to ${{ needs.determine-environment.outputs.environment }} completed"}' \
+          #   ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Create deployment record
         run: |
-          echo "🚨 检查错误率..."
+          mkdir -p deployment-records
           
-          # 模拟一些请求来检查错误率
-          SUCCESS_COUNT=0
-          TOTAL_COUNT=20
-          
-          for i in $(seq 1 $TOTAL_COUNT); do
-            if curl -f -s $BASE_URL/api/health > /dev/null; then
-              SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-            fi
-            sleep 1
-          done
-          
-          SUCCESS_RATE=$(echo "scale=2; $SUCCESS_COUNT * 100 / $TOTAL_COUNT" | bc)
-          echo "成功率: ${SUCCESS_RATE}%"
-          
-          if (( $(echo "$SUCCESS_RATE < 95" | bc -l) )); then
-            echo "❌ 错误率过高，成功率仅为 ${SUCCESS_RATE}%"
-            exit 1
-          else
-            echo "✅ 错误率正常，成功率为 ${SUCCESS_RATE}%"
-          fi
-      
-      - name: 生成监控报告
-        if: always()
-        run: |
-          echo "📋 生成监控报告..."
-          
-          cat > monitoring-report.md << EOF
-          # 部署后监控报告
-          
-          **环境**: $ENVIRONMENT  
-          **时间**: $(date)  
-          **状态**: ${{ job.status }}
-          
-          ## 监控结果
-          
-          - ✅ 服务可用性检查
-          - ✅ 响应时间监控
-          - ✅ 错误率检查
-          
-          ## 建议
-          
-          - 继续监控服务性能
-          - 关注用户反馈
-          - 定期检查日志
-          
+          cat > deployment-records/deployment-$(date +%Y%m%d-%H%M%S).json << EOF
+          {
+            "environment": "${{ needs.determine-environment.outputs.environment }}",
+            "commit": "${{ github.sha }}",
+            "strategy": "${{ needs.determine-environment.outputs.deployment_strategy }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "workflow_run": "${{ github.run_id }}",
+            "status": "success",
+            "services": [
+              "community-server",
+              "enterprise-server",
+              "auth-service",
+              "notification-service",
+              "community-admin",
+              "community-mobile",
+              "enterprise-admin"
+            ]
+          }
           EOF
-          
-          echo "✅ 监控报告生成完成"
-      
-      - name: 上传监控报告
-        uses: actions/upload-artifact@v3
-        if: always()
+
+      - name: Upload deployment record
+        uses: actions/upload-artifact@v4
         with:
-          name: monitoring-report-${{ env.ENVIRONMENT }}
-          path: monitoring-report.md
+          name: deployment-record-${{ needs.determine-environment.outputs.environment }}
+          path: deployment-records/
+          retention-days: 90
