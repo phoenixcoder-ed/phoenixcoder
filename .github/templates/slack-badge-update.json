@@ -1,0 +1,195 @@
+{
+  "text": "📊 PhoenixCoder 状态徽章更新",
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "📊 状态徽章更新通知"
+      }
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*项目:* {{ repository }}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*分支:* {{ branch }}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*触发方式:* {{ trigger_type }}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*更新时间:* {{ timestamp }}"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*工作流:* {{ workflow_name }}\n*状态:* {% if workflow_status == 'success' %}✅ 成功{% elif workflow_status == 'failure' %}❌ 失败{% else %}⚠️ {{ workflow_status }}{% endif %}"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*更新的徽章类型:*\n{% if badge_types == 'all' %}🔄 所有徽章{% else %}{% for badge_type in badge_types.split(',') %}• {{ badge_type.strip() }}\n{% endfor %}{% endif %}"
+      }
+    },
+    {% if badges_updated %}
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*徽章更新状态:* ✅ 成功更新"
+      }
+    },
+    {% if badge_changes %}
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*主要变更:*\n{% for change in badge_changes %}• {{ change }}\n{% endfor %}"
+      }
+    },
+    {% endif %}
+    {% else %}
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*徽章更新状态:* ❌ 更新失败"
+      }
+    },
+    {% endif %}
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "📈 *当前项目状态概览*"
+      }
+    },
+    {% if coverage_percentage %}
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*测试覆盖率:* {{ coverage_percentage }}%"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*代码质量:* {% if quality_gate %}{{ quality_gate }}{% else %}N/A{% endif %}"
+        }
+      ]
+    },
+    {% endif %}
+    {% if build_status %}
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*构建状态:* {% if build_status == 'success' %}✅ 通过{% elif build_status == 'failure' %}❌ 失败{% else %}⚠️ {{ build_status }}{% endif %}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*安全扫描:* {% if security_status == 'pass' %}✅ 通过{% elif security_status == 'fail' %}❌ 发现问题{% else %}⚠️ {{ security_status }}{% endif %}"
+        }
+      ]
+    },
+    {% endif %}
+    {% if deployment_status %}
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*生产环境:* {% if deployment_status.production %}{{ deployment_status.production }}{% else %}N/A{% endif %}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*预发布环境:* {% if deployment_status.staging %}{{ deployment_status.staging }}{% else %}N/A{% endif %}"
+        }
+      ]
+    },
+    {% endif %}
+    {% if performance_metrics %}
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*响应时间:* {% if performance_metrics.response_time %}{{ performance_metrics.response_time }}ms{% else %}N/A{% endif %}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*正常运行时间:* {% if performance_metrics.uptime %}{{ performance_metrics.uptime }}%{% else %}N/A{% endif %}"
+        }
+      ]
+    },
+    {% endif %}
+    {
+      "type": "divider"
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "查看工作流"
+          },
+          "url": "{{ run_url }}",
+          "style": "primary"
+        },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "查看项目"
+          },
+          "url": "https://github.com/{{ repository }}"
+        },
+        {% if badges_updated %}
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "查看徽章"
+          },
+          "url": "https://github.com/{{ repository }}#readme"
+        },
+        {% endif %}
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "查看提交"
+          },
+          "url": "https://github.com/{{ repository }}/commit/{{ commit_sha }}"
+        }
+      ]
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": "🤖 由 PhoenixCoder CI/CD 系统自动生成 | 提交: `{{ commit_sha[:8] }}` | 操作者: {{ actor }}"
+        }
+      ]
+    }
+  ]
+}

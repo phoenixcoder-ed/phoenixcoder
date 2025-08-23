@@ -1,0 +1,125 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "{{#if success}}✅ Workflow Completed Successfully{{else}}❌ Workflow Failed{{/if}}"
+      }
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Workflow:*\n{{workflow_name}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Status:*\n{{#if success}}✅ Success{{else}}❌ Failed{{/if}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Branch:*\n`{{branch}}`"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Environment:*\n{{environment}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Author:*\n{{author}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Duration:*\n{{duration}}"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Commit:* `{{commit_sha}}` - {{commit_message}}"
+      }
+    },
+    {{#unless success}}
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Error Details:*\n```{{error_message}}```"
+      }
+    },
+    {{/unless}}
+    {{#if test_results}}
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Test Results:*\n• Tests: {{test_results.total}} ({{test_results.passed}} passed, {{test_results.failed}} failed)\n• Coverage: {{test_results.coverage}}%"
+      }
+    },
+    {{/if}}
+    {{#if quality_results}}
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Code Quality:*\n• Quality Gate: {{quality_results.quality_gate}}\n• Coverage: {{quality_results.coverage}}%\n• Duplicated Lines: {{quality_results.duplicated_lines}}%\n• Security Hotspots: {{quality_results.security_hotspots}}"
+      }
+    },
+    {{/if}}
+    {{#if security_results}}
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Security Scan:*\n• Vulnerabilities: {{security_results.vulnerabilities}}\n• Critical: {{security_results.critical}}\n• High: {{security_results.high}}\n• Medium: {{security_results.medium}}\n• Low: {{security_results.low}}"
+      }
+    },
+    {{/if}}
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "View Workflow"
+          },
+          "url": "{{workflow_url}}",
+          "style": "primary"
+        },
+        {{#unless success}}
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "View Logs"
+          },
+          "url": "{{logs_url}}",
+          "style": "danger"
+        },
+        {{/unless}}
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "View Commit"
+          },
+          "url": "{{commit_url}}"
+        }
+      ]
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": "Triggered at {{timestamp}} | Repository: {{repository}}"
+        }
+      ]
+    }
+  ]
+}

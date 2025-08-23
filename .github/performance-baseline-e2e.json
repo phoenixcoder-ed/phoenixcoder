@@ -1,0 +1,38 @@
+{
+  "user_registration_flow": {
+    "total_time": 5000,
+    "steps": {
+      "load_registration_page": 1500,
+      "fill_form": 2000,
+      "submit_form": 1000,
+      "redirect_to_dashboard": 500
+    }
+  },
+  "task_creation_flow": {
+    "total_time": 8000,
+    "steps": {
+      "load_task_page": 1000,
+      "fill_task_details": 3000,
+      "upload_attachments": 2500,
+      "submit_task": 1500
+    }
+  },
+  "task_search_flow": {
+    "total_time": 3000,
+    "steps": {
+      "load_search_page": 800,
+      "perform_search": 1200,
+      "display_results": 1000
+    }
+  },
+  "payment_flow": {
+    "total_time": 12000,
+    "steps": {
+      "load_payment_page": 1500,
+      "select_payment_method": 2000,
+      "enter_payment_details": 4000,
+      "process_payment": 3500,
+      "confirmation": 1000
+    }
+  }
+}

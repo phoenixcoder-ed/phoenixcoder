@@ -12,6 +12,7 @@
     "preinstall": "npx only-allow pnpm",
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
+    "test:ci": "node test-ci-cd.js",
     "lint": "pnpm -r run lint",
     "clean": "pnpm -r run clean",
     "dev:community": "pnpm --filter=@phoenixcoder/community-* run dev",

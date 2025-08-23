@@ -1,0 +1,349 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/**'
+      - 'services/**'
+      - 'shared/**'
+      - 'docker/**'
+      - 'Dockerfile*'
+      - '.dockerignore'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - 'services/**'
+      - 'shared/**'
+      - 'docker/**'
+      - 'Dockerfile*'
+      - '.dockerignore'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      force_rebuild:
+        description: 'Force rebuild all images'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository }}
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      community-server: ${{ steps.changes.outputs.community-server }}
+      enterprise-server: ${{ steps.changes.outputs.enterprise-server }}
+      auth-service: ${{ steps.changes.outputs.auth-service }}
+      notification-service: ${{ steps.changes.outputs.notification-service }}
+      community-admin: ${{ steps.changes.outputs.community-admin }}
+      community-mobile: ${{ steps.changes.outputs.community-mobile }}
+      enterprise-admin: ${{ steps.changes.outputs.enterprise-admin }}
+      shared: ${{ steps.changes.outputs.shared }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            community-server:
+              - 'services/community/**'
+              - 'shared/**'
+              - 'docker/community-server.Dockerfile'
+            enterprise-server:
+              - 'services/enterprise/**'
+              - 'shared/**'
+              - 'docker/enterprise-server.Dockerfile'
+            auth-service:
+              - 'services/auth/**'
+              - 'shared/**'
+              - 'docker/auth-service.Dockerfile'
+            notification-service:
+              - 'services/notification/**'
+              - 'shared/**'
+              - 'docker/notification-service.Dockerfile'
+            community-admin:
+              - 'apps/community/admin/**'
+              - 'shared/**'
+              - 'docker/community-admin.Dockerfile'
+            community-mobile:
+              - 'apps/community/mobile/**'
+              - 'shared/**'
+              - 'docker/community-mobile.Dockerfile'
+            enterprise-admin:
+              - 'apps/enterprise/admin/**'
+              - 'shared/**'
+              - 'docker/enterprise-admin.Dockerfile'
+            shared:
+              - 'shared/**'
+
+  build-and-push:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.shared == 'true' || needs.detect-changes.outputs.community-server == 'true' || needs.detect-changes.outputs.enterprise-server == 'true' || needs.detect-changes.outputs.auth-service == 'true' || needs.detect-changes.outputs.notification-service == 'true' || needs.detect-changes.outputs.community-admin == 'true' || needs.detect-changes.outputs.community-mobile == 'true' || needs.detect-changes.outputs.enterprise-admin == 'true' || github.event.inputs.force_rebuild == 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - service: community-server
+            dockerfile: docker/community-server.Dockerfile
+            context: .
+            build-args: |
+              SERVICE_PATH=services/community
+              SHARED_PATH=shared
+          - service: enterprise-server
+            dockerfile: docker/enterprise-server.Dockerfile
+            context: .
+            build-args: |
+              SERVICE_PATH=services/enterprise
+              SHARED_PATH=shared
+          - service: auth-service
+            dockerfile: docker/auth-service.Dockerfile
+            context: .
+            build-args: |
+              SERVICE_PATH=services/auth
+              SHARED_PATH=shared
+          - service: notification-service
+            dockerfile: docker/notification-service.Dockerfile
+            context: .
+            build-args: |
+              SERVICE_PATH=services/notification
+              SHARED_PATH=shared
+          - service: community-admin
+            dockerfile: docker/community-admin.Dockerfile
+            context: .
+            build-args: |
+              APP_PATH=apps/community/admin
+              SHARED_PATH=shared
+          - service: community-mobile
+            dockerfile: docker/community-mobile.Dockerfile
+            context: .
+            build-args: |
+              APP_PATH=apps/community/mobile
+              SHARED_PATH=shared
+          - service: enterprise-admin
+            dockerfile: docker/enterprise-admin.Dockerfile
+            context: .
+            build-args: |
+              APP_PATH=apps/enterprise/admin
+              SHARED_PATH=shared
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            network=host
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=staging,enable=${{ github.ref == 'refs/heads/develop' }}
+            type=raw,value=production,enable=${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+
+      - name: Check if build is needed
+        id: should-build
+        run: |
+          FORCE_REBUILD="${{ github.event.inputs.force_rebuild }}"
+          SHARED_CHANGED="${{ needs.detect-changes.outputs.shared }}"
+          SERVICE_CHANGED="${{ needs.detect-changes.outputs[matrix.service] }}"
+          
+          if [[ "$FORCE_REBUILD" == "true" || "$SHARED_CHANGED" == "true" || "$SERVICE_CHANGED" == "true" ]]; then
+            echo "should-build=true" >> $GITHUB_OUTPUT
+            echo "Building ${{ matrix.service }} because:"
+            [[ "$FORCE_REBUILD" == "true" ]] && echo "  - Force rebuild requested"
+            [[ "$SHARED_CHANGED" == "true" ]] && echo "  - Shared code changed"
+            [[ "$SERVICE_CHANGED" == "true" ]] && echo "  - Service code changed"
+          else
+            echo "should-build=false" >> $GITHUB_OUTPUT
+            echo "Skipping ${{ matrix.service }} - no relevant changes detected"
+          fi
+
+      - name: Build and push Docker image
+        if: steps.should-build.outputs.should-build == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: ${{ matrix.build-args }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          platforms: linux/amd64,linux/arm64
+
+      - name: Run security scan
+        if: steps.should-build.outputs.should-build == 'true'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-${{ matrix.service }}.sarif'
+
+      - name: Upload security scan results
+        if: steps.should-build.outputs.should-build == 'true'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-${{ matrix.service }}.sarif'
+          category: 'docker-${{ matrix.service }}'
+
+      - name: Generate image manifest
+        if: steps.should-build.outputs.should-build == 'true'
+        run: |
+          mkdir -p artifacts
+          cat > artifacts/${{ matrix.service }}-manifest.json << EOF
+          {
+            "service": "${{ matrix.service }}",
+            "image": "${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service }}",
+            "tags": $(echo '${{ steps.meta.outputs.tags }}' | jq -R -s -c 'split("\n") | map(select(length > 0))'),
+            "digest": "${{ steps.meta.outputs.digest }}",
+            "built_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "workflow_run": "${{ github.run_id }}"
+          }
+          EOF
+
+      - name: Upload image manifest
+        if: steps.should-build.outputs.should-build == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-manifest-${{ matrix.service }}
+          path: artifacts/${{ matrix.service }}-manifest.json
+          retention-days: 30
+
+  update-deployment-manifests:
+    needs: [detect-changes, build-and-push]
+    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Download all image manifests
+        uses: actions/download-artifact@v4
+        with:
+          pattern: image-manifest-*
+          path: manifests
+          merge-multiple: true
+
+      - name: Update deployment manifests
+        run: |
+          ENVIRONMENT="staging"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            ENVIRONMENT="production"
+          fi
+          
+          echo "Updating deployment manifests for $ENVIRONMENT environment"
+          
+          # Create deployment manifest directory if it doesn't exist
+          mkdir -p k8s/overlays/$ENVIRONMENT
+          
+          # Update image tags in Kubernetes manifests
+          for manifest in manifests/*-manifest.json; do
+            if [[ -f "$manifest" ]]; then
+              SERVICE=$(jq -r '.service' "$manifest")
+              IMAGE=$(jq -r '.image' "$manifest")
+              TAG="${{ github.sha }}"
+              
+              echo "Updating $SERVICE to use image $IMAGE:$TAG"
+              
+              # Update kustomization.yaml if it exists
+              if [[ -f "k8s/overlays/$ENVIRONMENT/kustomization.yaml" ]]; then
+                yq eval ".images[] |= select(.name == \"$SERVICE\").newTag = \"$TAG\"" -i "k8s/overlays/$ENVIRONMENT/kustomization.yaml"
+              fi
+              
+              # Update docker-compose file if it exists
+              if [[ -f "docker-compose.$ENVIRONMENT.yml" ]]; then
+                yq eval ".services.$SERVICE.image = \"$IMAGE:$TAG\"" -i "docker-compose.$ENVIRONMENT.yml"
+              fi
+            fi
+          done
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          ENVIRONMENT="staging"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            ENVIRONMENT="production"
+          fi
+          
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add .
+            git commit -m "chore: update $ENVIRONMENT deployment manifests to ${{ github.sha }}"
+            git push
+          fi
+
+  notify-deployment:
+    needs: [build-and-push, update-deployment-manifests]
+    if: always() && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine environment
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify deployment status
+        run: |
+          STATUS="success"
+          if [[ "${{ needs.build-and-push.result }}" != "success" ]]; then
+            STATUS="failure"
+          fi
+          
+          echo "Docker build and push completed with status: $STATUS"
+          echo "Environment: ${{ steps.env.outputs.environment }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Images are ready for deployment to ${{ steps.env.outputs.environment }}"
+          
+          # Here you can add Slack/Discord/Email notifications
+          # Example: curl -X POST -H 'Content-type: application/json' \
+          #   --data '{"text":"Docker images built and pushed for ${{ steps.env.outputs.environment }}"}' \
+          #   ${{ secrets.SLACK_WEBHOOK_URL }}

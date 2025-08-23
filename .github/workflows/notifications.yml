@@ -1,0 +1,809 @@
+name: Notifications and Reporting
+
+on:
+  workflow_run:
+    workflows:
+      - "CI Pipeline"
+      - "Deploy"
+      - "Performance Monitoring"
+      - "Code Quality"
+      - "Docker Build and Push"
+    types:
+      - completed
+  pull_request:
+    types: [opened, synchronize, closed]
+  issues:
+    types: [opened, closed]
+  release:
+    types: [published]
+  schedule:
+    # Daily summary at 9:00 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      notification_type:
+        description: 'Type of notification to send'
+        required: true
+        default: 'summary'
+        type: choice
+        options:
+          - summary
+          - deployment
+          - performance
+          - security
+          - custom
+      custom_message:
+        description: 'Custom message (for custom notification type)'
+        required: false
+        type: string
+      channels:
+        description: 'Notification channels (comma-separated)'
+        required: false
+        default: 'slack,email'
+        type: string
+
+env:
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+  EMAIL_SMTP_HOST: ${{ secrets.EMAIL_SMTP_HOST }}
+  EMAIL_SMTP_PORT: ${{ secrets.EMAIL_SMTP_PORT }}
+  EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+  EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+  EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+  EMAIL_TO: ${{ secrets.EMAIL_TO }}
+
+jobs:
+  determine-notification-context:
+    runs-on: ubuntu-latest
+    outputs:
+      notification_type: ${{ steps.context.outputs.notification_type }}
+      workflow_name: ${{ steps.context.outputs.workflow_name }}
+      workflow_status: ${{ steps.context.outputs.workflow_status }}
+      branch: ${{ steps.context.outputs.branch }}
+      commit_sha: ${{ steps.context.outputs.commit_sha }}
+      commit_message: ${{ steps.context.outputs.commit_message }}
+      author: ${{ steps.context.outputs.author }}
+      pr_number: ${{ steps.context.outputs.pr_number }}
+      environment: ${{ steps.context.outputs.environment }}
+    steps:
+      - name: Determine notification context
+        id: context
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            echo "notification_type=workflow_completion" >> $GITHUB_OUTPUT
+            echo "workflow_name=${{ github.event.workflow_run.name }}" >> $GITHUB_OUTPUT
+            echo "workflow_status=${{ github.event.workflow_run.conclusion }}" >> $GITHUB_OUTPUT
+            echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+            echo "commit_sha=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
+            echo "author=${{ github.event.workflow_run.head_commit.author.name }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "notification_type=pull_request" >> $GITHUB_OUTPUT
+            echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+            echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
+            echo "commit_sha=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+            echo "author=${{ github.event.pull_request.user.login }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "release" ]]; then
+            echo "notification_type=release" >> $GITHUB_OUTPUT
+            echo "branch=${{ github.event.release.target_commitish }}" >> $GITHUB_OUTPUT
+            echo "author=${{ github.event.release.author.login }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+            echo "notification_type=daily_summary" >> $GITHUB_OUTPUT
+            echo "branch=main" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "notification_type=${{ github.event.inputs.notification_type }}" >> $GITHUB_OUTPUT
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "author=${{ github.actor }}" >> $GITHUB_OUTPUT
+          fi
+          
+          # Determine environment based on branch
+          if [[ "${{ steps.context.outputs.branch }}" == "main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          elif [[ "${{ steps.context.outputs.branch }}" == "develop" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          else
+            echo "environment=development" >> $GITHUB_OUTPUT
+          fi
+
+  collect-workflow-data:
+    runs-on: ubuntu-latest
+    needs: determine-notification-context
+    if: needs.determine-notification-context.outputs.notification_type == 'workflow_completion' || needs.determine-notification-context.outputs.notification_type == 'daily_summary'
+    outputs:
+      workflow_data: ${{ steps.collect.outputs.workflow_data }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect workflow data
+        id: collect
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create a script to collect workflow data
+          cat > collect_data.py << 'EOF'
+          import json
+          import requests
+          import os
+          from datetime import datetime, timedelta
+          
+          def get_workflow_runs(repo, token, days=1):
+              headers = {
+                  'Authorization': f'token {token}',
+                  'Accept': 'application/vnd.github.v3+json'
+              }
+              
+              since = (datetime.now() - timedelta(days=days)).isoformat()
+              url = f'https://api.github.com/repos/{repo}/actions/runs'
+              params = {'created': f'>{since}', 'per_page': 100}
+              
+              response = requests.get(url, headers=headers, params=params)
+              return response.json().get('workflow_runs', [])
+          
+          def analyze_workflows(runs):
+              stats = {
+                  'total_runs': len(runs),
+                  'successful_runs': 0,
+                  'failed_runs': 0,
+                  'cancelled_runs': 0,
+                  'workflows': {},
+                  'branches': {},
+                  'authors': {}
+              }
+              
+              for run in runs:
+                  # Count by status
+                  if run['conclusion'] == 'success':
+                      stats['successful_runs'] += 1
+                  elif run['conclusion'] == 'failure':
+                      stats['failed_runs'] += 1
+                  elif run['conclusion'] == 'cancelled':
+                      stats['cancelled_runs'] += 1
+                  
+                  # Count by workflow
+                  workflow_name = run['name']
+                  if workflow_name not in stats['workflows']:
+                      stats['workflows'][workflow_name] = {'success': 0, 'failure': 0, 'cancelled': 0}
+                  stats['workflows'][workflow_name][run['conclusion']] += 1
+                  
+                  # Count by branch
+                  branch = run['head_branch']
+                  if branch not in stats['branches']:
+                      stats['branches'][branch] = {'success': 0, 'failure': 0, 'cancelled': 0}
+                  stats['branches'][branch][run['conclusion']] += 1
+                  
+                  # Count by author
+                  author = run['head_commit']['author']['name'] if run['head_commit'] else 'Unknown'
+                  if author not in stats['authors']:
+                      stats['authors'][author] = {'success': 0, 'failure': 0, 'cancelled': 0}
+                  stats['authors'][author][run['conclusion']] += 1
+              
+              return stats
+          
+          # Main execution
+          repo = os.environ['GITHUB_REPOSITORY']
+          token = os.environ['GITHUB_TOKEN']
+          
+          runs = get_workflow_runs(repo, token)
+          stats = analyze_workflows(runs)
+          
+          print(json.dumps(stats, indent=2))
+          
+          # Save to output
+          with open('workflow_data.json', 'w') as f:
+              json.dump(stats, f)
+          EOF
+          
+          python collect_data.py
+          
+          # Set output
+          echo "workflow_data=$(cat workflow_data.json | jq -c .)" >> $GITHUB_OUTPUT
+
+  send-slack-notification:
+    runs-on: ubuntu-latest
+    needs: [determine-notification-context, collect-workflow-data]
+    if: always() && (contains(github.event.inputs.channels, 'slack') || github.event.inputs.channels == '' || github.event_name != 'workflow_dispatch')
+    steps:
+      - name: Send Slack notification
+        env:
+          NOTIFICATION_TYPE: ${{ needs.determine-notification-context.outputs.notification_type }}
+          WORKFLOW_NAME: ${{ needs.determine-notification-context.outputs.workflow_name }}
+          WORKFLOW_STATUS: ${{ needs.determine-notification-context.outputs.workflow_status }}
+          BRANCH: ${{ needs.determine-notification-context.outputs.branch }}
+          COMMIT_SHA: ${{ needs.determine-notification-context.outputs.commit_sha }}
+          AUTHOR: ${{ needs.determine-notification-context.outputs.author }}
+          PR_NUMBER: ${{ needs.determine-notification-context.outputs.pr_number }}
+          ENVIRONMENT: ${{ needs.determine-notification-context.outputs.environment }}
+          WORKFLOW_DATA: ${{ needs.collect-workflow-data.outputs.workflow_data }}
+        run: |
+          if [[ -z "$SLACK_WEBHOOK_URL" ]]; then
+            echo "Slack webhook URL not configured, skipping Slack notification"
+            exit 0
+          fi
+          
+          # Create Slack notification script
+          cat > send_slack.py << 'EOF'
+          import json
+          import requests
+          import os
+          from datetime import datetime
+          
+          def get_status_emoji(status):
+              if status == 'success':
+                  return ':white_check_mark:'
+              elif status == 'failure':
+                  return ':x:'
+              elif status == 'cancelled':
+                  return ':warning:'
+              else:
+                  return ':question:'
+          
+          def get_environment_emoji(env):
+              if env == 'production':
+                  return ':rocket:'
+              elif env == 'staging':
+                  return ':construction:'
+              else:
+                  return ':hammer_and_wrench:'
+          
+          def create_workflow_completion_message():
+              status = os.environ.get('WORKFLOW_STATUS', 'unknown')
+              workflow_name = os.environ.get('WORKFLOW_NAME', 'Unknown Workflow')
+              branch = os.environ.get('BRANCH', 'unknown')
+              author = os.environ.get('AUTHOR', 'Unknown')
+              commit_sha = os.environ.get('COMMIT_SHA', '')[:8]
+              environment = os.environ.get('ENVIRONMENT', 'unknown')
+              
+              status_emoji = get_status_emoji(status)
+              env_emoji = get_environment_emoji(environment)
+              
+              color = 'good' if status == 'success' else 'danger' if status == 'failure' else 'warning'
+              
+              return {
+                  'text': f'{status_emoji} Workflow {status}: {workflow_name}',
+                  'attachments': [{
+                      'color': color,
+                      'fields': [
+                          {'title': 'Workflow', 'value': workflow_name, 'short': True},
+                          {'title': 'Status', 'value': f'{status_emoji} {status.title()}', 'short': True},
+                          {'title': 'Branch', 'value': branch, 'short': True},
+                          {'title': 'Environment', 'value': f'{env_emoji} {environment}', 'short': True},
+                          {'title': 'Author', 'value': author, 'short': True},
+                          {'title': 'Commit', 'value': commit_sha, 'short': True}
+                      ],
+                      'footer': 'GitHub Actions',
+                      'ts': int(datetime.now().timestamp())
+                  }]
+              }
+          
+          def create_daily_summary_message():
+              workflow_data = json.loads(os.environ.get('WORKFLOW_DATA', '{}'))
+              
+              total_runs = workflow_data.get('total_runs', 0)
+              successful_runs = workflow_data.get('successful_runs', 0)
+              failed_runs = workflow_data.get('failed_runs', 0)
+              
+              success_rate = (successful_runs / total_runs * 100) if total_runs > 0 else 0
+              
+              color = 'good' if success_rate >= 90 else 'warning' if success_rate >= 70 else 'danger'
+              
+              # Top workflows
+              workflows = workflow_data.get('workflows', {})
+              top_workflows = sorted(workflows.items(), key=lambda x: sum(x[1].values()), reverse=True)[:5]
+              
+              workflow_summary = '\n'.join([
+                  f'• {name}: {data["success"]}✅ {data["failure"]}❌ {data["cancelled"]}⚠️'
+                  for name, data in top_workflows
+              ])
+              
+              return {
+                  'text': f':chart_with_upwards_trend: Daily CI/CD Summary - {success_rate:.1f}% Success Rate',
+                  'attachments': [{
+                      'color': color,
+                      'fields': [
+                          {'title': 'Total Runs', 'value': str(total_runs), 'short': True},
+                          {'title': 'Success Rate', 'value': f'{success_rate:.1f}%', 'short': True},
+                          {'title': 'Successful', 'value': f':white_check_mark: {successful_runs}', 'short': True},
+                          {'title': 'Failed', 'value': f':x: {failed_runs}', 'short': True},
+                          {'title': 'Top Workflows', 'value': workflow_summary or 'No workflows found', 'short': False}
+                      ],
+                      'footer': 'GitHub Actions Daily Summary',
+                      'ts': int(datetime.now().timestamp())
+                  }]
+              }
+          
+          def create_pull_request_message():
+              pr_number = os.environ.get('PR_NUMBER', '')
+              branch = os.environ.get('BRANCH', 'unknown')
+              author = os.environ.get('AUTHOR', 'Unknown')
+              
+              return {
+                  'text': f':git-pull-request: Pull Request #{pr_number} opened',
+                  'attachments': [{
+                      'color': 'good',
+                      'fields': [
+                          {'title': 'PR Number', 'value': f'#{pr_number}', 'short': True},
+                          {'title': 'Branch', 'value': branch, 'short': True},
+                          {'title': 'Author', 'value': author, 'short': True}
+                      ],
+                      'footer': 'GitHub Pull Request',
+                      'ts': int(datetime.now().timestamp())
+                  }]
+              }
+          
+          def create_release_message():
+              author = os.environ.get('AUTHOR', 'Unknown')
+              branch = os.environ.get('BRANCH', 'main')
+              
+              return {
+                  'text': f':rocket: New release published!',
+                  'attachments': [{
+                      'color': 'good',
+                      'fields': [
+                          {'title': 'Released by', 'value': author, 'short': True},
+                          {'title': 'Branch', 'value': branch, 'short': True}
+                      ],
+                      'footer': 'GitHub Release',
+                      'ts': int(datetime.now().timestamp())
+                  }]
+              }
+          
+          # Main execution
+          notification_type = os.environ.get('NOTIFICATION_TYPE', 'unknown')
+          webhook_url = os.environ.get('SLACK_WEBHOOK_URL')
+          
+          if notification_type == 'workflow_completion':
+              message = create_workflow_completion_message()
+          elif notification_type == 'daily_summary':
+              message = create_daily_summary_message()
+          elif notification_type == 'pull_request':
+              message = create_pull_request_message()
+          elif notification_type == 'release':
+              message = create_release_message()
+          else:
+              message = {'text': f'Unknown notification type: {notification_type}'}
+          
+          # Send to Slack
+          response = requests.post(webhook_url, json=message)
+          
+          if response.status_code == 200:
+              print('Slack notification sent successfully')
+          else:
+              print(f'Failed to send Slack notification: {response.status_code} - {response.text}')
+              exit(1)
+          EOF
+          
+          python send_slack.py
+
+  send-email-notification:
+    runs-on: ubuntu-latest
+    needs: [determine-notification-context, collect-workflow-data]
+    if: always() && (contains(github.event.inputs.channels, 'email') || github.event.inputs.channels == '' || github.event_name != 'workflow_dispatch')
+    steps:
+      - name: Send email notification
+        env:
+          NOTIFICATION_TYPE: ${{ needs.determine-notification-context.outputs.notification_type }}
+          WORKFLOW_NAME: ${{ needs.determine-notification-context.outputs.workflow_name }}
+          WORKFLOW_STATUS: ${{ needs.determine-notification-context.outputs.workflow_status }}
+          BRANCH: ${{ needs.determine-notification-context.outputs.branch }}
+          COMMIT_SHA: ${{ needs.determine-notification-context.outputs.commit_sha }}
+          AUTHOR: ${{ needs.determine-notification-context.outputs.author }}
+          ENVIRONMENT: ${{ needs.determine-notification-context.outputs.environment }}
+          WORKFLOW_DATA: ${{ needs.collect-workflow-data.outputs.workflow_data }}
+        run: |
+          if [[ -z "$EMAIL_SMTP_HOST" || -z "$EMAIL_USERNAME" || -z "$EMAIL_PASSWORD" ]]; then
+            echo "Email configuration not complete, skipping email notification"
+            exit 0
+          fi
+          
+          # Install required packages
+          pip install jinja2
+          
+          # Create email notification script
+          cat > send_email.py << 'EOF'
+          import smtplib
+          import json
+          import os
+          from email.mime.text import MIMEText
+          from email.mime.multipart import MIMEMultipart
+          from datetime import datetime
+          from jinja2 import Template
+          
+          def create_html_template():
+              return Template('''
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="utf-8">
+              <style>
+                  body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
+                  .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                  .header { background-color: {% if status == 'success' %}#28a745{% elif status == 'failure' %}#dc3545{% else %}#ffc107{% endif %}; color: white; padding: 20px; text-align: center; }
+                  .content { padding: 20px; }
+                  .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+                  .success { background-color: #d4edda; color: #155724; }
+                  .failure { background-color: #f8d7da; color: #721c24; }
+                  .warning { background-color: #fff3cd; color: #856404; }
+                  .info-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                  .info-table th, .info-table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+                  .info-table th { background-color: #f8f9fa; font-weight: bold; }
+                  .footer { background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; color: #6c757d; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <div class="header">
+                      <h1>{{ title }}</h1>
+                      <p>{{ subtitle }}</p>
+                  </div>
+                  <div class="content">
+                      {% if notification_type == 'workflow_completion' %}
+                          <h2>Workflow Details</h2>
+                          <table class="info-table">
+                              <tr><th>Workflow</th><td>{{ workflow_name }}</td></tr>
+                              <tr><th>Status</th><td><span class="status-badge {{ status }}">{{ status.title() }}</span></td></tr>
+                              <tr><th>Branch</th><td>{{ branch }}</td></tr>
+                              <tr><th>Environment</th><td>{{ environment }}</td></tr>
+                              <tr><th>Author</th><td>{{ author }}</td></tr>
+                              <tr><th>Commit</th><td>{{ commit_sha }}</td></tr>
+                              <tr><th>Timestamp</th><td>{{ timestamp }}</td></tr>
+                          </table>
+                      {% elif notification_type == 'daily_summary' %}
+                          <h2>CI/CD Summary</h2>
+                          <table class="info-table">
+                              <tr><th>Total Runs</th><td>{{ workflow_data.total_runs }}</td></tr>
+                              <tr><th>Successful</th><td><span class="status-badge success">{{ workflow_data.successful_runs }}</span></td></tr>
+                              <tr><th>Failed</th><td><span class="status-badge failure">{{ workflow_data.failed_runs }}</span></td></tr>
+                              <tr><th>Cancelled</th><td><span class="status-badge warning">{{ workflow_data.cancelled_runs }}</span></td></tr>
+                              <tr><th>Success Rate</th><td>{{ "%.1f" | format((workflow_data.successful_runs / workflow_data.total_runs * 100) if workflow_data.total_runs > 0 else 0) }}%</td></tr>
+                          </table>
+                          
+                          <h3>Top Workflows</h3>
+                          <table class="info-table">
+                              <tr><th>Workflow</th><th>Success</th><th>Failed</th><th>Cancelled</th></tr>
+                              {% for name, data in top_workflows %}
+                              <tr>
+                                  <td>{{ name }}</td>
+                                  <td><span class="status-badge success">{{ data.success }}</span></td>
+                                  <td><span class="status-badge failure">{{ data.failure }}</span></td>
+                                  <td><span class="status-badge warning">{{ data.cancelled }}</span></td>
+                              </tr>
+                              {% endfor %}
+                          </table>
+                      {% endif %}
+                  </div>
+                  <div class="footer">
+                      <p>This is an automated notification from GitHub Actions</p>
+                      <p>Generated at {{ timestamp }}</p>
+                  </div>
+              </div>
+          </body>
+          </html>
+              ''')
+          
+          def send_email(subject, html_content, text_content):
+              smtp_host = os.environ.get('EMAIL_SMTP_HOST')
+              smtp_port = int(os.environ.get('EMAIL_SMTP_PORT', '587'))
+              username = os.environ.get('EMAIL_USERNAME')
+              password = os.environ.get('EMAIL_PASSWORD')
+              from_email = os.environ.get('EMAIL_FROM', username)
+              to_email = os.environ.get('EMAIL_TO')
+              
+              msg = MIMEMultipart('alternative')
+              msg['Subject'] = subject
+              msg['From'] = from_email
+              msg['To'] = to_email
+              
+              # Add text and HTML parts
+              text_part = MIMEText(text_content, 'plain')
+              html_part = MIMEText(html_content, 'html')
+              
+              msg.attach(text_part)
+              msg.attach(html_part)
+              
+              # Send email
+              with smtplib.SMTP(smtp_host, smtp_port) as server:
+                  server.starttls()
+                  server.login(username, password)
+                  server.send_message(msg)
+          
+          # Main execution
+          notification_type = os.environ.get('NOTIFICATION_TYPE', 'unknown')
+          workflow_name = os.environ.get('WORKFLOW_NAME', 'Unknown Workflow')
+          status = os.environ.get('WORKFLOW_STATUS', 'unknown')
+          branch = os.environ.get('BRANCH', 'unknown')
+          author = os.environ.get('AUTHOR', 'Unknown')
+          commit_sha = os.environ.get('COMMIT_SHA', '')[:8]
+          environment = os.environ.get('ENVIRONMENT', 'unknown')
+          timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')
+          
+          template = create_html_template()
+          
+          if notification_type == 'workflow_completion':
+              title = f'Workflow {status.title()}: {workflow_name}'
+              subtitle = f'Branch: {branch} | Environment: {environment}'
+              
+              html_content = template.render(
+                  title=title,
+                  subtitle=subtitle,
+                  notification_type=notification_type,
+                  workflow_name=workflow_name,
+                  status=status,
+                  branch=branch,
+                  environment=environment,
+                  author=author,
+                  commit_sha=commit_sha,
+                  timestamp=timestamp
+              )
+              
+              text_content = f'''
+          Workflow {status.title()}: {workflow_name}
+          
+          Details:
+          - Status: {status.title()}
+          - Branch: {branch}
+          - Environment: {environment}
+          - Author: {author}
+          - Commit: {commit_sha}
+          - Timestamp: {timestamp}
+              '''
+              
+              subject = f'[GitHub Actions] {workflow_name} - {status.title()}'
+              
+          elif notification_type == 'daily_summary':
+              workflow_data = json.loads(os.environ.get('WORKFLOW_DATA', '{}'))
+              total_runs = workflow_data.get('total_runs', 0)
+              success_rate = (workflow_data.get('successful_runs', 0) / total_runs * 100) if total_runs > 0 else 0
+              
+              # Get top workflows
+              workflows = workflow_data.get('workflows', {})
+              top_workflows = sorted(workflows.items(), key=lambda x: sum(x[1].values()), reverse=True)[:5]
+              
+              title = f'Daily CI/CD Summary - {success_rate:.1f}% Success Rate'
+              subtitle = f'Total Runs: {total_runs} | Date: {datetime.now().strftime("%Y-%m-%d")}'
+              
+              html_content = template.render(
+                  title=title,
+                  subtitle=subtitle,
+                  notification_type=notification_type,
+                  workflow_data=workflow_data,
+                  top_workflows=top_workflows,
+                  timestamp=timestamp
+              )
+              
+              text_content = f'''
+          Daily CI/CD Summary
+          
+          Statistics:
+          - Total Runs: {workflow_data.get('total_runs', 0)}
+          - Successful: {workflow_data.get('successful_runs', 0)}
+          - Failed: {workflow_data.get('failed_runs', 0)}
+          - Cancelled: {workflow_data.get('cancelled_runs', 0)}
+          - Success Rate: {success_rate:.1f}%
+          
+          Generated at: {timestamp}
+              '''
+              
+              subject = f'[GitHub Actions] Daily Summary - {datetime.now().strftime("%Y-%m-%d")}'
+          
+          else:
+              subject = f'[GitHub Actions] Notification - {notification_type}'
+              html_content = f'<p>Unknown notification type: {notification_type}</p>'
+              text_content = f'Unknown notification type: {notification_type}'
+          
+          send_email(subject, html_content, text_content)
+          print('Email notification sent successfully')
+          EOF
+          
+          python send_email.py
+
+  update-pr-status:
+    runs-on: ubuntu-latest
+    needs: [determine-notification-context]
+    if: needs.determine-notification-context.outputs.notification_type == 'workflow_completion' && needs.determine-notification-context.outputs.pr_number != ''
+    steps:
+      - name: Update PR with workflow status
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ needs.determine-notification-context.outputs.pr_number }}
+          WORKFLOW_NAME: ${{ needs.determine-notification-context.outputs.workflow_name }}
+          WORKFLOW_STATUS: ${{ needs.determine-notification-context.outputs.workflow_status }}
+          COMMIT_SHA: ${{ needs.determine-notification-context.outputs.commit_sha }}
+        run: |
+          # Create PR comment with workflow status
+          cat > update_pr.py << 'EOF'
+          import requests
+          import os
+          import json
+          
+          def get_status_emoji(status):
+              if status == 'success':
+                  return '✅'
+              elif status == 'failure':
+                  return '❌'
+              elif status == 'cancelled':
+                  return '⚠️'
+              else:
+                  return '❓'
+          
+          # Get environment variables
+          token = os.environ['GITHUB_TOKEN']
+          repo = os.environ['GITHUB_REPOSITORY']
+          pr_number = os.environ['PR_NUMBER']
+          workflow_name = os.environ['WORKFLOW_NAME']
+          workflow_status = os.environ['WORKFLOW_STATUS']
+          commit_sha = os.environ['COMMIT_SHA'][:8]
+          
+          headers = {
+              'Authorization': f'token {token}',
+              'Accept': 'application/vnd.github.v3+json'
+          }
+          
+          # Create comment
+          status_emoji = get_status_emoji(workflow_status)
+          comment_body = f'''
+          ## {status_emoji} Workflow Update: {workflow_name}
+          
+          **Status:** {status_emoji} {workflow_status.title()}
+          **Commit:** `{commit_sha}`
+          **Workflow:** {workflow_name}
+          
+          <details>
+          <summary>View workflow details</summary>
+          
+          - **Repository:** {repo}
+          - **Branch:** {os.environ.get('GITHUB_HEAD_REF', 'unknown')}
+          - **Triggered by:** {os.environ.get('GITHUB_ACTOR', 'unknown')}
+          - **Run ID:** {os.environ.get('GITHUB_RUN_ID', 'unknown')}
+          
+          [View full workflow run](https://github.com/{repo}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')})
+          </details>
+          '''
+          
+          # Post comment
+          url = f'https://api.github.com/repos/{repo}/issues/{pr_number}/comments'
+          data = {'body': comment_body}
+          
+          response = requests.post(url, headers=headers, json=data)
+          
+          if response.status_code == 201:
+              print('PR comment posted successfully')
+          else:
+              print(f'Failed to post PR comment: {response.status_code} - {response.text}')
+          EOF
+          
+          python update_pr.py
+
+  generate-status-badges:
+    runs-on: ubuntu-latest
+    needs: [determine-notification-context, collect-workflow-data]
+    if: needs.determine-notification-context.outputs.notification_type == 'daily_summary' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Generate status badges
+        env:
+          WORKFLOW_DATA: ${{ needs.collect-workflow-data.outputs.workflow_data }}
+        run: |
+          # Create badge generation script
+          cat > generate_badges.py << 'EOF'
+          import json
+          import os
+          import requests
+          from urllib.parse import quote
+          
+          def generate_badge_url(label, message, color):
+              label_encoded = quote(label)
+              message_encoded = quote(message)
+              return f'https://img.shields.io/badge/{label_encoded}-{message_encoded}-{color}'
+          
+          def get_color_for_percentage(percentage):
+              if percentage >= 90:
+                  return 'brightgreen'
+              elif percentage >= 70:
+                  return 'yellow'
+              else:
+                  return 'red'
+          
+          # Load workflow data
+          workflow_data = json.loads(os.environ.get('WORKFLOW_DATA', '{}'))
+          
+          total_runs = workflow_data.get('total_runs', 0)
+          successful_runs = workflow_data.get('successful_runs', 0)
+          
+          success_rate = (successful_runs / total_runs * 100) if total_runs > 0 else 0
+          color = get_color_for_percentage(success_rate)
+          
+          # Generate badges
+          badges = {
+              'build_status': generate_badge_url('Build', 'Passing' if success_rate >= 90 else 'Failing', 'brightgreen' if success_rate >= 90 else 'red'),
+              'success_rate': generate_badge_url('Success Rate', f'{success_rate:.1f}%', color),
+              'total_runs': generate_badge_url('Total Runs', str(total_runs), 'blue'),
+              'last_updated': generate_badge_url('Last Updated', 'Today', 'blue')
+          }
+          
+          # Create README badges section
+          badges_markdown = f'''
+          ## Status Badges
+          
+          ![Build Status]({badges['build_status']})
+          ![Success Rate]({badges['success_rate']})
+          ![Total Runs]({badges['total_runs']})
+          ![Last Updated]({badges['last_updated']})
+          '''
+          
+          print('Generated status badges:')
+          print(badges_markdown)
+          
+          # Save badges data
+          with open('badges.json', 'w') as f:
+              json.dump(badges, f, indent=2)
+          
+          with open('badges.md', 'w') as f:
+              f.write(badges_markdown)
+          EOF
+          
+          python generate_badges.py
+          
+          # Upload badges as artifacts
+          echo "Badges generated successfully"
+
+      - name: Upload badge artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: status-badges
+          path: |
+            badges.json
+            badges.md
+          retention-days: 30
+
+  notification-summary:
+    runs-on: ubuntu-latest
+    needs: [send-slack-notification, send-email-notification, update-pr-status, generate-status-badges]
+    if: always()
+    steps:
+      - name: Notification summary
+        run: |
+          echo "## Notification Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.send-slack-notification.result }}" == "success" ]]; then
+            echo "✅ Slack notification sent successfully" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.send-slack-notification.result }}" == "skipped" ]]; then
+            echo "⏭️ Slack notification skipped" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Slack notification failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.send-email-notification.result }}" == "success" ]]; then
+            echo "✅ Email notification sent successfully" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.send-email-notification.result }}" == "skipped" ]]; then
+            echo "⏭️ Email notification skipped" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Email notification failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.update-pr-status.result }}" == "success" ]]; then
+            echo "✅ PR status updated successfully" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.update-pr-status.result }}" == "skipped" ]]; then
+            echo "⏭️ PR status update skipped" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ PR status update failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.generate-status-badges.result }}" == "success" ]]; then
+            echo "✅ Status badges generated successfully" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.generate-status-badges.result }}" == "skipped" ]]; then
+            echo "⏭️ Status badge generation skipped" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Status badge generation failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Notification Type:** ${{ needs.determine-notification-context.outputs.notification_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date -u)" >> $GITHUB_STEP_SUMMARY

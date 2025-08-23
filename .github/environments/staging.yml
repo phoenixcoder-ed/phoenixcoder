@@ -1,0 +1,104 @@
+# Staging Environment Configuration
+name: staging
+description: "Staging environment for testing and validation"
+
+# Environment URLs
+urls:
+  community_admin: "https://staging-community-admin.phoenixcoder.dev"
+  community_mobile: "https://staging-community-mobile.phoenixcoder.dev"
+  enterprise_admin: "https://staging-enterprise-admin.phoenixcoder.dev"
+  community_api: "https://staging-api-community.phoenixcoder.dev"
+  enterprise_api: "https://staging-api-enterprise.phoenixcoder.dev"
+  auth_service: "https://staging-auth.phoenixcoder.dev"
+  notification_service: "https://staging-notifications.phoenixcoder.dev"
+
+# Required Environment Variables
+required_env_vars:
+  # Database
+  - DATABASE_URL
+  - REDIS_URL
+  - ELASTICSEARCH_URL
+  
+  # Authentication
+  - JWT_SECRET
+  - OAUTH_GITHUB_CLIENT_ID
+  - OAUTH_GITHUB_CLIENT_SECRET
+  - OAUTH_GOOGLE_CLIENT_ID
+  - OAUTH_GOOGLE_CLIENT_SECRET
+  
+  # External Services
+  - STRIPE_SECRET_KEY
+  - STRIPE_WEBHOOK_SECRET
+  - SENDGRID_API_KEY
+  - ALIYUN_OSS_ACCESS_KEY_ID
+  - ALIYUN_OSS_ACCESS_KEY_SECRET
+  - ALIYUN_OSS_BUCKET
+  - ALIYUN_OSS_REGION
+  
+  # Monitoring
+  - SENTRY_DSN
+  - DATADOG_API_KEY
+  
+  # Feature Flags
+  - FEATURE_ENTERPRISE_MODE
+  - FEATURE_PAYMENT_ENABLED
+  - FEATURE_NOTIFICATIONS_ENABLED
+
+# Health Check Endpoints
+health_checks:
+  community_server:
+    url: "https://staging-api-community.phoenixcoder.dev/health"
+    timeout: 30
+    expected_status: 200
+  enterprise_server:
+    url: "https://staging-api-enterprise.phoenixcoder.dev/health"
+    timeout: 30
+    expected_status: 200
+  auth_service:
+    url: "https://staging-auth.phoenixcoder.dev/health"
+    timeout: 30
+    expected_status: 200
+  notification_service:
+    url: "https://staging-notifications.phoenixcoder.dev/health"
+    timeout: 30
+    expected_status: 200
+
+# Deployment Configuration
+deployment:
+  strategy: "rolling"
+  replicas: 2
+  max_unavailable: 1
+  max_surge: 1
+  
+# Resource Limits
+resources:
+  community_server:
+    cpu: "500m"
+    memory: "1Gi"
+  enterprise_server:
+    cpu: "1000m"
+    memory: "2Gi"
+  auth_service:
+    cpu: "250m"
+    memory: "512Mi"
+  notification_service:
+    cpu: "250m"
+    memory: "256Mi"
+
+# Security Configuration
+security:
+  tls_enabled: true
+  cors_origins:
+    - "https://staging-community-admin.phoenixcoder.dev"
+    - "https://staging-community-mobile.phoenixcoder.dev"
+    - "https://staging-enterprise-admin.phoenixcoder.dev"
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 1000
+
+# Monitoring and Logging
+monitoring:
+  metrics_enabled: true
+  logging_level: "info"
+  tracing_enabled: true
+  alerts_enabled: true

@@ -1,0 +1,32 @@
+{
+  "community-admin": {
+    "lighthouse_performance": 90,
+    "lighthouse_accessibility": 95,
+    "lighthouse_best_practices": 90,
+    "lighthouse_seo": 85,
+    "first_contentful_paint": 1.5,
+    "largest_contentful_paint": 2.5,
+    "cumulative_layout_shift": 0.1,
+    "bundle_size": 500
+  },
+  "community-mobile": {
+    "lighthouse_performance": 85,
+    "lighthouse_accessibility": 90,
+    "lighthouse_best_practices": 85,
+    "lighthouse_seo": 80,
+    "first_contentful_paint": 2.0,
+    "largest_contentful_paint": 3.0,
+    "cumulative_layout_shift": 0.15,
+    "bundle_size": 300
+  },
+  "enterprise-admin": {
+    "lighthouse_performance": 92,
+    "lighthouse_accessibility": 98,
+    "lighthouse_best_practices": 95,
+    "lighthouse_seo": 90,
+    "first_contentful_paint": 1.2,
+    "largest_contentful_paint": 2.0,
+    "cumulative_layout_shift": 0.08,
+    "bundle_size": 600
+  }
+}

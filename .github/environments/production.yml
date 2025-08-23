@@ -1,0 +1,147 @@
+# Production Environment Configuration
+name: production
+description: "Production environment for live services"
+
+# Environment URLs
+urls:
+  community_admin: "https://admin.phoenixcoder.com"
+  community_mobile: "https://app.phoenixcoder.com"
+  enterprise_admin: "https://enterprise.phoenixcoder.com"
+  community_api: "https://api.phoenixcoder.com"
+  enterprise_api: "https://enterprise-api.phoenixcoder.com"
+  auth_service: "https://auth.phoenixcoder.com"
+  notification_service: "https://notifications.phoenixcoder.com"
+
+# Required Environment Variables
+required_env_vars:
+  # Database
+  - DATABASE_URL
+  - DATABASE_REPLICA_URL
+  - REDIS_URL
+  - REDIS_CLUSTER_URL
+  - ELASTICSEARCH_URL
+  
+  # Authentication
+  - JWT_SECRET
+  - JWT_REFRESH_SECRET
+  - OAUTH_GITHUB_CLIENT_ID
+  - OAUTH_GITHUB_CLIENT_SECRET
+  - OAUTH_GOOGLE_CLIENT_ID
+  - OAUTH_GOOGLE_CLIENT_SECRET
+  - OAUTH_WECHAT_APP_ID
+  - OAUTH_WECHAT_APP_SECRET
+  
+  # External Services
+  - STRIPE_SECRET_KEY
+  - STRIPE_WEBHOOK_SECRET
+  - ALIPAY_APP_ID
+  - ALIPAY_PRIVATE_KEY
+  - SENDGRID_API_KEY
+  - ALIYUN_OSS_ACCESS_KEY_ID
+  - ALIYUN_OSS_ACCESS_KEY_SECRET
+  - ALIYUN_OSS_BUCKET
+  - ALIYUN_OSS_REGION
+  - ALIYUN_SMS_ACCESS_KEY_ID
+  - ALIYUN_SMS_ACCESS_KEY_SECRET
+  
+  # Monitoring
+  - SENTRY_DSN
+  - DATADOG_API_KEY
+  - DATADOG_APP_KEY
+  - NEW_RELIC_LICENSE_KEY
+  
+  # CDN and Cache
+  - CLOUDFLARE_API_TOKEN
+  - CLOUDFLARE_ZONE_ID
+  
+  # Feature Flags
+  - FEATURE_ENTERPRISE_MODE
+  - FEATURE_PAYMENT_ENABLED
+  - FEATURE_NOTIFICATIONS_ENABLED
+  - FEATURE_AI_RECOMMENDATIONS
+  - FEATURE_ADVANCED_ANALYTICS
+
+# Health Check Endpoints
+health_checks:
+  community_server:
+    url: "https://api.phoenixcoder.com/health"
+    timeout: 30
+    expected_status: 200
+  enterprise_server:
+    url: "https://enterprise-api.phoenixcoder.com/health"
+    timeout: 30
+    expected_status: 200
+  auth_service:
+    url: "https://auth.phoenixcoder.com/health"
+    timeout: 30
+    expected_status: 200
+  notification_service:
+    url: "https://notifications.phoenixcoder.com/health"
+    timeout: 30
+    expected_status: 200
+
+# Deployment Configuration
+deployment:
+  strategy: "blue-green"
+  replicas: 5
+  max_unavailable: 1
+  max_surge: 2
+  canary_percentage: 10
+  rollback_enabled: true
+  
+# Resource Limits
+resources:
+  community_server:
+    cpu: "2000m"
+    memory: "4Gi"
+    replicas: 3
+  enterprise_server:
+    cpu: "4000m"
+    memory: "8Gi"
+    replicas: 2
+  auth_service:
+    cpu: "1000m"
+    memory: "2Gi"
+    replicas: 2
+  notification_service:
+    cpu: "500m"
+    memory: "1Gi"
+    replicas: 2
+
+# Security Configuration
+security:
+  tls_enabled: true
+  hsts_enabled: true
+  cors_origins:
+    - "https://admin.phoenixcoder.com"
+    - "https://app.phoenixcoder.com"
+    - "https://enterprise.phoenixcoder.com"
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 5000
+    burst_limit: 10000
+  waf_enabled: true
+  ddos_protection: true
+
+# Monitoring and Logging
+monitoring:
+  metrics_enabled: true
+  logging_level: "warn"
+  tracing_enabled: true
+  alerts_enabled: true
+  uptime_monitoring: true
+  performance_monitoring: true
+  
+# Backup Configuration
+backup:
+  database_backup_enabled: true
+  backup_retention_days: 30
+  backup_schedule: "0 2 * * *"  # Daily at 2 AM
+  
+# Auto-scaling Configuration
+autoscaling:
+  enabled: true
+  min_replicas: 2
+  max_replicas: 10
+  target_cpu_utilization: 70
+  target_memory_utilization: 80

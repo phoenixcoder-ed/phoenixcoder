@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhoenixCoder Daily CI/CD Summary</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .header .date {
+            margin-top: 10px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        .card.success {
+            border-left-color: #28a745;
+        }
+        .card.warning {
+            border-left-color: #ffc107;
+        }
+        .card.danger {
+            border-left-color: #dc3545;
+        }
+        .card-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .card-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .workflow-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .workflow-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .workflow-item:last-child {
+            border-bottom: none;
+        }
+        .workflow-name {
+            font-weight: 500;
+        }
+        .workflow-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 14px;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-failure {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .chart-container {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .metric {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .metric-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .security-alerts {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .security-alerts h3 {
+            color: #c53030;
+            margin-top: 0;
+        }
+        .alert-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #fed7d7;
+        }
+        .alert-item:last-child {
+            border-bottom: none;
+        }
+        .recommendations {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .recommendations h3 {
+            color: #2f855a;
+            margin-top: 0;
+        }
+        .recommendation-item {
+            margin: 10px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        .recommendation-item:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        @media (max-width: 600px) {
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            .workflow-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .workflow-stats {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 PhoenixCoder CI/CD Daily Summary</h1>
+            <div class="date">{{date}}</div>
+        </div>
+        
+        <div class="content">
+            <!-- 总览卡片 -->
+            <div class="summary-cards">
+                <div class="card {{#if (gt workflow_stats.success_rate 90)}}success{{else if (gt workflow_stats.success_rate 70)}}warning{{else}}danger{{/if}}">
+                    <div class="card-value">{{workflow_stats.success_rate}}%</div>
+                    <div class="card-label">Success Rate</div>
+                </div>
+                <div class="card">
+                    <div class="card-value">{{workflow_stats.total_runs}}</div>
+                    <div class="card-label">Total Runs</div>
+                </div>
+                <div class="card success">
+                    <div class="card-value">{{workflow_stats.successful_runs}}</div>
+                    <div class="card-label">Successful</div>
+                </div>
+                <div class="card danger">
+                    <div class="card-value">{{workflow_stats.failed_runs}}</div>
+                    <div class="card-label">Failed</div>
+                </div>
+            </div>
+
+            <!-- 工作流统计 -->
+            <div class="section">
+                <h2>📊 Workflow Statistics</h2>
+                <div class="workflow-list">
+                    {{#each workflows}}
+                    <div class="workflow-item">
+                        <div class="workflow-name">{{name}}</div>
+                        <div class="workflow-stats">
+                            <span class="status-badge status-success">{{success}} ✓</span>
+                            <span class="status-badge status-failure">{{failure}} ✗</span>
+                            <span>{{success_rate}}%</span>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+
+            <!-- 性能指标 -->
+            {{#if performance_metrics}}
+            <div class="section">
+                <h2>⚡ Performance Metrics</h2>
+                <div class="performance-metrics">
+                    <div class="metric">
+                        <div class="metric-value">{{performance_metrics.avg_response_time}}ms</div>
+                        <div class="metric-label">Avg Response Time</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{{performance_metrics.throughput}}</div>
+                        <div class="metric-label">Throughput (req/s)</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{{performance_metrics.error_rate}}%</div>
+                        <div class="metric-label">Error Rate</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{{performance_metrics.uptime}}%</div>
+                        <div class="metric-label">Uptime</div>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+
+            <!-- 代码质量 -->
+            {{#if code_quality}}
+            <div class="section">
+                <h2>🔍 Code Quality</h2>
+                <div class="performance-metrics">
+                    <div class="metric">
+                        <div class="metric-value">{{code_quality.coverage}}%</div>
+                        <div class="metric-label">Test Coverage</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{{code_quality.quality_gate}}</div>
+                        <div class="metric-label">Quality Gate</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{{code_quality.duplicated_lines}}%</div>
+                        <div class="metric-label">Duplicated Lines</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{{code_quality.technical_debt}}</div>
+                        <div class="metric-label">Technical Debt</div>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+
+            <!-- 安全警报 -->
+            {{#if security_alerts}}
+            <div class="security-alerts">
+                <h3>🔒 Security Alerts</h3>
+                {{#each security_alerts}}
+                <div class="alert-item">
+                    <span><strong>{{severity}}:</strong> {{description}}</span>
+                    <span class="status-badge status-{{#if (eq status 'resolved')}}success{{else}}failure{{/if}}">{{status}}</span>
+                </div>
+                {{/each}}
+            </div>
+            {{/if}}
+
+            <!-- 部署统计 -->
+            {{#if deployments}}
+            <div class="section">
+                <h2>🚀 Deployments</h2>
+                <div class="workflow-list">
+                    {{#each deployments}}
+                    <div class="workflow-item">
+                        <div>
+                            <div class="workflow-name">{{environment}}</div>
+                            <div style="font-size: 12px; color: #666;">{{version}} - {{timestamp}}</div>
+                        </div>
+                        <div class="workflow-stats">
+                            <span class="status-badge status-{{#if success}}success{{else}}failure{{/if}}">{{#if success}}Success{{else}}Failed{{/if}}</span>
+                            <span>{{duration}}</span>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+            {{/if}}
+
+            <!-- 建议 -->
+            {{#if recommendations}}
+            <div class="recommendations">
+                <h3>💡 Recommendations</h3>
+                {{#each recommendations}}
+                <div class="recommendation-item">{{this}}</div>
+                {{/each}}
+            </div>
+            {{/if}}
+
+            <!-- 趋势图表占位符 -->
+            {{#if include_charts}}
+            <div class="section">
+                <h2>📈 Trends</h2>
+                <div class="chart-container">
+                    <p>📊 Success Rate Trend (Last 7 Days)</p>
+                    <p style="color: #666; font-size: 14px;">Chart data would be embedded here in actual implementation</p>
+                </div>
+                <div class="chart-container">
+                    <p>⏱️ Build Duration Trend (Last 7 Days)</p>
+                    <p style="color: #666; font-size: 14px;">Chart data would be embedded here in actual implementation</p>
+                </div>
+            </div>
+            {{/if}}
+        </div>
+        
+        <div class="footer">
+            <p>This report was automatically generated by PhoenixCoder CI/CD system.</p>
+            <p>
+                <a href="{{dashboard_url}}">View Dashboard</a> |
+                <a href="{{settings_url}}">Notification Settings</a> |
+                <a href="{{unsubscribe_url}}">Unsubscribe</a>
+            </p>
+            <p style="margin-top: 15px; font-size: 12px; color: #999;">
+                Generated at {{timestamp}} | Repository: {{repository}}
+            </p>
+        </div>
+    </div>
+</body>
+</html>

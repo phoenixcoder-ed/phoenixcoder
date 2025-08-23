@@ -1,0 +1,357 @@
+# 通知和报告配置文件
+# 用于配置各种通知渠道和报告设置
+
+# Slack 通知配置
+slack:
+  enabled: true
+  webhook_url_secret: SLACK_WEBHOOK_URL
+  channels:
+    general:
+      name: "#general"
+      events:
+        - workflow_completion
+        - deployment
+        - release
+    dev:
+      name: "#dev"
+      events:
+        - pull_request
+        - code_quality
+        - security_alerts
+    alerts:
+      name: "#alerts"
+      events:
+        - failure
+        - performance_regression
+        - security_vulnerability
+  message_format:
+    include_author: true
+    include_commit_info: true
+    include_environment: true
+    include_duration: true
+  notification_rules:
+    success:
+      - main_branch_only: true
+      - production_deployments: true
+    failure:
+      - all_branches: true
+      - immediate: true
+    performance_regression:
+      - threshold: 20  # 性能下降超过20%时通知
+      - immediate: true
+
+# Microsoft Teams 通知配置
+teams:
+  enabled: false
+  webhook_url_secret: TEAMS_WEBHOOK_URL
+  channels:
+    development:
+      name: "Development Team"
+      events:
+        - workflow_completion
+        - deployment
+    management:
+      name: "Management"
+      events:
+        - release
+        - daily_summary
+        - weekly_summary
+
+# 邮件通知配置
+email:
+  enabled: true
+  smtp:
+    host_secret: EMAIL_SMTP_HOST
+    port_secret: EMAIL_SMTP_PORT
+    username_secret: EMAIL_USERNAME
+    password_secret: EMAIL_PASSWORD
+    from_secret: EMAIL_FROM
+    use_tls: true
+  recipients:
+    developers:
+      addresses:
+        - dev-team@company.com
+      events:
+        - daily_summary
+        - security_alerts
+        - performance_reports
+    management:
+      addresses:
+        - management@company.com
+      events:
+        - weekly_summary
+        - release
+        - critical_failures
+    devops:
+      addresses:
+        - devops@company.com
+      events:
+        - deployment
+        - infrastructure_alerts
+        - performance_regression
+  templates:
+    daily_summary:
+      subject: "[PhoenixCoder] Daily CI/CD Summary - {date}"
+      include_charts: true
+      include_metrics: true
+    weekly_summary:
+      subject: "[PhoenixCoder] Weekly Report - {week}"
+      include_trends: true
+      include_recommendations: true
+    security_alert:
+      subject: "[SECURITY] PhoenixCoder Security Alert"
+      priority: high
+      immediate: true
+
+# GitHub 通知配置
+github:
+  enabled: true
+  pr_comments:
+    enabled: true
+    events:
+      - workflow_completion
+      - code_quality_results
+      - security_scan_results
+      - performance_test_results
+    auto_update: true
+    include_suggestions: true
+  issue_creation:
+    enabled: true
+    events:
+      - critical_security_vulnerability
+      - performance_regression
+      - test_failures
+    auto_assign: true
+    labels:
+      security: ["security", "high-priority"]
+      performance: ["performance", "investigation"]
+      failure: ["bug", "ci-failure"]
+
+# 状态徽章配置
+badges:
+  enabled: true
+  shields_io:
+    base_url: "https://img.shields.io/badge"
+    style: "flat-square"
+  update_frequency: "daily"
+  badges:
+    build_status:
+      label: "Build"
+      success_message: "Passing"
+      failure_message: "Failing"
+      success_color: "brightgreen"
+      failure_color: "red"
+    success_rate:
+      label: "Success Rate"
+      format: "{percentage}%"
+      colors:
+        excellent: "brightgreen"  # >= 95%
+        good: "green"            # >= 85%
+        warning: "yellow"        # >= 70%
+        critical: "red"          # < 70%
+    coverage:
+      label: "Coverage"
+      format: "{percentage}%"
+      source: "codecov"
+    security:
+      label: "Security"
+      success_message: "Passed"
+      failure_message: "Issues Found"
+    dependencies:
+      label: "Dependencies"
+      up_to_date_message: "Up to Date"
+      outdated_message: "Outdated"
+
+# 报告配置
+reports:
+  daily_summary:
+    enabled: true
+    schedule: "0 9 * * *"  # 每天上午9点
+    include:
+      - workflow_statistics
+      - success_rates
+      - failure_analysis
+      - performance_metrics
+      - security_status
+    format: ["slack", "email"]
+    retention_days: 30
+  
+  weekly_summary:
+    enabled: true
+    schedule: "0 9 * * 1"  # 每周一上午9点
+    include:
+      - trend_analysis
+      - performance_trends
+      - security_summary
+      - dependency_updates
+      - recommendations
+    format: ["email"]
+    retention_days: 90
+  
+  monthly_summary:
+    enabled: true
+    schedule: "0 9 1 * *"  # 每月1号上午9点
+    include:
+      - comprehensive_analysis
+      - cost_analysis
+      - capacity_planning
+      - strategic_recommendations
+    format: ["email"]
+    retention_days: 365
+
+# 性能监控通知
+performance:
+  thresholds:
+    response_time:
+      warning: 500   # ms
+      critical: 1000 # ms
+    throughput:
+      warning: -10   # % decrease
+      critical: -20  # % decrease
+    error_rate:
+      warning: 1     # %
+      critical: 5    # %
+    memory_usage:
+      warning: 80    # %
+      critical: 90   # %
+  notifications:
+    immediate:
+      - critical_threshold_exceeded
+      - service_down
+    daily:
+      - warning_threshold_exceeded
+      - performance_trends
+
+# 安全监控通知
+security:
+  vulnerability_scanning:
+    notify_on:
+      - critical_vulnerabilities
+      - high_vulnerabilities
+      - new_vulnerabilities
+    exclude:
+      - low_severity
+      - false_positives
+  dependency_scanning:
+    notify_on:
+      - outdated_dependencies
+      - security_advisories
+      - license_violations
+  code_scanning:
+    notify_on:
+      - security_hotspots
+      - code_smells
+      - duplicated_code
+
+# 部署通知
+deployment:
+  environments:
+    staging:
+      notify_on:
+        - deployment_start
+        - deployment_success
+        - deployment_failure
+        - rollback
+      channels: ["slack"]
+    production:
+      notify_on:
+        - deployment_start
+        - deployment_success
+        - deployment_failure
+        - rollback
+        - health_check_failure
+      channels: ["slack", "email", "teams"]
+      escalation:
+        - immediate: ["devops", "on-call"]
+        - after_5min: ["management"]
+        - after_15min: ["executives"]
+
+# 通知过滤和去重
+filtering:
+  rate_limiting:
+    enabled: true
+    max_notifications_per_hour: 10
+    max_notifications_per_day: 50
+  deduplication:
+    enabled: true
+    window_minutes: 30
+    similarity_threshold: 0.8
+  quiet_hours:
+    enabled: true
+    start: "22:00"
+    end: "08:00"
+    timezone: "UTC"
+    exceptions:
+      - critical_security_alerts
+      - production_outages
+
+# 自定义通知模板
+templates:
+  slack:
+    workflow_success: |
+      :white_check_mark: *Workflow Successful*
+      
+      *Workflow:* {workflow_name}
+      *Branch:* {branch}
+      *Environment:* {environment}
+      *Author:* {author}
+      *Duration:* {duration}
+      
+      <{workflow_url}|View Details>
+    
+    workflow_failure: |
+      :x: *Workflow Failed*
+      
+      *Workflow:* {workflow_name}
+      *Branch:* {branch}
+      *Environment:* {environment}
+      *Author:* {author}
+      *Error:* {error_message}
+      
+      <{workflow_url}|View Details> | <{logs_url}|View Logs>
+    
+    deployment_success: |
+      :rocket: *Deployment Successful*
+      
+      *Environment:* {environment}
+      *Version:* {version}
+      *Services:* {services}
+      *Duration:* {duration}
+      
+      <{deployment_url}|View Deployment>
+  
+  email:
+    subject_prefix: "[PhoenixCoder]"
+    footer: |
+      ---
+      This is an automated notification from PhoenixCoder CI/CD system.
+      To unsubscribe or modify notification preferences, please contact the DevOps team.
+
+# 集成配置
+integrations:
+  jira:
+    enabled: false
+    base_url: "https://company.atlassian.net"
+    username_secret: JIRA_USERNAME
+    token_secret: JIRA_API_TOKEN
+    project_key: "PHOENIX"
+    auto_create_issues:
+      - critical_failures
+      - security_vulnerabilities
+  
+  pagerduty:
+    enabled: false
+    integration_key_secret: PAGERDUTY_INTEGRATION_KEY
+    escalation_policy: "PhoenixCoder Escalation"
+    trigger_on:
+      - production_outages
+      - critical_security_alerts
+  
+  datadog:
+    enabled: false
+    api_key_secret: DATADOG_API_KEY
+    app_key_secret: DATADOG_APP_KEY
+    events:
+      - deployments
+      - releases
+      - performance_alerts

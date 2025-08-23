@@ -1,0 +1,146 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "{{#if success}}🚀 Deployment Successful{{else}}💥 Deployment Failed{{/if}}"
+      }
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Environment:*\n{{environment}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Status:*\n{{#if success}}🟢 Success{{else}}🔴 Failed{{/if}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Version:*\n`{{version}}`"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Strategy:*\n{{deployment_strategy}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Duration:*\n{{duration}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Deployed By:*\n{{deployed_by}}"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Services Deployed:*\n{{#each services}}• {{name}} ({{image}}:{{tag}})\n{{/each}}"
+      }
+    },
+    {{#if rollback}}
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "⚠️ *Rollback Information:*\n• Previous Version: `{{rollback.previous_version}}`\n• Rollback Reason: {{rollback.reason}}"
+      }
+    },
+    {{/if}}
+    {{#unless success}}
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Failure Details:*\n```{{error_message}}```"
+      }
+    },
+    {{/unless}}
+    {{#if health_checks}}
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Health Checks:*\n{{#each health_checks}}• {{name}}: {{#if passed}}✅ Passed{{else}}❌ Failed{{/if}} ({{response_time}}ms)\n{{/each}}"
+      }
+    },
+    {{/if}}
+    {{#if performance_metrics}}
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Performance Metrics:*\n• Response Time: {{performance_metrics.response_time}}ms\n• Throughput: {{performance_metrics.throughput}} req/s\n• Error Rate: {{performance_metrics.error_rate}}%\n• Memory Usage: {{performance_metrics.memory_usage}}%"
+      }
+    },
+    {{/if}}
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "View Deployment"
+          },
+          "url": "{{deployment_url}}",
+          "style": "{{#if success}}primary{{else}}danger{{/if}}"
+        },
+        {{#if environment_url}}
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Open {{environment}}"
+          },
+          "url": "{{environment_url}}"
+        },
+        {{/if}}
+        {{#unless success}}
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Trigger Rollback"
+          },
+          "url": "{{rollback_url}}",
+          "style": "danger"
+        },
+        {{/unless}}
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "View Logs"
+          },
+          "url": "{{logs_url}}"
+        }
+      ]
+    },
+    {{#if environment_info}}
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": "Environment: {{environment_info.cluster}} | Namespace: {{environment_info.namespace}} | Replicas: {{environment_info.replicas}}"
+        }
+      ]
+    },
+    {{/if}}
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": "Deployed at {{timestamp}} | Repository: {{repository}}"
+        }
+      ]
+    }
+  ]
+}

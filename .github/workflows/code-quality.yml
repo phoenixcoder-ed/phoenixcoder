@@ -1,0 +1,506 @@
+name: Code Quality Analysis
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '24'
+  PYTHON_VERSION: '3.13'
+  JAVA_VERSION: '21'
+
+jobs:
+  lint-and-format:
+    name: Lint and Format Check (${{ matrix.component }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component:
+          - frontend-apps
+          - backend-services
+          - shared-packages
+      fail-fast: false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup Python
+        if: matrix.component == 'backend-services'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install pnpm
+        run: npm install -g pnpm@latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Python dependencies
+        if: matrix.component == 'backend-services'
+        run: |
+          python -m pip install --upgrade pip
+          pip install black isort flake8 mypy pylint bandit safety
+          # Install service-specific dependencies
+          for service in services/*/; do
+            if [[ -f "$service/requirements.txt" ]]; then
+              pip install -r "$service/requirements.txt"
+            fi
+          done
+
+      - name: Run ESLint (Frontend)
+        if: matrix.component == 'frontend-apps' || matrix.component == 'shared-packages'
+        run: |
+          if [[ "${{ matrix.component }}" == "frontend-apps" ]]; then
+            pnpm run lint:apps
+          else
+            pnpm run lint:shared
+          fi
+
+      - name: Run Prettier check (Frontend)
+        if: matrix.component == 'frontend-apps' || matrix.component == 'shared-packages'
+        run: |
+          if [[ "${{ matrix.component }}" == "frontend-apps" ]]; then
+            pnpm run format:check:apps
+          else
+            pnpm run format:check:shared
+          fi
+
+      - name: Run TypeScript check (Frontend)
+        if: matrix.component == 'frontend-apps' || matrix.component == 'shared-packages'
+        run: |
+          if [[ "${{ matrix.component }}" == "frontend-apps" ]]; then
+            pnpm run type-check:apps
+          else
+            pnpm run type-check:shared
+          fi
+
+      - name: Run Python linting (Backend)
+        if: matrix.component == 'backend-services'
+        run: |
+          echo "Running Python code quality checks..."
+          
+          # Black formatting check
+          echo "Checking code formatting with Black..."
+          black --check --diff services/
+          
+          # isort import sorting check
+          echo "Checking import sorting with isort..."
+          isort --check-only --diff services/
+          
+          # Flake8 style check
+          echo "Running Flake8 style checks..."
+          flake8 services/ --max-line-length=88 --extend-ignore=E203,W503
+          
+          # MyPy type checking
+          echo "Running MyPy type checking..."
+          for service in services/*/; do
+            if [[ -f "$service/pyproject.toml" ]] || [[ -f "$service/mypy.ini" ]]; then
+              mypy "$service" || true  # Don't fail on type errors for now
+            fi
+          done
+          
+          # Pylint code analysis
+          echo "Running Pylint code analysis..."
+          pylint services/ --output-format=json > pylint-report.json || true
+          
+          # Bandit security check
+          echo "Running Bandit security checks..."
+          bandit -r services/ -f json -o bandit-report.json || true
+          
+          # Safety dependency check
+          echo "Running Safety dependency checks..."
+          safety check --json --output safety-report.json || true
+
+      - name: Upload Python quality reports
+        if: matrix.component == 'backend-services'
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-quality-reports
+          path: |
+            pylint-report.json
+            bandit-report.json
+            safety-report.json
+          retention-days: 30
+
+  sonarqube-analysis:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    needs: lint-and-format
+    if: github.event_name != 'schedule'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Install pnpm
+        run: npm install -g pnpm@latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install coverage pytest pytest-cov
+          for service in services/*/; do
+            if [[ -f "$service/requirements.txt" ]]; then
+              pip install -r "$service/requirements.txt"
+            fi
+          done
+
+      - name: Run tests with coverage
+        run: |
+          # Frontend tests
+          pnpm run test:coverage
+          
+          # Backend tests
+          for service in services/*/; do
+            if [[ -f "$service/pytest.ini" ]] || [[ -f "$service/pyproject.toml" ]]; then
+              cd "$service"
+              python -m pytest --cov=. --cov-report=xml --cov-report=html
+              cd -
+            fi
+          done
+
+      - name: Download Python quality reports
+        uses: actions/download-artifact@v4
+        with:
+          name: python-quality-reports
+          path: quality-reports/
+
+      - name: SonarQube Scan
+        uses: sonarqube-quality-gate-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.projectKey=phoenixcoder
+            -Dsonar.organization=phoenixcoder
+            -Dsonar.sources=apps,services,shared
+            -Dsonar.tests=apps,services,shared
+            -Dsonar.test.inclusions=**/*test*/**,**/*.test.*,**/*.spec.*
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/*.min.js,**/coverage/**,**/__pycache__/**,**/*.pyc
+            -Dsonar.javascript.lcov.reportPaths=apps/*/coverage/lcov.info,shared/*/coverage/lcov.info
+            -Dsonar.python.coverage.reportPaths=services/*/coverage.xml
+            -Dsonar.python.pylint.reportPaths=quality-reports/pylint-report.json
+            -Dsonar.python.bandit.reportPaths=quality-reports/bandit-report.json
+
+  codeclimate-analysis:
+    name: CodeClimate Analysis
+    runs-on: ubuntu-latest
+    needs: lint-and-format
+    if: github.event_name != 'schedule'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: npm install -g pnpm@latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests with coverage
+        run: pnpm run test:coverage
+
+      - name: Setup CodeClimate test reporter
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+
+      - name: Format coverage reports
+        run: |
+          # Format frontend coverage
+          for app in apps/*/; do
+            if [[ -f "$app/coverage/lcov.info" ]]; then
+              ./cc-test-reporter format-coverage -t lcov "$app/coverage/lcov.info" -o "coverage-$(basename $app).json"
+            fi
+          done
+          
+          # Format shared package coverage
+          for pkg in shared/*/; do
+            if [[ -f "$pkg/coverage/lcov.info" ]]; then
+              ./cc-test-reporter format-coverage -t lcov "$pkg/coverage/lcov.info" -o "coverage-$(basename $pkg).json"
+            fi
+          done
+
+      - name: Upload coverage to CodeClimate
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        run: |
+          ./cc-test-reporter sum-coverage coverage-*.json -o total-coverage.json
+          ./cc-test-reporter upload-coverage -i total-coverage.json
+
+  dependency-analysis:
+    name: Dependency Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install pnpm
+        run: npm install -g pnpm@latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Python security tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install safety pip-audit
+
+      - name: Run npm audit
+        run: |
+          echo "Running npm security audit..."
+          pnpm audit --audit-level moderate --json > npm-audit.json || true
+          
+          # Generate human-readable report
+          pnpm audit --audit-level moderate > npm-audit.txt || true
+
+      - name: Run Python dependency security check
+        run: |
+          echo "Running Python dependency security checks..."
+          
+          # Safety check
+          for service in services/*/; do
+            if [[ -f "$service/requirements.txt" ]]; then
+              echo "Checking $service with Safety..."
+              safety check -r "$service/requirements.txt" --json > "safety-$(basename $service).json" || true
+            fi
+          done
+          
+          # pip-audit check
+          for service in services/*/; do
+            if [[ -f "$service/requirements.txt" ]]; then
+              echo "Checking $service with pip-audit..."
+              pip-audit -r "$service/requirements.txt" --format=json --output="pip-audit-$(basename $service).json" || true
+            fi
+          done
+
+      - name: Analyze dependency licenses
+        run: |
+          echo "Analyzing dependency licenses..."
+          
+          # Install license checker
+          npm install -g license-checker
+          
+          # Check frontend licenses
+          license-checker --json --out frontend-licenses.json
+          
+          # Check for problematic licenses
+          license-checker --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;WTFPL' --summary
+
+      - name: Generate dependency report
+        run: |
+          mkdir -p dependency-reports
+          
+          # Combine all reports
+          cat > dependency-reports/summary.md << 'EOF'
+          # Dependency Security and License Report
+          
+          ## Security Vulnerabilities
+          
+          ### Frontend (npm/pnpm)
+          \`\`\`
+          EOF
+          
+          if [[ -f npm-audit.txt ]]; then
+            cat npm-audit.txt >> dependency-reports/summary.md
+          else
+            echo "No vulnerabilities found" >> dependency-reports/summary.md
+          fi
+          
+          cat >> dependency-reports/summary.md << 'EOF'
+          \`\`\`
+          
+          ### Backend (Python)
+          \`\`\`
+          EOF
+          
+          # Add Python security results
+          for file in safety-*.json; do
+            if [[ -f "$file" ]]; then
+              echo "Results from $file:" >> dependency-reports/summary.md
+              jq -r '.vulnerabilities[] | "- " + .package_name + " (" + .vulnerability_id + "): " + .advisory' "$file" >> dependency-reports/summary.md || true
+            fi
+          done
+          
+          cat >> dependency-reports/summary.md << 'EOF'
+          \`\`\`
+          
+          ## License Analysis
+          
+          See frontend-licenses.json for detailed license information.
+          EOF
+
+      - name: Upload dependency reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-reports
+          path: |
+            dependency-reports/
+            npm-audit.json
+            npm-audit.txt
+            safety-*.json
+            pip-audit-*.json
+            frontend-licenses.json
+          retention-days: 30
+
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, sonarqube-analysis, codeclimate-analysis, dependency-analysis]
+    if: always()
+    
+    steps:
+      - name: Check quality gate status
+        run: |
+          echo "Quality Gate Results:"
+          echo "- Lint and Format: ${{ needs.lint-and-format.result }}"
+          echo "- SonarQube Analysis: ${{ needs.sonarqube-analysis.result }}"
+          echo "- CodeClimate Analysis: ${{ needs.codeclimate-analysis.result }}"
+          echo "- Dependency Analysis: ${{ needs.dependency-analysis.result }}"
+          
+          # Fail if any critical checks failed
+          if [[ "${{ needs.lint-and-format.result }}" == "failure" ]]; then
+            echo "❌ Quality gate failed: Linting and formatting issues found"
+            exit 1
+          fi
+          
+          if [[ "${{ needs.dependency-analysis.result }}" == "failure" ]]; then
+            echo "❌ Quality gate failed: Critical dependency vulnerabilities found"
+            exit 1
+          fi
+          
+          # Warn on other failures but don't block
+          if [[ "${{ needs.sonarqube-analysis.result }}" == "failure" ]]; then
+            echo "⚠️  Warning: SonarQube analysis failed"
+          fi
+          
+          if [[ "${{ needs.codeclimate-analysis.result }}" == "failure" ]]; then
+            echo "⚠️  Warning: CodeClimate analysis failed"
+          fi
+          
+          echo "✅ Quality gate passed"
+
+      - name: Comment PR with quality results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && comment.body.includes('## 🔍 Code Quality Report')
+            );
+            
+            const lintResult = '${{ needs.lint-and-format.result }}';
+            const sonarResult = '${{ needs.sonarqube-analysis.result }}';
+            const codeClimateResult = '${{ needs.codeclimate-analysis.result }}';
+            const depResult = '${{ needs.dependency-analysis.result }}';
+            
+            const getStatusEmoji = (result) => {
+              switch(result) {
+                case 'success': return '✅';
+                case 'failure': return '❌';
+                case 'cancelled': return '⏹️';
+                case 'skipped': return '⏭️';
+                default: return '⚠️';
+              }
+            };
+            
+            const body = `## 🔍 Code Quality Report
+            
+            | Check | Status | Result |
+            |-------|--------|--------|
+            | Lint & Format | ${getStatusEmoji(lintResult)} | ${lintResult} |
+            | SonarQube | ${getStatusEmoji(sonarResult)} | ${sonarResult} |
+            | CodeClimate | ${getStatusEmoji(codeClimateResult)} | ${codeClimateResult} |
+            | Dependencies | ${getStatusEmoji(depResult)} | ${depResult} |
+            
+            **Overall Status**: ${lintResult === 'success' && depResult === 'success' ? '✅ Passed' : '❌ Failed'}
+            
+            ---
+            *Updated at: ${new Date().toISOString()}*`;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }

@@ -1,0 +1,1324 @@
+name: Performance Monitoring
+
+on:
+  schedule:
+    # Run performance tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment for performance testing'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      test_duration:
+        description: 'Test duration in minutes'
+        required: true
+        default: '10'
+        type: string
+      load_pattern:
+        description: 'Load testing pattern'
+        required: true
+        default: 'baseline'
+        type: choice
+        options:
+          - baseline
+          - stress
+          - spike
+          - endurance
+      compare_with_baseline:
+        description: 'Compare results with baseline'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  NODE_VERSION: '24'
+  PYTHON_VERSION: '3.13'
+
+jobs:
+  setup-performance-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.config.outputs.environment }}
+      test_duration: ${{ steps.config.outputs.test_duration }}
+      load_pattern: ${{ steps.config.outputs.load_pattern }}
+      baseline_comparison: ${{ steps.config.outputs.baseline_comparison }}
+    
+    steps:
+      - name: Configure performance test parameters
+        id: config
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+            echo "test_duration=${{ github.event.inputs.test_duration }}" >> $GITHUB_OUTPUT
+            echo "load_pattern=${{ github.event.inputs.load_pattern }}" >> $GITHUB_OUTPUT
+            echo "baseline_comparison=${{ github.event.inputs.compare_with_baseline }}" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "test_duration=10" >> $GITHUB_OUTPUT
+            echo "load_pattern=baseline" >> $GITHUB_OUTPUT
+            echo "baseline_comparison=true" >> $GITHUB_OUTPUT
+          fi
+
+  backend-performance-tests:
+    needs: setup-performance-environment
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [community-server, enterprise-server, auth-service, notification-service]
+      fail-fast: false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install performance testing tools
+        run: |
+          # Node.js performance tools
+          npm install -g autocannon clinic artillery
+          
+          # Python performance tools
+          pip install locust py-spy memory-profiler psutil requests
+
+      - name: Load service configuration
+        id: service-config
+        run: |
+          SERVICE="${{ matrix.service }}"
+          ENV="${{ needs.setup-performance-environment.outputs.environment }}"
+          
+          # Set service URLs based on environment
+          case "$ENV" in
+            "staging")
+              case "$SERVICE" in
+                "community-server")
+                  echo "service_url=https://staging-api-community.phoenixcoder.dev" >> $GITHUB_OUTPUT
+                  echo "service_port=3000" >> $GITHUB_OUTPUT
+                  ;;
+                "enterprise-server")
+                  echo "service_url=https://staging-api-enterprise.phoenixcoder.dev" >> $GITHUB_OUTPUT
+                  echo "service_port=3001" >> $GITHUB_OUTPUT
+                  ;;
+                "auth-service")
+                  echo "service_url=https://staging-auth.phoenixcoder.dev" >> $GITHUB_OUTPUT
+                  echo "service_port=3002" >> $GITHUB_OUTPUT
+                  ;;
+                "notification-service")
+                  echo "service_url=https://staging-notifications.phoenixcoder.dev" >> $GITHUB_OUTPUT
+                  echo "service_port=3003" >> $GITHUB_OUTPUT
+                  ;;
+              esac
+              ;;
+            "production")
+              case "$SERVICE" in
+                "community-server")
+                  echo "service_url=https://api.phoenixcoder.com" >> $GITHUB_OUTPUT
+                  echo "service_port=3000" >> $GITHUB_OUTPUT
+                  ;;
+                "enterprise-server")
+                  echo "service_url=https://enterprise-api.phoenixcoder.com" >> $GITHUB_OUTPUT
+                  echo "service_port=3001" >> $GITHUB_OUTPUT
+                  ;;
+                "auth-service")
+                  echo "service_url=https://auth.phoenixcoder.com" >> $GITHUB_OUTPUT
+                  echo "service_port=3002" >> $GITHUB_OUTPUT
+                  ;;
+                "notification-service")
+                  echo "service_url=https://notifications.phoenixcoder.com" >> $GITHUB_OUTPUT
+                  echo "service_port=3003" >> $GITHUB_OUTPUT
+                  ;;
+              esac
+              ;;
+          esac
+
+      - name: Create performance test script
+        run: |
+          cat > performance-test-${{ matrix.service }}.py << 'EOF'
+          import time
+          import json
+          import statistics
+          import requests
+          import psutil
+          import sys
+          from datetime import datetime
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+          
+          class PerformanceTester:
+              def __init__(self, base_url, service_name, test_duration, load_pattern):
+                  self.base_url = base_url
+                  self.service_name = service_name
+                  self.test_duration = int(test_duration) * 60  # Convert to seconds
+                  self.load_pattern = load_pattern
+                  self.results = {
+                      'service': service_name,
+                      'test_duration': test_duration,
+                      'load_pattern': load_pattern,
+                      'timestamp': datetime.utcnow().isoformat(),
+                      'metrics': {}
+                  }
+          
+              def get_load_config(self):
+                  configs = {
+                      'baseline': {'concurrent_users': 10, 'requests_per_user': 100},
+                      'stress': {'concurrent_users': 50, 'requests_per_user': 200},
+                      'spike': {'concurrent_users': 100, 'requests_per_user': 50},
+                      'endurance': {'concurrent_users': 20, 'requests_per_user': 500}
+                  }
+                  return configs.get(self.load_pattern, configs['baseline'])
+          
+              def make_request(self, endpoint='/health'):
+                  start_time = time.time()
+                  try:
+                      response = requests.get(f"{self.base_url}{endpoint}", timeout=30)
+                      end_time = time.time()
+                      return {
+                          'status_code': response.status_code,
+                          'response_time': (end_time - start_time) * 1000,  # ms
+                          'success': response.status_code == 200,
+                          'timestamp': start_time
+                      }
+                  except Exception as e:
+                      end_time = time.time()
+                      return {
+                          'status_code': 0,
+                          'response_time': (end_time - start_time) * 1000,
+                          'success': False,
+                          'error': str(e),
+                          'timestamp': start_time
+                      }
+          
+              def run_load_test(self):
+                  config = self.get_load_config()
+                  concurrent_users = config['concurrent_users']
+                  requests_per_user = config['requests_per_user']
+                  
+                  print(f"Starting load test for {self.service_name}")
+                  print(f"Configuration: {concurrent_users} users, {requests_per_user} requests each")
+                  
+                  all_results = []
+                  start_time = time.time()
+                  
+                  def user_session(user_id):
+                      session_results = []
+                      for i in range(requests_per_user):
+                          if time.time() - start_time > self.test_duration:
+                              break
+                          result = self.make_request()
+                          session_results.append(result)
+                          time.sleep(0.1)  # Small delay between requests
+                      return session_results
+                  
+                  with ThreadPoolExecutor(max_workers=concurrent_users) as executor:
+                      futures = [executor.submit(user_session, i) for i in range(concurrent_users)]
+                      
+                      for future in as_completed(futures):
+                          try:
+                              results = future.result()
+                              all_results.extend(results)
+                          except Exception as e:
+                              print(f"Error in user session: {e}")
+                  
+                  return all_results
+          
+              def analyze_results(self, results):
+                  if not results:
+                      return {'error': 'No results to analyze'}
+                  
+                  successful_requests = [r for r in results if r['success']]
+                  failed_requests = [r for r in results if not r['success']]
+                  
+                  response_times = [r['response_time'] for r in successful_requests]
+                  
+                  if not response_times:
+                      return {'error': 'No successful requests'}
+                  
+                  total_requests = len(results)
+                  success_rate = len(successful_requests) / total_requests * 100
+                  
+                  # Calculate percentiles
+                  response_times.sort()
+                  p50 = statistics.median(response_times)
+                  p95 = response_times[int(0.95 * len(response_times))] if len(response_times) > 1 else response_times[0]
+                  p99 = response_times[int(0.99 * len(response_times))] if len(response_times) > 1 else response_times[0]
+                  
+                  # Calculate throughput
+                  test_duration_actual = max(r['timestamp'] for r in results) - min(r['timestamp'] for r in results)
+                  throughput = len(successful_requests) / test_duration_actual if test_duration_actual > 0 else 0
+                  
+                  return {
+                      'total_requests': total_requests,
+                      'successful_requests': len(successful_requests),
+                      'failed_requests': len(failed_requests),
+                      'success_rate': round(success_rate, 2),
+                      'response_time': {
+                          'mean': round(statistics.mean(response_times), 2),
+                          'median': round(p50, 2),
+                          'p95': round(p95, 2),
+                          'p99': round(p99, 2),
+                          'min': round(min(response_times), 2),
+                          'max': round(max(response_times), 2)
+                      },
+                      'throughput': round(throughput, 2),
+                      'test_duration': round(test_duration_actual, 2)
+                  }
+          
+              def get_system_metrics(self):
+                  return {
+                      'cpu_percent': psutil.cpu_percent(interval=1),
+                      'memory_percent': psutil.virtual_memory().percent,
+                      'disk_usage': psutil.disk_usage('/').percent
+                  }
+          
+              def run_test(self):
+                  print(f"Starting performance test for {self.service_name}")
+                  
+                  # Get initial system metrics
+                  initial_metrics = self.get_system_metrics()
+                  
+                  # Run load test
+                  results = self.run_load_test()
+                  
+                  # Get final system metrics
+                  final_metrics = self.get_system_metrics()
+                  
+                  # Analyze results
+                  analysis = self.analyze_results(results)
+                  
+                  self.results['metrics'] = analysis
+                  self.results['system_metrics'] = {
+                      'initial': initial_metrics,
+                      'final': final_metrics
+                  }
+                  
+                  return self.results
+          
+          if __name__ == "__main__":
+              if len(sys.argv) != 5:
+                  print("Usage: python script.py <base_url> <service_name> <test_duration> <load_pattern>")
+                  sys.exit(1)
+              
+              base_url = sys.argv[1]
+              service_name = sys.argv[2]
+              test_duration = sys.argv[3]
+              load_pattern = sys.argv[4]
+              
+              tester = PerformanceTester(base_url, service_name, test_duration, load_pattern)
+              results = tester.run_test()
+              
+              # Save results to file
+              with open(f'performance-results-{service_name}.json', 'w') as f:
+                  json.dump(results, f, indent=2)
+              
+              print(f"Performance test completed for {service_name}")
+              print(f"Results saved to performance-results-{service_name}.json")
+          EOF
+
+      - name: Run performance tests
+        run: |
+          SERVICE="${{ matrix.service }}"
+          SERVICE_URL="${{ steps.service-config.outputs.service_url }}"
+          TEST_DURATION="${{ needs.setup-performance-environment.outputs.test_duration }}"
+          LOAD_PATTERN="${{ needs.setup-performance-environment.outputs.load_pattern }}"
+          
+          echo "Running performance test for $SERVICE"
+          echo "URL: $SERVICE_URL"
+          echo "Duration: $TEST_DURATION minutes"
+          echo "Load pattern: $LOAD_PATTERN"
+          
+          # Run the performance test
+          python performance-test-$SERVICE.py "$SERVICE_URL" "$SERVICE" "$TEST_DURATION" "$LOAD_PATTERN"
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results-${{ matrix.service }}
+          path: performance-results-${{ matrix.service }}.json
+          retention-days: 30
+
+  frontend-performance-tests:
+    needs: setup-performance-environment
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [community-admin, community-mobile, enterprise-admin]
+      fail-fast: false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Lighthouse CI
+        run: |
+          npm install -g @lhci/cli puppeteer
+
+      - name: Load app configuration
+        id: app-config
+        run: |
+          APP="${{ matrix.app }}"
+          ENV="${{ needs.setup-performance-environment.outputs.environment }}"
+          
+          # Set app URLs based on environment
+          case "$ENV" in
+            "staging")
+              case "$APP" in
+                "community-admin")
+                  echo "app_url=https://staging-admin.phoenixcoder.dev" >> $GITHUB_OUTPUT
+                  ;;
+                "community-mobile")
+                  echo "app_url=https://staging-mobile.phoenixcoder.dev" >> $GITHUB_OUTPUT
+                  ;;
+                "enterprise-admin")
+                  echo "app_url=https://staging-enterprise.phoenixcoder.dev" >> $GITHUB_OUTPUT
+                  ;;
+              esac
+              ;;
+            "production")
+              case "$APP" in
+                "community-admin")
+                  echo "app_url=https://admin.phoenixcoder.com" >> $GITHUB_OUTPUT
+                  ;;
+                "community-mobile")
+                  echo "app_url=https://mobile.phoenixcoder.com" >> $GITHUB_OUTPUT
+                  ;;
+                "enterprise-admin")
+                  echo "app_url=https://enterprise.phoenixcoder.com" >> $GITHUB_OUTPUT
+                  ;;
+              esac
+              ;;
+          esac
+
+      - name: Create Lighthouse CI configuration
+        run: |
+          cat > lighthouserc.json << EOF
+          {
+            "ci": {
+              "collect": {
+                "url": ["${{ steps.app-config.outputs.app_url }}"],
+                "numberOfRuns": 3,
+                "settings": {
+                  "chromeFlags": "--no-sandbox --disable-dev-shm-usage",
+                  "preset": "desktop",
+                  "throttling": {
+                    "rttMs": 40,
+                    "throughputKbps": 10240,
+                    "cpuSlowdownMultiplier": 1
+                  }
+                }
+              },
+              "assert": {
+                "assertions": {
+                  "categories:performance": ["error", {"minScore": 0.8}],
+                  "categories:accessibility": ["error", {"minScore": 0.9}],
+                  "categories:best-practices": ["error", {"minScore": 0.8}],
+                  "categories:seo": ["error", {"minScore": 0.8}]
+                }
+              },
+              "upload": {
+                "target": "filesystem",
+                "outputDir": "./lighthouse-results"
+              }
+            }
+          }
+          EOF
+
+      - name: Run Lighthouse CI
+        run: |
+          APP="${{ matrix.app }}"
+          APP_URL="${{ steps.app-config.outputs.app_url }}"
+          
+          echo "Running Lighthouse performance test for $APP"
+          echo "URL: $APP_URL"
+          
+          # Run Lighthouse CI
+          lhci autorun
+          
+          # Extract key metrics and create summary
+          cat > extract-lighthouse-metrics.js << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
+          
+          const resultsDir = './lighthouse-results';
+          const files = fs.readdirSync(resultsDir).filter(f => f.endsWith('.json'));
+          
+          if (files.length === 0) {
+            console.error('No Lighthouse results found');
+            process.exit(1);
+          }
+          
+          const results = files.map(file => {
+            const content = fs.readFileSync(path.join(resultsDir, file), 'utf8');
+            return JSON.parse(content);
+          });
+          
+          // Calculate averages
+          const avgMetrics = {
+            performance: 0,
+            accessibility: 0,
+            bestPractices: 0,
+            seo: 0,
+            firstContentfulPaint: 0,
+            largestContentfulPaint: 0,
+            cumulativeLayoutShift: 0,
+            speedIndex: 0,
+            totalBlockingTime: 0
+          };
+          
+          results.forEach(result => {
+            avgMetrics.performance += result.categories.performance.score;
+            avgMetrics.accessibility += result.categories.accessibility.score;
+            avgMetrics.bestPractices += result.categories['best-practices'].score;
+            avgMetrics.seo += result.categories.seo.score;
+            
+            const audits = result.audits;
+            avgMetrics.firstContentfulPaint += audits['first-contentful-paint'].numericValue;
+            avgMetrics.largestContentfulPaint += audits['largest-contentful-paint'].numericValue;
+            avgMetrics.cumulativeLayoutShift += audits['cumulative-layout-shift'].numericValue;
+            avgMetrics.speedIndex += audits['speed-index'].numericValue;
+            avgMetrics.totalBlockingTime += audits['total-blocking-time'].numericValue;
+          });
+          
+          const count = results.length;
+          Object.keys(avgMetrics).forEach(key => {
+            avgMetrics[key] = Math.round((avgMetrics[key] / count) * 100) / 100;
+          });
+          
+          const summary = {
+            app: process.argv[2],
+            url: process.argv[3],
+            timestamp: new Date().toISOString(),
+            numberOfRuns: count,
+            metrics: {
+              lighthouse: {
+                performance: avgMetrics.performance,
+                accessibility: avgMetrics.accessibility,
+                bestPractices: avgMetrics.bestPractices,
+                seo: avgMetrics.seo
+              },
+              coreWebVitals: {
+                firstContentfulPaint: avgMetrics.firstContentfulPaint,
+                largestContentfulPaint: avgMetrics.largestContentfulPaint,
+                cumulativeLayoutShift: avgMetrics.cumulativeLayoutShift,
+                speedIndex: avgMetrics.speedIndex,
+                totalBlockingTime: avgMetrics.totalBlockingTime
+              }
+            }
+          };
+          
+          fs.writeFileSync(`frontend-performance-${process.argv[2]}.json`, JSON.stringify(summary, null, 2));
+          console.log(`Frontend performance results saved for ${process.argv[2]}`);
+          EOF
+          
+          node extract-lighthouse-metrics.js "$APP" "$APP_URL"
+
+      - name: Upload frontend performance results
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-performance-${{ matrix.app }}
+          path: frontend-performance-${{ matrix.app }}.json
+          retention-days: 30
+
+      - name: Upload Lighthouse reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports-${{ matrix.app }}
+          path: lighthouse-results/
+          retention-days: 30
+
+  e2e-performance-tests:
+    needs: setup-performance-environment
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install E2E testing tools
+        run: |
+          npm install -g playwright @playwright/test
+          npx playwright install chromium
+
+      - name: Create E2E performance test
+        run: |
+          mkdir -p e2e-performance
+          
+          cat > e2e-performance/performance-test.js << 'EOF'
+          const { test, expect } = require('@playwright/test');
+          const fs = require('fs');
+          
+          const baseUrl = process.env.BASE_URL || 'https://staging-admin.phoenixcoder.dev';
+          
+          test.describe('E2E Performance Tests', () => {
+            let performanceMetrics = {
+              timestamp: new Date().toISOString(),
+              baseUrl: baseUrl,
+              scenarios: []
+            };
+          
+            test.afterAll(async () => {
+              fs.writeFileSync('e2e-performance-results.json', JSON.stringify(performanceMetrics, null, 2));
+            });
+          
+            test('User Registration Flow', async ({ page }) => {
+              const startTime = Date.now();
+              
+              // Navigate to registration page
+              const navStart = Date.now();
+              await page.goto(`${baseUrl}/register`);
+              await page.waitForLoadState('networkidle');
+              const navEnd = Date.now();
+              
+              // Fill registration form
+              const formStart = Date.now();
+              await page.fill('[data-testid="email"]', 'test@example.com');
+              await page.fill('[data-testid="password"]', 'password123');
+              await page.fill('[data-testid="confirmPassword"]', 'password123');
+              const formEnd = Date.now();
+              
+              // Submit form
+              const submitStart = Date.now();
+              await page.click('[data-testid="submit"]');
+              await page.waitForURL('**/dashboard', { timeout: 30000 });
+              const submitEnd = Date.now();
+              
+              const totalTime = Date.now() - startTime;
+              
+              performanceMetrics.scenarios.push({
+                name: 'User Registration Flow',
+                totalTime: totalTime,
+                steps: {
+                  navigation: navEnd - navStart,
+                  formFilling: formEnd - formStart,
+                  submission: submitEnd - submitStart
+                }
+              });
+              
+              expect(totalTime).toBeLessThan(15000); // Should complete within 15 seconds
+            });
+          
+            test('Task Creation Flow', async ({ page }) => {
+              const startTime = Date.now();
+              
+              // Login first
+              await page.goto(`${baseUrl}/login`);
+              await page.fill('[data-testid="email"]', 'test@example.com');
+              await page.fill('[data-testid="password"]', 'password123');
+              await page.click('[data-testid="login"]');
+              await page.waitForURL('**/dashboard');
+              
+              // Navigate to task creation
+              const navStart = Date.now();
+              await page.click('[data-testid="create-task"]');
+              await page.waitForLoadState('networkidle');
+              const navEnd = Date.now();
+              
+              // Fill task form
+              const formStart = Date.now();
+              await page.fill('[data-testid="task-title"]', 'Test Task');
+              await page.fill('[data-testid="task-description"]', 'This is a test task description');
+              await page.selectOption('[data-testid="task-category"]', 'development');
+              await page.fill('[data-testid="task-budget"]', '1000');
+              const formEnd = Date.now();
+              
+              // Submit task
+              const submitStart = Date.now();
+              await page.click('[data-testid="create-task-submit"]');
+              await page.waitForSelector('[data-testid="task-created-success"]');
+              const submitEnd = Date.now();
+              
+              const totalTime = Date.now() - startTime;
+              
+              performanceMetrics.scenarios.push({
+                name: 'Task Creation Flow',
+                totalTime: totalTime,
+                steps: {
+                  navigation: navEnd - navStart,
+                  formFilling: formEnd - formStart,
+                  submission: submitEnd - submitStart
+                }
+              });
+              
+              expect(totalTime).toBeLessThan(20000); // Should complete within 20 seconds
+            });
+          
+            test('Task Search and Filter', async ({ page }) => {
+              const startTime = Date.now();
+              
+              // Navigate to task marketplace
+              const navStart = Date.now();
+              await page.goto(`${baseUrl}/tasks`);
+              await page.waitForLoadState('networkidle');
+              const navEnd = Date.now();
+              
+              // Perform search
+              const searchStart = Date.now();
+              await page.fill('[data-testid="search-input"]', 'development');
+              await page.press('[data-testid="search-input"]', 'Enter');
+              await page.waitForSelector('[data-testid="search-results"]');
+              const searchEnd = Date.now();
+              
+              // Apply filters
+              const filterStart = Date.now();
+              await page.click('[data-testid="filter-category"]');
+              await page.click('[data-testid="category-web-development"]');
+              await page.waitForSelector('[data-testid="filtered-results"]');
+              const filterEnd = Date.now();
+              
+              const totalTime = Date.now() - startTime;
+              
+              performanceMetrics.scenarios.push({
+                name: 'Task Search and Filter',
+                totalTime: totalTime,
+                steps: {
+                  navigation: navEnd - navStart,
+                  search: searchEnd - searchStart,
+                  filtering: filterEnd - filterStart
+                }
+              });
+              
+              expect(totalTime).toBeLessThan(10000); // Should complete within 10 seconds
+            });
+          
+            test('Payment Flow', async ({ page }) => {
+              const startTime = Date.now();
+              
+              // Navigate to a task and start payment flow
+              await page.goto(`${baseUrl}/tasks/1`);
+              await page.waitForLoadState('networkidle');
+              
+              // Click hire button
+              const hireStart = Date.now();
+              await page.click('[data-testid="hire-freelancer"]');
+              await page.waitForSelector('[data-testid="payment-form"]');
+              const hireEnd = Date.now();
+              
+              // Fill payment form
+              const paymentStart = Date.now();
+              await page.fill('[data-testid="card-number"]', '4242424242424242');
+              await page.fill('[data-testid="card-expiry"]', '12/25');
+              await page.fill('[data-testid="card-cvc"]', '123');
+              const paymentEnd = Date.now();
+              
+              // Submit payment (mock)
+              const submitStart = Date.now();
+              await page.click('[data-testid="submit-payment"]');
+              await page.waitForSelector('[data-testid="payment-success"]');
+              const submitEnd = Date.now();
+              
+              const totalTime = Date.now() - startTime;
+              
+              performanceMetrics.scenarios.push({
+                name: 'Payment Flow',
+                totalTime: totalTime,
+                steps: {
+                  hireAction: hireEnd - hireStart,
+                  paymentForm: paymentEnd - paymentStart,
+                  submission: submitEnd - submitStart
+                }
+              });
+              
+              expect(totalTime).toBeLessThan(25000); // Should complete within 25 seconds
+            });
+          });
+          EOF
+
+      - name: Run E2E performance tests
+        run: |
+          ENV="${{ needs.setup-performance-environment.outputs.environment }}"
+          
+          # Set base URL based on environment
+          case "$ENV" in
+            "staging")
+              export BASE_URL="https://staging-admin.phoenixcoder.dev"
+              ;;
+            "production")
+              export BASE_URL="https://admin.phoenixcoder.com"
+              ;;
+          esac
+          
+          echo "Running E2E performance tests against: $BASE_URL"
+          
+          cd e2e-performance
+          npx playwright test --reporter=json --output=test-results.json
+
+      - name: Upload E2E performance results
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-performance-results
+          path: e2e-performance/e2e-performance-results.json
+          retention-days: 30
+
+  analyze-performance-results:
+    needs: [setup-performance-environment, backend-performance-tests, frontend-performance-tests, e2e-performance-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Download all performance results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*performance*'
+          merge-multiple: true
+          path: performance-results/
+
+      - name: Download baseline performance data
+        run: |
+          # Copy baseline files from repository
+          cp .github/performance-baseline-backend.json performance-results/ || echo "Backend baseline not found"
+          cp .github/performance-baseline-frontend.json performance-results/ || echo "Frontend baseline not found"
+          cp .github/performance-baseline-e2e.json performance-results/ || echo "E2E baseline not found"
+
+      - name: Install analysis dependencies
+        run: |
+          pip install pandas matplotlib seaborn jinja2
+
+      - name: Create performance analysis script
+        run: |
+          cat > analyze-performance.py << 'EOF'
+          import json
+          import os
+          import pandas as pd
+          import matplotlib.pyplot as plt
+          import seaborn as sns
+          from datetime import datetime
+          import sys
+          
+          class PerformanceAnalyzer:
+              def __init__(self, results_dir, baseline_comparison=True):
+                  self.results_dir = results_dir
+                  self.baseline_comparison = baseline_comparison
+                  self.analysis_results = {
+                      'timestamp': datetime.utcnow().isoformat(),
+                      'summary': {},
+                      'regressions': [],
+                      'improvements': [],
+                      'recommendations': []
+                  }
+          
+              def load_results(self):
+                  results = {
+                      'backend': {},
+                      'frontend': {},
+                      'e2e': {},
+                      'baselines': {}
+                  }
+                  
+                  for filename in os.listdir(self.results_dir):
+                      if not filename.endswith('.json'):
+                          continue
+                      
+                      filepath = os.path.join(self.results_dir, filename)
+                      try:
+                          with open(filepath, 'r') as f:
+                              data = json.load(f)
+                          
+                          if 'performance-results-' in filename:
+                              service = filename.replace('performance-results-', '').replace('.json', '')
+                              results['backend'][service] = data
+                          elif 'frontend-performance-' in filename:
+                              app = filename.replace('frontend-performance-', '').replace('.json', '')
+                              results['frontend'][app] = data
+                          elif 'e2e-performance-results' in filename:
+                              results['e2e'] = data
+                          elif 'baseline' in filename:
+                              if 'backend' in filename:
+                                  results['baselines']['backend'] = data
+                              elif 'frontend' in filename:
+                                  results['baselines']['frontend'] = data
+                              elif 'e2e' in filename:
+                                  results['baselines']['e2e'] = data
+                      except Exception as e:
+                          print(f"Error loading {filename}: {e}")
+                  
+                  return results
+          
+              def compare_with_baseline(self, current, baseline, component_type, component_name):
+                  regressions = []
+                  improvements = []
+                  
+                  if component_type == 'backend':
+                      if 'metrics' in current and 'response_time' in current['metrics']:
+                          current_p95 = current['metrics']['response_time']['p95']
+                          baseline_p95 = baseline.get('response_time_p95', 0)
+                          
+                          if baseline_p95 > 0:
+                              change_percent = ((current_p95 - baseline_p95) / baseline_p95) * 100
+                              if change_percent > 20:  # 20% regression threshold
+                                  regressions.append({
+                                      'component': component_name,
+                                      'metric': 'Response Time P95',
+                                      'current': current_p95,
+                                      'baseline': baseline_p95,
+                                      'change_percent': round(change_percent, 2)
+                                  })
+                              elif change_percent < -10:  # 10% improvement threshold
+                                  improvements.append({
+                                      'component': component_name,
+                                      'metric': 'Response Time P95',
+                                      'current': current_p95,
+                                      'baseline': baseline_p95,
+                                      'change_percent': round(change_percent, 2)
+                                  })
+                  
+                  elif component_type == 'frontend':
+                      if 'metrics' in current and 'lighthouse' in current['metrics']:
+                          current_perf = current['metrics']['lighthouse']['performance']
+                          baseline_perf = baseline.get('lighthouse_performance', 0)
+                          
+                          if baseline_perf > 0:
+                              change_percent = ((current_perf - baseline_perf) / baseline_perf) * 100
+                              if change_percent < -10:  # 10% performance score drop
+                                  regressions.append({
+                                      'component': component_name,
+                                      'metric': 'Lighthouse Performance',
+                                      'current': current_perf,
+                                      'baseline': baseline_perf,
+                                      'change_percent': round(change_percent, 2)
+                                  })
+                              elif change_percent > 5:  # 5% performance improvement
+                                  improvements.append({
+                                      'component': component_name,
+                                      'metric': 'Lighthouse Performance',
+                                      'current': current_perf,
+                                      'baseline': baseline_perf,
+                                      'change_percent': round(change_percent, 2)
+                                  })
+                  
+                  return regressions, improvements
+          
+              def generate_recommendations(self, results):
+                  recommendations = []
+                  
+                  # Backend recommendations
+                  for service, data in results['backend'].items():
+                      if 'metrics' in data:
+                          metrics = data['metrics']
+                          if 'response_time' in metrics:
+                              p95 = metrics['response_time']['p95']
+                              if p95 > 2000:  # > 2 seconds
+                                  recommendations.append(f"🔴 {service}: P95 response time ({p95}ms) exceeds 2s threshold. Consider optimizing database queries and adding caching.")
+                              elif p95 > 1000:  # > 1 second
+                                  recommendations.append(f"🟡 {service}: P95 response time ({p95}ms) is above 1s. Monitor for potential optimization opportunities.")
+                          
+                          if 'success_rate' in metrics and metrics['success_rate'] < 99:
+                              recommendations.append(f"🔴 {service}: Success rate ({metrics['success_rate']}%) is below 99%. Investigate error causes.")
+                  
+                  # Frontend recommendations
+                  for app, data in results['frontend'].items():
+                      if 'metrics' in data and 'lighthouse' in data['metrics']:
+                          lighthouse = data['metrics']['lighthouse']
+                          if lighthouse['performance'] < 0.8:
+                              recommendations.append(f"🔴 {app}: Lighthouse performance score ({lighthouse['performance']}) is below 0.8. Optimize bundle size and loading performance.")
+                          if lighthouse['accessibility'] < 0.9:
+                              recommendations.append(f"🟡 {app}: Accessibility score ({lighthouse['accessibility']}) could be improved.")
+                  
+                  return recommendations
+          
+              def create_summary_report(self, results):
+                  summary = {
+                      'backend_services': len(results['backend']),
+                      'frontend_apps': len(results['frontend']),
+                      'e2e_scenarios': len(results['e2e'].get('scenarios', [])) if results['e2e'] else 0,
+                      'total_regressions': len(self.analysis_results['regressions']),
+                      'total_improvements': len(self.analysis_results['improvements'])
+                  }
+                  
+                  # Calculate average metrics
+                  backend_p95_times = []
+                  frontend_perf_scores = []
+                  
+                  for service, data in results['backend'].items():
+                      if 'metrics' in data and 'response_time' in data['metrics']:
+                          backend_p95_times.append(data['metrics']['response_time']['p95'])
+                  
+                  for app, data in results['frontend'].items():
+                      if 'metrics' in data and 'lighthouse' in data['metrics']:
+                          frontend_perf_scores.append(data['metrics']['lighthouse']['performance'])
+                  
+                  if backend_p95_times:
+                      summary['avg_backend_p95'] = round(sum(backend_p95_times) / len(backend_p95_times), 2)
+                  
+                  if frontend_perf_scores:
+                      summary['avg_frontend_performance'] = round(sum(frontend_perf_scores) / len(frontend_perf_scores), 2)
+                  
+                  return summary
+          
+              def analyze(self):
+                  print("Loading performance results...")
+                  results = self.load_results()
+                  
+                  if self.baseline_comparison:
+                      print("Comparing with baselines...")
+                      
+                      # Compare backend services
+                      if 'backend' in results['baselines']:
+                          for service, current_data in results['backend'].items():
+                              if service in results['baselines']['backend']:
+                                  baseline_data = results['baselines']['backend'][service]
+                                  regressions, improvements = self.compare_with_baseline(
+                                      current_data, baseline_data, 'backend', service
+                                  )
+                                  self.analysis_results['regressions'].extend(regressions)
+                                  self.analysis_results['improvements'].extend(improvements)
+                      
+                      # Compare frontend apps
+                      if 'frontend' in results['baselines']:
+                          for app, current_data in results['frontend'].items():
+                              if app in results['baselines']['frontend']:
+                                  baseline_data = results['baselines']['frontend'][app]
+                                  regressions, improvements = self.compare_with_baseline(
+                                      current_data, baseline_data, 'frontend', app
+                                  )
+                                  self.analysis_results['regressions'].extend(regressions)
+                                  self.analysis_results['improvements'].extend(improvements)
+                  
+                  # Generate recommendations
+                  self.analysis_results['recommendations'] = self.generate_recommendations(results)
+                  
+                  # Create summary
+                  self.analysis_results['summary'] = self.create_summary_report(results)
+                  
+                  return self.analysis_results
+          
+              def save_results(self, output_file='performance-analysis.json'):
+                  with open(output_file, 'w') as f:
+                      json.dump(self.analysis_results, f, indent=2)
+                  print(f"Analysis results saved to {output_file}")
+          
+          if __name__ == "__main__":
+              results_dir = sys.argv[1] if len(sys.argv) > 1 else 'performance-results'
+              baseline_comparison = sys.argv[2].lower() == 'true' if len(sys.argv) > 2 else True
+              
+              analyzer = PerformanceAnalyzer(results_dir, baseline_comparison)
+              results = analyzer.analyze()
+              analyzer.save_results()
+              
+              # Print summary
+              print("\n=== Performance Analysis Summary ===")
+              print(f"Backend Services: {results['summary'].get('backend_services', 0)}")
+              print(f"Frontend Apps: {results['summary'].get('frontend_apps', 0)}")
+              print(f"E2E Scenarios: {results['summary'].get('e2e_scenarios', 0)}")
+              print(f"Regressions Found: {results['summary'].get('total_regressions', 0)}")
+              print(f"Improvements Found: {results['summary'].get('total_improvements', 0)}")
+              
+              if results['regressions']:
+                  print("\n🔴 Performance Regressions:")
+                  for regression in results['regressions']:
+                      print(f"  - {regression['component']}: {regression['metric']} changed by {regression['change_percent']}%")
+              
+              if results['improvements']:
+                  print("\n🟢 Performance Improvements:")
+                  for improvement in results['improvements']:
+                      print(f"  - {improvement['component']}: {improvement['metric']} improved by {abs(improvement['change_percent'])}%")
+              
+              if results['recommendations']:
+                  print("\n💡 Recommendations:")
+                  for rec in results['recommendations']:
+                      print(f"  {rec}")
+          EOF
+
+      - name: Run performance analysis
+        run: |
+          BASELINE_COMPARISON="${{ needs.setup-performance-environment.outputs.baseline_comparison }}"
+          
+          echo "Running performance analysis..."
+          echo "Baseline comparison: $BASELINE_COMPARISON"
+          
+          python analyze-performance.py performance-results/ "$BASELINE_COMPARISON"
+
+      - name: Create performance report
+        run: |
+          cat > create-performance-report.py << 'EOF'
+          import json
+          import os
+          from datetime import datetime
+          
+          def create_markdown_report(analysis_file):
+              with open(analysis_file, 'r') as f:
+                  analysis = json.load(f)
+              
+              report = []
+              report.append("# 🚀 Performance Monitoring Report")
+              report.append(f"**Generated:** {analysis['timestamp']}")
+              report.append("")
+              
+              # Summary
+              summary = analysis['summary']
+              report.append("## 📊 Summary")
+              report.append(f"- **Backend Services Tested:** {summary.get('backend_services', 0)}")
+              report.append(f"- **Frontend Apps Tested:** {summary.get('frontend_apps', 0)}")
+              report.append(f"- **E2E Scenarios Tested:** {summary.get('e2e_scenarios', 0)}")
+              report.append(f"- **Performance Regressions:** {summary.get('total_regressions', 0)}")
+              report.append(f"- **Performance Improvements:** {summary.get('total_improvements', 0)}")
+              
+              if 'avg_backend_p95' in summary:
+                  report.append(f"- **Average Backend P95:** {summary['avg_backend_p95']}ms")
+              if 'avg_frontend_performance' in summary:
+                  report.append(f"- **Average Frontend Performance:** {summary['avg_frontend_performance']}")
+              
+              report.append("")
+              
+              # Regressions
+              if analysis['regressions']:
+                  report.append("## 🔴 Performance Regressions")
+                  report.append("| Component | Metric | Current | Baseline | Change |")
+                  report.append("|-----------|--------|---------|----------|--------|")
+                  for reg in analysis['regressions']:
+                      report.append(f"| {reg['component']} | {reg['metric']} | {reg['current']} | {reg['baseline']} | {reg['change_percent']:+.1f}% |")
+                  report.append("")
+              
+              # Improvements
+              if analysis['improvements']:
+                  report.append("## 🟢 Performance Improvements")
+                  report.append("| Component | Metric | Current | Baseline | Change |")
+                  report.append("|-----------|--------|---------|----------|--------|")
+                  for imp in analysis['improvements']:
+                      report.append(f"| {imp['component']} | {imp['metric']} | {imp['current']} | {imp['baseline']} | {imp['change_percent']:+.1f}% |")
+                  report.append("")
+              
+              # Recommendations
+              if analysis['recommendations']:
+                  report.append("## 💡 Recommendations")
+                  for rec in analysis['recommendations']:
+                      report.append(f"- {rec}")
+                  report.append("")
+              
+              # Status
+              if analysis['regressions']:
+                  report.append("## ⚠️ Status: Performance Issues Detected")
+                  report.append("Please review the regressions above and take appropriate action.")
+              else:
+                  report.append("## ✅ Status: All Performance Metrics Within Acceptable Range")
+                  report.append("No significant performance regressions detected.")
+              
+              return "\n".join(report)
+          
+          if __name__ == "__main__":
+              report_content = create_markdown_report('performance-analysis.json')
+              
+              with open('performance-report.md', 'w') as f:
+                  f.write(report_content)
+              
+              print("Performance report created: performance-report.md")
+          EOF
+          
+          python create-performance-report.py
+
+      - name: Upload performance analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-analysis
+          path: |
+            performance-analysis.json
+            performance-report.md
+          retention-days: 90
+
+      - name: Comment performance report on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            try {
+              const reportContent = fs.readFileSync('performance-report.md', 'utf8');
+              
+              // Find existing performance comment
+              const comments = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+              
+              const existingComment = comments.data.find(comment => 
+                comment.body.includes('🚀 Performance Monitoring Report')
+              );
+              
+              const commentBody = `${reportContent}
+              
+              ---
+              *This report was automatically generated by the Performance Monitoring workflow.*`;
+              
+              if (existingComment) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existingComment.id,
+                  body: commentBody
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: commentBody
+                });
+              }
+            } catch (error) {
+              console.error('Error posting performance report:', error);
+            }
+
+  update-performance-baselines:
+    needs: [setup-performance-environment, analyze-performance-results]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download performance results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*performance*'
+          merge-multiple: true
+          path: performance-results/
+
+      - name: Update baseline files
+        run: |
+          echo "Updating performance baselines from main branch results..."
+          
+          # Update backend baselines
+          if ls performance-results/performance-results-*.json 1> /dev/null 2>&1; then
+            echo "Updating backend baselines..."
+            python3 << 'EOF'
+          import json
+          import glob
+          import os
+          
+          baseline = {}
+          
+          for file in glob.glob('performance-results/performance-results-*.json'):
+              service = os.path.basename(file).replace('performance-results-', '').replace('.json', '')
+              
+              with open(file, 'r') as f:
+                  data = json.load(f)
+              
+              if 'metrics' in data and 'response_time' in data['metrics']:
+                  baseline[service] = {
+                      'response_time_p95': data['metrics']['response_time']['p95'],
+                      'throughput': data['metrics'].get('throughput', 0),
+                      'memory_usage': data.get('system_metrics', {}).get('final', {}).get('memory_percent', 0),
+                      'cpu_usage': data.get('system_metrics', {}).get('final', {}).get('cpu_percent', 0)
+                  }
+          
+          if baseline:
+              with open('.github/performance-baseline-backend.json', 'w') as f:
+                  json.dump(baseline, f, indent=2)
+              print(f"Updated backend baseline with {len(baseline)} services")
+          EOF
+          fi
+          
+          # Update frontend baselines
+          if ls performance-results/frontend-performance-*.json 1> /dev/null 2>&1; then
+            echo "Updating frontend baselines..."
+            python3 << 'EOF'
+          import json
+          import glob
+          import os
+          
+          baseline = {}
+          
+          for file in glob.glob('performance-results/frontend-performance-*.json'):
+              app = os.path.basename(file).replace('frontend-performance-', '').replace('.json', '')
+              
+              with open(file, 'r') as f:
+                  data = json.load(f)
+              
+              if 'metrics' in data:
+                  lighthouse = data['metrics'].get('lighthouse', {})
+                  core_vitals = data['metrics'].get('coreWebVitals', {})
+                  
+                  baseline[app] = {
+                      'lighthouse_performance': lighthouse.get('performance', 0),
+                      'lighthouse_accessibility': lighthouse.get('accessibility', 0),
+                      'lighthouse_best_practices': lighthouse.get('bestPractices', 0),
+                      'lighthouse_seo': lighthouse.get('seo', 0),
+                      'first_contentful_paint': core_vitals.get('firstContentfulPaint', 0),
+                      'largest_contentful_paint': core_vitals.get('largestContentfulPaint', 0),
+                      'cumulative_layout_shift': core_vitals.get('cumulativeLayoutShift', 0)
+                  }
+          
+          if baseline:
+              with open('.github/performance-baseline-frontend.json', 'w') as f:
+                  json.dump(baseline, f, indent=2)
+              print(f"Updated frontend baseline with {len(baseline)} apps")
+          EOF
+          fi
+          
+          # Update E2E baselines
+          if [[ -f "performance-results/e2e-performance-results.json" ]]; then
+            echo "Updating E2E baselines..."
+            python3 << 'EOF'
+          import json
+          
+          with open('performance-results/e2e-performance-results.json', 'r') as f:
+              data = json.load(f)
+          
+          baseline = {}
+          
+          if 'scenarios' in data:
+              for scenario in data['scenarios']:
+                  scenario_name = scenario['name'].lower().replace(' ', '_')
+                  baseline[scenario_name] = {
+                      'total_time': scenario['totalTime'],
+                      'steps': scenario.get('steps', {})
+                  }
+          
+          if baseline:
+              with open('.github/performance-baseline-e2e.json', 'w') as f:
+                  json.dump(baseline, f, indent=2)
+              print(f"Updated E2E baseline with {len(baseline)} scenarios")
+          EOF
+          fi
+
+      - name: Commit updated baselines
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add .github/performance-baseline-*.json
+            git commit -m "chore: update performance baselines [skip ci]"
+            git push
+            echo "Performance baselines updated and committed"
+          fi

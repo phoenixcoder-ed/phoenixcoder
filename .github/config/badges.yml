@@ -1,0 +1,552 @@
+# PhoenixCoder 状态徽章配置
+# 定义项目状态徽章的样式、数据源和生成规则
+
+# 徽章基础配置
+badge_config:
+  # 徽章样式
+  style: "flat-square"  # flat, flat-square, plastic, for-the-badge, social
+  logo_width: 14
+  logo_height: 14
+  
+  # 颜色主题
+  colors:
+    success: "#28a745"
+    warning: "#ffc107"
+    error: "#dc3545"
+    info: "#17a2b8"
+    primary: "#007bff"
+    secondary: "#6c757d"
+    
+  # 自定义颜色
+  custom_colors:
+    excellent: "#00d4aa"
+    good: "#97ca00"
+    fair: "#dfb317"
+    poor: "#fe7d37"
+    critical: "#e05d44"
+    
+  # 徽章尺寸
+  dimensions:
+    height: 20
+    font_size: 11
+    padding: 4
+
+# 构建状态徽章
+build_badges:
+  # CI/CD 状态
+  ci_status:
+    label: "Build"
+    data_source: "github_actions"
+    workflow_name: "CI/CD Pipeline"
+    colors:
+      passing: "success"
+      failing: "error"
+      pending: "warning"
+    logo: "github-actions"
+    
+  # 测试覆盖率
+  test_coverage:
+    label: "Coverage"
+    data_source: "coverage_report"
+    file_path: "coverage/coverage-summary.json"
+    colors:
+      excellent: "#00d4aa"  # >= 90%
+      good: "#97ca00"      # >= 80%
+      fair: "#dfb317"      # >= 70%
+      poor: "#fe7d37"      # >= 60%
+      critical: "#e05d44"  # < 60%
+    thresholds:
+      excellent: 90
+      good: 80
+      fair: 70
+      poor: 60
+    format: "{value}%"
+    logo: "codecov"
+    
+  # 代码质量
+  code_quality:
+    label: "Quality"
+    data_source: "sonarqube"
+    project_key: "phoenixcoder"
+    colors:
+      A: "success"
+      B: "good"
+      C: "warning"
+      D: "poor"
+      E: "error"
+    logo: "sonarqube"
+    
+  # 安全扫描
+  security_scan:
+    label: "Security"
+    data_source: "security_report"
+    file_path: "security/security-report.json"
+    colors:
+      no_issues: "success"
+      low_risk: "good"
+      medium_risk: "warning"
+      high_risk: "error"
+      critical_risk: "critical"
+    logo: "shield"
+
+# 部署状态徽章
+deployment_badges:
+  # 生产环境状态
+  production_status:
+    label: "Production"
+    data_source: "deployment_status"
+    environment: "production"
+    colors:
+      deployed: "success"
+      deploying: "warning"
+      failed: "error"
+      rollback: "secondary"
+    logo: "vercel"
+    
+  # 预发布环境状态
+  staging_status:
+    label: "Staging"
+    data_source: "deployment_status"
+    environment: "staging"
+    colors:
+      deployed: "success"
+      deploying: "warning"
+      failed: "error"
+    logo: "vercel"
+    
+  # 正常运行时间
+  uptime:
+    label: "Uptime"
+    data_source: "uptime_monitor"
+    service_url: "https://api.phoenixcoder.com/health"
+    colors:
+      excellent: "success"  # >= 99.9%
+      good: "good"         # >= 99.5%
+      fair: "warning"      # >= 99.0%
+      poor: "error"        # < 99.0%
+    thresholds:
+      excellent: 99.9
+      good: 99.5
+      fair: 99.0
+    format: "{value}%"
+    logo: "uptimerobot"
+
+# 性能指标徽章
+performance_badges:
+  # 响应时间
+  response_time:
+    label: "Response Time"
+    data_source: "performance_report"
+    metric: "avg_response_time"
+    colors:
+      excellent: "success"  # < 200ms
+      good: "good"         # < 500ms
+      fair: "warning"      # < 1000ms
+      poor: "error"        # >= 1000ms
+    thresholds:
+      excellent: 200
+      good: 500
+      fair: 1000
+    format: "{value}ms"
+    logo: "speedtest"
+    
+  # 吞吐量
+  throughput:
+    label: "Throughput"
+    data_source: "performance_report"
+    metric: "requests_per_second"
+    colors:
+      excellent: "success"  # >= 1000 RPS
+      good: "good"         # >= 500 RPS
+      fair: "warning"      # >= 100 RPS
+      poor: "error"        # < 100 RPS
+    thresholds:
+      excellent: 1000
+      good: 500
+      fair: 100
+    format: "{value} RPS"
+    logo: "gauge"
+    
+  # Lighthouse 性能分数
+  lighthouse_performance:
+    label: "Lighthouse"
+    data_source: "lighthouse_report"
+    metric: "performance_score"
+    colors:
+      excellent: "success"  # >= 90
+      good: "good"         # >= 80
+      fair: "warning"      # >= 70
+      poor: "error"        # < 70
+    thresholds:
+      excellent: 90
+      good: 80
+      fair: 70
+    format: "{value}/100"
+    logo: "lighthouse"
+
+# 技术栈徽章
+technology_badges:
+  # Node.js 版本
+  nodejs_version:
+    label: "Node.js"
+    data_source: "package_json"
+    field: "engines.node"
+    color: "success"
+    logo: "node.js"
+    
+  # Python 版本
+  python_version:
+    label: "Python"
+    data_source: "pyproject_toml"
+    field: "tool.poetry.dependencies.python"
+    color: "success"
+    logo: "python"
+    
+  # TypeScript
+  typescript:
+    label: "TypeScript"
+    data_source: "static"
+    value: "5.x"
+    color: "primary"
+    logo: "typescript"
+    
+  # React
+  react:
+    label: "React"
+    data_source: "package_json"
+    field: "dependencies.react"
+    color: "info"
+    logo: "react"
+    
+  # Vue.js
+  vue:
+    label: "Vue.js"
+    data_source: "package_json"
+    field: "dependencies.vue"
+    color: "success"
+    logo: "vue.js"
+    
+  # FastAPI
+  fastapi:
+    label: "FastAPI"
+    data_source: "pyproject_toml"
+    field: "tool.poetry.dependencies.fastapi"
+    color: "good"
+    logo: "fastapi"
+    
+  # PostgreSQL
+  postgresql:
+    label: "PostgreSQL"
+    data_source: "static"
+    value: "16"
+    color: "primary"
+    logo: "postgresql"
+    
+  # Redis
+  redis:
+    label: "Redis"
+    data_source: "static"
+    value: "7.x"
+    color: "error"
+    logo: "redis"
+
+# 项目信息徽章
+project_badges:
+  # 版本号
+  version:
+    label: "Version"
+    data_source: "package_json"
+    field: "version"
+    color: "primary"
+    logo: "tag"
+    
+  # 许可证
+  license:
+    label: "License"
+    data_source: "package_json"
+    field: "license"
+    color: "secondary"
+    logo: "license"
+    
+  # 贡献者数量
+  contributors:
+    label: "Contributors"
+    data_source: "github_api"
+    endpoint: "/repos/{owner}/{repo}/contributors"
+    color: "info"
+    logo: "contributors"
+    
+  # 星标数
+  stars:
+    label: "Stars"
+    data_source: "github_api"
+    endpoint: "/repos/{owner}/{repo}"
+    field: "stargazers_count"
+    color: "warning"
+    logo: "star"
+    
+  # Fork 数
+  forks:
+    label: "Forks"
+    data_source: "github_api"
+    endpoint: "/repos/{owner}/{repo}"
+    field: "forks_count"
+    color: "secondary"
+    logo: "fork"
+    
+  # 问题数
+  issues:
+    label: "Issues"
+    data_source: "github_api"
+    endpoint: "/repos/{owner}/{repo}"
+    field: "open_issues_count"
+    colors:
+      low: "success"      # < 10
+      medium: "warning"   # < 50
+      high: "error"       # >= 50
+    thresholds:
+      low: 10
+      medium: 50
+    logo: "issue"
+    
+  # 最后提交时间
+  last_commit:
+    label: "Last Commit"
+    data_source: "github_api"
+    endpoint: "/repos/{owner}/{repo}/commits"
+    field: "commit.author.date"
+    color: "info"
+    format: "relative_time"  # "2 days ago"
+    logo: "commit"
+
+# 自定义徽章
+custom_badges:
+  # 代码行数
+  lines_of_code:
+    label: "Lines of Code"
+    data_source: "cloc_report"
+    file_path: "reports/cloc.json"
+    field: "SUM.code"
+    color: "secondary"
+    format: "{value:,}"
+    logo: "code"
+    
+  # 技术债务
+  tech_debt:
+    label: "Tech Debt"
+    data_source: "sonarqube"
+    metric: "sqale_index"
+    colors:
+      low: "success"      # < 1h
+      medium: "warning"   # < 8h
+      high: "error"       # >= 8h
+    thresholds:
+      low: 60          # 1 hour in minutes
+      medium: 480      # 8 hours in minutes
+    format: "duration"   # "2h 30m"
+    logo: "debt"
+    
+  # API 端点数量
+  api_endpoints:
+    label: "API Endpoints"
+    data_source: "openapi_spec"
+    file_path: "docs/openapi.json"
+    field: "paths"
+    color: "info"
+    logo: "api"
+    
+  # 数据库表数量
+  database_tables:
+    label: "DB Tables"
+    data_source: "database_schema"
+    query: "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public'"
+    color: "primary"
+    logo: "database"
+
+# 徽章生成规则
+generation_rules:
+  # 更新频率
+  update_frequency:
+    build_badges: "on_workflow_completion"  # 工作流完成时更新
+    deployment_badges: "on_deployment"      # 部署时更新
+    performance_badges: "daily"             # 每日更新
+    technology_badges: "on_dependency_change" # 依赖变更时更新
+    project_badges: "weekly"                # 每周更新
+    custom_badges: "daily"                  # 每日更新
+    
+  # 缓存策略
+  cache:
+    enabled: true
+    ttl: 3600  # 1 小时
+    
+  # 错误处理
+  error_handling:
+    fallback_color: "secondary"
+    fallback_value: "unknown"
+    retry_attempts: 3
+    retry_delay: 5  # 秒
+    
+  # 输出格式
+  output:
+    formats:
+      - "shields_io"    # Shields.io 格式
+      - "markdown"      # Markdown 格式
+      - "html"          # HTML 格式
+      - "json"          # JSON 数据
+    
+    # 文件路径
+    output_dir: "badges"
+    markdown_file: "README-badges.md"
+    json_file: "badges.json"
+    
+  # 徽章排序
+  display_order:
+    - "ci_status"
+    - "test_coverage"
+    - "code_quality"
+    - "security_scan"
+    - "production_status"
+    - "uptime"
+    - "response_time"
+    - "lighthouse_performance"
+    - "version"
+    - "license"
+    - "nodejs_version"
+    - "python_version"
+    - "typescript"
+    - "react"
+    - "fastapi"
+    - "postgresql"
+    - "contributors"
+    - "stars"
+    - "last_commit"
+
+# 数据源配置
+data_sources:
+  # GitHub API
+  github_api:
+    base_url: "https://api.github.com"
+    headers:
+      Accept: "application/vnd.github.v3+json"
+      User-Agent: "PhoenixCoder-Badge-Generator"
+    auth:
+      token: "${GITHUB_TOKEN}"
+      
+  # GitHub Actions
+  github_actions:
+    api_url: "https://api.github.com/repos/{owner}/{repo}/actions"
+    
+  # SonarQube
+  sonarqube:
+    base_url: "${SONARQUBE_URL}"
+    auth:
+      token: "${SONARQUBE_TOKEN}"
+      
+  # 覆盖率报告
+  coverage_report:
+    formats:
+      - "lcov"
+      - "json-summary"
+      - "cobertura"
+      
+  # 性能报告
+  performance_report:
+    file_patterns:
+      - "performance-results/*.json"
+      - "lighthouse-results/*.json"
+      
+  # 正常运行时间监控
+  uptime_monitor:
+    providers:
+      - "uptimerobot"
+      - "pingdom"
+      - "custom"
+      
+  # 包管理文件
+  package_json:
+    file_path: "package.json"
+    
+  pyproject_toml:
+    file_path: "pyproject.toml"
+    
+  # 静态数据
+  static:
+    # 预定义的静态值
+    values: {}
+
+# 通知配置
+notifications:
+  # 徽章状态变化通知
+  status_changes:
+    enabled: true
+    channels:
+      - "slack"
+      - "github_pr_comment"
+    
+    # 通知条件
+    conditions:
+      - "build_status_changed"
+      - "coverage_decreased"
+      - "quality_gate_failed"
+      - "security_issues_found"
+      - "deployment_failed"
+      
+  # 通知模板
+  templates:
+    slack:
+      build_failed: |
+        🚨 构建失败
+        项目: {project_name}
+        分支: {branch}
+        提交: {commit_sha}
+        查看详情: {workflow_url}
+        
+    github_pr_comment: |
+      ## 📊 状态徽章更新
+      
+      {badge_changes}
+      
+      查看完整报告: [性能报告]({report_url})
+
+# 国际化配置
+i18n:
+  default_language: "zh-CN"
+  
+  labels:
+    zh-CN:
+      build: "构建"
+      coverage: "覆盖率"
+      quality: "质量"
+      security: "安全"
+      production: "生产环境"
+      staging: "预发布"
+      uptime: "正常运行时间"
+      response_time: "响应时间"
+      throughput: "吞吐量"
+      lighthouse: "Lighthouse"
+      version: "版本"
+      license: "许可证"
+      contributors: "贡献者"
+      stars: "星标"
+      forks: "分支"
+      issues: "问题"
+      last_commit: "最后提交"
+      
+    en-US:
+      build: "Build"
+      coverage: "Coverage"
+      quality: "Quality"
+      security: "Security"
+      production: "Production"
+      staging: "Staging"
+      uptime: "Uptime"
+      response_time: "Response Time"
+      throughput: "Throughput"
+      lighthouse: "Lighthouse"
+      version: "Version"
+      license: "License"
+      contributors: "Contributors"
+      stars: "Stars"
+      forks: "Forks"
+      issues: "Issues"
+      last_commit: "Last Commit"

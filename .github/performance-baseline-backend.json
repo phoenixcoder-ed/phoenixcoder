@@ -1,0 +1,26 @@
+{
+  "community-server": {
+    "response_time_p95": 150,
+    "throughput": 1000,
+    "memory_usage": 512,
+    "cpu_usage": 30
+  },
+  "enterprise-server": {
+    "response_time_p95": 120,
+    "throughput": 1500,
+    "memory_usage": 768,
+    "cpu_usage": 25
+  },
+  "auth-service": {
+    "response_time_p95": 80,
+    "throughput": 2000,
+    "memory_usage": 256,
+    "cpu_usage": 20
+  },
+  "notification-service": {
+    "response_time_p95": 100,
+    "throughput": 800,
+    "memory_usage": 128,
+    "cpu_usage": 15
+  }
+}

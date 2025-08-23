@@ -1,0 +1,319 @@
+name: Update Status Badges
+
+# 触发条件
+on:
+  # 工作流完成时触发
+  workflow_run:
+    workflows:
+      - "CI/CD Pipeline"
+      - "Security Scan"
+      - "Performance Test"
+      - "Deploy to Production"
+      - "Deploy to Staging"
+    types:
+      - completed
+  
+  # 定时触发（每天凌晨2点）
+  schedule:
+    - cron: '0 2 * * *'
+  
+  # 手动触发
+  workflow_dispatch:
+    inputs:
+      badge_types:
+        description: '要更新的徽章类型（逗号分隔）'
+        required: false
+        default: 'all'
+        type: string
+      force_update:
+        description: '强制更新所有徽章'
+        required: false
+        default: false
+        type: boolean
+
+# 环境变量
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+  SONARQUBE_URL: ${{ secrets.SONARQUBE_URL }}
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  UPTIME_ROBOT_API_KEY: ${{ secrets.UPTIME_ROBOT_API_KEY }}
+
+# 权限设置
+permissions:
+  contents: write
+  actions: read
+  pull-requests: write
+  issues: write
+  checks: read
+  deployments: read
+
+jobs:
+  # 检测变更和准备数据
+  prepare-badge-update:
+    name: Prepare Badge Update
+    runs-on: ubuntu-latest
+    outputs:
+      should_update: ${{ steps.check-changes.outputs.should_update }}
+      badge_types: ${{ steps.determine-badges.outputs.badge_types }}
+      trigger_type: ${{ steps.context.outputs.trigger_type }}
+      workflow_status: ${{ steps.context.outputs.workflow_status }}
+      workflow_name: ${{ steps.context.outputs.workflow_name }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Determine trigger context
+        id: context
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            echo "trigger_type=workflow_completion" >> $GITHUB_OUTPUT
+            echo "workflow_status=${{ github.event.workflow_run.conclusion }}" >> $GITHUB_OUTPUT
+            echo "workflow_name=${{ github.event.workflow_run.name }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+            echo "trigger_type=scheduled" >> $GITHUB_OUTPUT
+            echo "workflow_status=success" >> $GITHUB_OUTPUT
+            echo "workflow_name=Scheduled Update" >> $GITHUB_OUTPUT
+          else
+            echo "trigger_type=manual" >> $GITHUB_OUTPUT
+            echo "workflow_status=success" >> $GITHUB_OUTPUT
+            echo "workflow_name=Manual Update" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check if badges need update
+        id: check-changes
+        run: |
+          should_update="false"
+          
+          # 强制更新
+          if [[ "${{ github.event.inputs.force_update }}" == "true" ]]; then
+            should_update="true"
+            echo "Force update requested"
+          fi
+          
+          # 工作流完成触发
+          if [[ "${{ steps.context.outputs.trigger_type }}" == "workflow_completion" ]]; then
+            should_update="true"
+            echo "Workflow completion detected: ${{ steps.context.outputs.workflow_name }}"
+          fi
+          
+          # 定时触发
+          if [[ "${{ steps.context.outputs.trigger_type }}" == "scheduled" ]]; then
+            should_update="true"
+            echo "Scheduled update"
+          fi
+          
+          # 检查是否有相关文件变更
+          if git diff --name-only HEAD~1 HEAD | grep -E '(package\.json|pyproject\.toml|coverage/|performance-results/|lighthouse-results/)'; then
+            should_update="true"
+            echo "Relevant files changed"
+          fi
+          
+          echo "should_update=$should_update" >> $GITHUB_OUTPUT
+      
+      - name: Determine badge types to update
+        id: determine-badges
+        run: |
+          badge_types="${{ github.event.inputs.badge_types }}"
+          
+          if [[ -z "$badge_types" || "$badge_types" == "all" ]]; then
+            # 根据触发类型确定要更新的徽章
+            case "${{ steps.context.outputs.trigger_type }}" in
+              "workflow_completion")
+                case "${{ steps.context.outputs.workflow_name }}" in
+                  "CI/CD Pipeline")
+                    badge_types="build_badges,project_badges"
+                    ;;
+                  "Security Scan")
+                    badge_types="build_badges"
+                    ;;
+                  "Performance Test")
+                    badge_types="performance_badges"
+                    ;;
+                  "Deploy to Production"|"Deploy to Staging")
+                    badge_types="deployment_badges"
+                    ;;
+                  *)
+                    badge_types="build_badges"
+                    ;;
+                esac
+                ;;
+              "scheduled")
+                badge_types="all"
+                ;;
+              "manual")
+                badge_types="all"
+                ;;
+            esac
+          fi
+          
+          echo "badge_types=$badge_types" >> $GITHUB_OUTPUT
+          echo "Will update badge types: $badge_types"
+
+  # 收集数据
+  collect-badge-data:
+    name: Collect Badge Data
+    runs-on: ubuntu-latest
+    needs: prepare-badge-update
+    if: needs.prepare-badge-update.outputs.should_update == 'true'
+    outputs:
+      coverage_data: ${{ steps.coverage.outputs.data }}
+      performance_data: ${{ steps.performance.outputs.data }}
+      security_data: ${{ steps.security.outputs.data }}
+      deployment_data: ${{ steps.deployment.outputs.data }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests pyyaml jinja2 python-dateutil
+      
+      - name: Collect coverage data
+        id: coverage
+        run: |
+          coverage_data="{}"
+          
+          # 检查覆盖率报告文件
+          if [[ -f "coverage/coverage-summary.json" ]]; then
+            coverage_data=$(cat coverage/coverage-summary.json)
+          elif [[ -f "coverage/lcov.info" ]]; then
+            # 从 lcov 文件解析覆盖率
+            if command -v lcov >/dev/null 2>&1; then
+              lcov --summary coverage/lcov.info 2>/dev/null | grep -E 'lines|functions|branches' || true
+            fi
+          fi
+          
+          echo "data<<EOF" >> $GITHUB_OUTPUT
+          echo "$coverage_data" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Collect performance data
+        id: performance
+        run: |
+          performance_data="{}"
+          
+          # 收集性能测试结果
+          if [[ -d "performance-results" ]]; then
+            latest_file=$(find performance-results -name "*.json" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -d' ' -f2-)
+            if [[ -n "$latest_file" && -f "$latest_file" ]]; then
+              performance_data=$(cat "$latest_file")
+            fi
+          fi
+          
+          # 收集 Lighthouse 结果
+          if [[ -d "lighthouse-results" ]]; then
+            latest_lighthouse=$(find lighthouse-results -name "*.json" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -d' ' -f2-)
+            if [[ -n "$latest_lighthouse" && -f "$latest_lighthouse" ]]; then
+              lighthouse_data=$(cat "$latest_lighthouse")
+              performance_data=$(echo "$performance_data" | jq --argjson lighthouse "$lighthouse_data" '. + {lighthouse: $lighthouse}' 2>/dev/null || echo "$performance_data")
+            fi
+          fi
+          
+          echo "data<<EOF" >> $GITHUB_OUTPUT
+          echo "$performance_data" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Collect security data
+        id: security
+        run: |
+          security_data="{}"
+          
+          # 检查安全扫描报告
+          if [[ -f "security/security-report.json" ]]; then
+            security_data=$(cat security/security-report.json)
+          elif [[ -f "security/snyk-report.json" ]]; then
+            security_data=$(cat security/snyk-report.json)
+          fi
+          
+          echo "data<<EOF" >> $GITHUB_OUTPUT
+          echo "$security_data" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Collect deployment data
+        id: deployment
+        run: |
+          deployment_data="{}"
+          
+          # 从 GitHub API 获取部署状态
+          if [[ -n "$GITHUB_TOKEN" ]]; then
+            deployments=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              "https://api.github.com/repos/${{ github.repository }}/deployments?per_page=10" || echo "[]")
+            
+            deployment_data=$(echo "$deployments" | jq '{
+              production: (map(select(.environment == "production")) | first),
+              staging: (map(select(.environment == "staging")) | first)
+            }' 2>/dev/null || echo "{}")
+          fi
+          
+          echo "data<<EOF" >> $GITHUB_OUTPUT
+          echo "$deployment_data" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  # 生成徽章
+  generate-badges:
+    name: Generate Status Badges
+    runs-on: ubuntu-latest
+    needs: [prepare-badge-update, collect-badge-data]
+    if: needs.prepare-badge-update.outputs.should_update == 'true'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests pyyaml jinja2 python-dateutil pillow
+      
+      - name: Generate badges
+        run: |
+          python .github/scripts/generate-badges.py \
+            --config .github/config/badges.yml \
+            --badge-types "${{ needs.prepare-badge-update.outputs.badge_types }}" \
+            --output-dir badges \
+            --coverage-data '${{ needs.collect-badge-data.outputs.coverage_data }}' \
+            --performance-data '${{ needs.collect-badge-data.outputs.performance_data }}' \
+            --security-data '${{ needs.collect-badge-data.outputs.security_data }}' \
+            --deployment-data '${{ needs.collect-badge-data.outputs.deployment_data }}' \
+            --github-token "$GITHUB_TOKEN" \
+            --repository "${{ github.repository }}" \
+            --verbose
+      
+      - name: Update README badges
+        run: |
+          if [[ -f "badges/README-badges.md" ]]; then
+            # 更新主 README 文件中的徽章部分
+            if [[ -f "README.md" ]]; then
+              # 查找并替换徽章部分
+              if grep -q "<!-- BADGES_START -->" README.md; then
+                # 提取徽章内容
+                badge_content=$(sed -n '/<!-- BADGES_START -->/,/<!-- BADGES_END -->/p' badges/README-badges.md)
+                
+                # 使用 sed 替换
+                sed -i '/<!-- BADGES_START -->/,/<!-- BADGES_END -->/c\
+'
