@@ -1,0 +1,70 @@
+.code-editor {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.3s ease;
+}
+
+.code-editor.focused {
+    border-color: #3d5afe;
+    box-shadow: 0 0 0 2px rgba(61, 90, 254, 0.2);
+}
+
+.code-editor-header {
+    background-color: #f5f5f5;
+    padding: 8px 12px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+}
+
+.language-tag {
+    font-size: 12px;
+    padding: 2px 6px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    color: #666;
+}
+
+.code-editor-content {
+    width: 100%;
+    min-height: 200px;
+    padding: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    border: none;
+    background-color: #fff;
+    resize: vertical;
+    color: #333;
+}
+
+.code-editor-content:focus {
+    outline: none;
+}
+
+// 暗色主题样式
+.dark .code-editor {
+    border-color: #333;
+    background-color: #1e1e1e;
+}
+
+.dark .code-editor.focused {
+    border-color: #5e81f4;
+    box-shadow: 0 0 0 2px rgba(94, 129, 244, 0.2);
+}
+
+.dark .code-editor-header {
+    background-color: #2d2d2d;
+    border-bottom-color: #444;
+}
+
+.dark .language-tag {
+    background-color: #444;
+    color: #ccc;
+}
+
+.dark .code-editor-content {
+    background-color: #1e1e1e;
+    color: #ccc;
+}

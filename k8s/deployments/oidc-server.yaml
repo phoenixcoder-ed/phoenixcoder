@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: community-oidc-server
+  namespace: phoenixcoder
+  labels:
+    app: community-oidc-server
+    component: auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: community-oidc-server
+  template:
+    metadata:
+      labels:
+        app: community-oidc-server
+        component: auth
+    spec:
+      containers:
+      - name: oidc-server
+        image: localhost:32000/community-oidc-server:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: POSTGRES_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: phoenixcoder-config
+              key: POSTGRES_HOST
+        - name: POSTGRES_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: phoenixcoder-config
+              key: POSTGRES_PORT
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: phoenixcoder-config
+              key: POSTGRES_DB
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: phoenixcoder-config
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: phoenixcoder-secrets
+              key: POSTGRES_PASSWORD
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: phoenixcoder-config
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: phoenixcoder-config
+              key: REDIS_PORT
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: phoenixcoder-secrets
+              key: REDIS_PASSWORD
+        - name: JWT_SECRET
+          valueFrom:
+            configMapKeyRef:
+              name: phoenixcoder-config
+              key: JWT_SECRET
+        - name: OIDC_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: phoenixcoder-config
+              key: OIDC_ISSUER
+        - name: APP_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: phoenixcoder-config
+              key: APP_ENV
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: phoenixcoder-config
+              key: DEBUG
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      restartPolicy: Always

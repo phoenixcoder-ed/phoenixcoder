@@ -1,0 +1,197 @@
+.container {
+    min-height: 100vh;
+    padding-bottom: 20px;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 15px;
+    border-bottom: 1px solid;
+}
+
+.headerContent {
+    margin-bottom: 15px;
+}
+
+.pathTitle {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.pathDescription {
+    font-size: 14px;
+    color: #a0a0a0;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.progressBar {
+    margin-bottom: 5px;
+}
+
+.progressText {
+    font-size: 14px;
+    display: block;
+    text-align: right;
+}
+
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.errorContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.sectionTitle {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 20px 15px 10px;
+    padding-left: 5px;
+    border-left: 3px solid;
+}
+
+.modulesContainer {
+    padding: 0 15px;
+}
+
+.modulesList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.moduleCard {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 150px;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.moduleCard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.activeModule {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.moduleTitle {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.moduleProgress {
+    margin-bottom: 5px;
+}
+
+.moduleProgressText {
+    font-size: 14px;
+    display: block;
+    text-align: right;
+}
+
+.activeModuleDetail {
+    margin: 20px 15px;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid;
+}
+
+.detailTitle {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.detailDescription {
+    font-size: 14px;
+    margin-bottom: 20px;
+    display: block;
+    line-height: 1.5;
+}
+
+.challengesTitle {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.challengesList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.challengeItem {
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid;
+}
+
+.challengeHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.challengeName {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.difficultyBadge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    color: #ffffff;
+}
+
+.easy {
+    background-color: #00bfa5;
+}
+
+.medium {
+    background-color: #ffa940;
+}
+
+.hard {
+    background-color: #ff5252;
+}
+
+.completedChallenge {
+    opacity: 0.7;
+}
+
+// 响应式调整
+@media (min-width: 768px) {
+    .moduleCard {
+        flex: 1 1 calc(33.333% - 10px);
+    }
+}
+
+@media (min-width: 1024px) {
+    .moduleCard {
+        flex: 1 1 calc(25% - 10px);
+    }
+}

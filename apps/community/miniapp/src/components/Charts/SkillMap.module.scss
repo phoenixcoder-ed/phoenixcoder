@@ -1,0 +1,105 @@
+.container {
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    padding-left: 5px;
+    border-left: 3px solid;
+}
+
+.chartContainer {
+    margin-bottom: 20px;
+}
+
+.skillList {
+    margin-top: 20px;
+}
+
+.categorySection {
+    margin-bottom: 20px;
+}
+
+.categoryTitle {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    padding-left: 5px;
+    border-left: 2px solid;
+}
+
+.skillsRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.skillCard {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 150px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.skillCard.selected {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.skillLevel {
+    height: 6px;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.levelBar {
+    height: 100%;
+    border-radius: 3px;
+}
+
+.skillDetail {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid;
+}
+
+.detailHeader {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.detailContent {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+.detailFooter {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+// 响应式调整
+@media (min-width: 768px) {
+    .skillCard {
+        flex: 1 1 calc(33.333% - 10px);
+    }
+}
+
+@media (min-width: 1024px) {
+    .skillCard {
+        flex: 1 1 calc(25% - 10px);
+    }
+}

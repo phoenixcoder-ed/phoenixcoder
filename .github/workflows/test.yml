@@ -1,0 +1,641 @@
+name: 🧪 智能分层测试
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # 每天凌晨2点运行完整测试套件
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: '测试类型'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - unit
+          - integration
+          - e2e
+          - performance
+          - security
+      test_environment:
+        description: '测试环境'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      skip_cache:
+        description: '跳过缓存'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: '24'
+  PYTHON_VERSION: '3.13'
+  PNPM_VERSION: '9'
+  # 测试环境变量
+  CI: true
+  NODE_ENV: test
+  PYTHONPATH: ${{ github.workspace }}
+  # 数据库配置
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/phoenixcoder_test
+  REDIS_URL: redis://localhost:6379/1
+  # 测试配置
+  TEST_TIMEOUT: 30000
+  COVERAGE_THRESHOLD: 80
+  # 性能测试配置
+  PERFORMANCE_BUDGET_RESPONSE_TIME: 500
+  PERFORMANCE_BUDGET_ERROR_RATE: 1
+  PERFORMANCE_BUDGET_THROUGHPUT: 100
+
+jobs:
+  # 代码质量检查
+  code-quality:
+    name: 🔍 代码质量检查
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 🏗️ 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      
+      - name: 📦 安装 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      
+      - name: 📦 安装依赖
+        run: pnpm install --frozen-lockfile
+      
+      - name: 🔍 ESLint 检查
+        run: pnpm run lint
+      
+      - name: 🎨 Prettier 检查
+        run: pnpm run format:check
+      
+      - name: 🔧 TypeScript 类型检查
+        run: pnpm run type-check
+      
+      - name: 🔒 安全漏洞扫描
+        run: pnpm audit --audit-level moderate
+      
+      - name: 📊 代码复杂度分析
+        run: |
+          npx complexity-report --output json --format json src/ > complexity-report.json
+          echo "代码复杂度报告已生成"
+      
+      - name: 📤 上传代码质量报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: code-quality-reports
+          path: |
+            complexity-report.json
+            eslint-report.json
+          retention-days: 7
+
+  # 后端单元测试
+  backend-unit-tests:
+    name: 🐍 后端单元测试
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: code-quality
+    
+    strategy:
+      matrix:
+        service: [server, oidc-server, notification-service]
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: phoenixcoder_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 🐍 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: 📦 安装 Python 依赖
+        working-directory: apps/community/${{ matrix.service }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-test.txt
+      
+      - name: 🗄️ 数据库迁移
+        working-directory: apps/community/${{ matrix.service }}
+        run: |
+          python manage.py migrate --settings=config.settings.test
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+      
+      - name: 🧪 运行单元测试
+        working-directory: apps/community/${{ matrix.service }}
+        run: |
+          pytest tests/unit/ \
+            --cov=. \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term \
+            --cov-fail-under=${{ env.COVERAGE_THRESHOLD }} \
+            --junitxml=test-results.xml \
+            --maxfail=5 \
+            -v
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+      
+      - name: 📊 上传覆盖率报告
+        uses: codecov/codecov-action@v4
+        with:
+          file: apps/community/${{ matrix.service }}/coverage.xml
+          flags: backend-${{ matrix.service }}
+          name: backend-${{ matrix.service }}-coverage
+          fail_ci_if_error: true
+      
+      - name: 📤 上传测试报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-${{ matrix.service }}-test-results
+          path: |
+            apps/community/${{ matrix.service }}/test-results.xml
+            apps/community/${{ matrix.service }}/htmlcov/
+          retention-days: 7
+
+  # 前端单元测试
+  frontend-unit-tests:
+    name: ⚛️ 前端单元测试
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: code-quality
+    
+    strategy:
+      matrix:
+        app: [admin, mobile]
+    
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 🏗️ 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      
+      - name: 📦 安装 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      
+      - name: 📦 安装依赖
+        working-directory: apps/community/${{ matrix.app }}
+        run: pnpm install --frozen-lockfile
+      
+      - name: 🧪 运行单元测试
+        working-directory: apps/community/${{ matrix.app }}
+        run: |
+          pnpm test:unit \
+            --coverage \
+            --reporter=verbose \
+            --reporter=junit \
+            --outputFile=test-results.xml
+        env:
+          CI: true
+      
+      - name: 📊 上传覆盖率报告
+        uses: codecov/codecov-action@v4
+        with:
+          file: apps/community/${{ matrix.app }}/coverage/coverage-final.json
+          flags: frontend-${{ matrix.app }}
+          name: frontend-${{ matrix.app }}-coverage
+          fail_ci_if_error: true
+      
+      - name: 📤 上传测试报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-${{ matrix.app }}-test-results
+          path: |
+            apps/community/${{ matrix.app }}/test-results.xml
+            apps/community/${{ matrix.app }}/coverage/
+          retention-days: 7
+
+  # 集成测试
+  integration-tests:
+    name: 🔗 集成测试
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [backend-unit-tests, frontend-unit-tests]
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'integration-test')
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: phoenixcoder_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+      
+      elasticsearch:
+        image: elasticsearch:8.11.0
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: false
+        options: >-
+          --health-cmd "curl -f http://localhost:9200/_cluster/health"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 9200:9200
+    
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 🐍 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: 🏗️ 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      
+      - name: 📦 安装 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      
+      - name: 📦 安装依赖
+        run: |
+          # 安装 Python 依赖
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-test.txt
+          
+          # 安装 Node.js 依赖
+          pnpm install --frozen-lockfile
+      
+      - name: 🗄️ 设置测试数据库
+        run: |
+          python scripts/setup-test-db.py
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+      
+      - name: 🚀 启动测试服务
+        run: |
+          # 启动后端服务
+          python apps/community/server/main.py &
+          python apps/community/oidc-server/main.py &
+          
+          # 等待服务启动
+          sleep 10
+          
+          # 健康检查
+          curl -f http://localhost:8000/health
+          curl -f http://localhost:8001/health
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+      
+      - name: 🧪 运行集成测试
+        run: |
+          pytest tests/integration/ \
+            --cov=. \
+            --cov-report=xml \
+            --cov-report=html \
+            --junitxml=integration-test-results.xml \
+            --maxfail=3 \
+            -v
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+          API_BASE_URL: http://localhost:8000
+          OIDC_BASE_URL: http://localhost:8001
+      
+      - name: 📊 上传覆盖率报告
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage.xml
+          flags: integration
+          name: integration-coverage
+          fail_ci_if_error: false
+      
+      - name: 📤 上传测试报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: |
+            integration-test-results.xml
+            htmlcov/
+          retention-days: 7
+
+  # E2E 测试
+  e2e-tests:
+    name: 🎭 E2E 测试
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: integration-tests
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'e2e-test')
+    
+    strategy:
+      matrix:
+        browser: [chromium, firefox]
+        shard: [1, 2, 3, 4]
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: phoenixcoder_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 🐍 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: 🏗️ 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      
+      - name: 📦 安装 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      
+      - name: 📦 安装依赖
+        run: |
+          # 安装 Python 依赖
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+          # 安装 Node.js 依赖
+          pnpm install --frozen-lockfile
+      
+      - name: 🎭 安装 Playwright
+        run: |
+          pnpm exec playwright install --with-deps ${{ matrix.browser }}
+      
+      - name: 🗄️ 设置测试数据库
+        run: |
+          python scripts/setup-test-db.py
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+      
+      - name: 🚀 启动应用
+        run: |
+          # 启动后端服务
+          python apps/community/server/main.py &
+          python apps/community/oidc-server/main.py &
+          
+          # 构建并启动前端
+          cd apps/community/admin
+          pnpm build
+          pnpm preview &
+          
+          # 等待服务启动
+          sleep 15
+          
+          # 健康检查
+          curl -f http://localhost:8000/health
+          curl -f http://localhost:3000
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+      
+      - name: 🧪 运行 E2E 测试
+        run: |
+          pnpm exec playwright test \
+            --project=${{ matrix.browser }} \
+            --shard=${{ matrix.shard }}/4 \
+            --reporter=html,junit \
+            --output-dir=test-results/${{ matrix.browser }}-shard-${{ matrix.shard }}
+        env:
+          CI: true
+          PLAYWRIGHT_HTML_REPORT: test-results/${{ matrix.browser }}-shard-${{ matrix.shard }}/html-report
+      
+      - name: 📤 上传 E2E 测试报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results-${{ matrix.browser }}-shard-${{ matrix.shard }}
+          path: |
+            test-results/${{ matrix.browser }}-shard-${{ matrix.shard }}/
+            test-results/junit-results.xml
+          retention-days: 7
+      
+      - name: 📸 上传失败截图
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-screenshots-${{ matrix.browser }}-shard-${{ matrix.shard }}
+          path: test-results/${{ matrix.browser }}-shard-${{ matrix.shard }}/screenshots/
+          retention-days: 7
+
+  # 性能测试
+  performance-tests:
+    name: ⚡ 性能测试
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: integration-tests
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'performance-test')
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: phoenixcoder_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 🐍 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: 🏗️ 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      
+      - name: 📦 安装 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      
+      - name: ⚡ 安装 k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+      
+      - name: 📦 安装依赖
+        run: |
+          # 安装 Python 依赖
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+          # 安装 Node.js 依赖
+          pnpm install --frozen-lockfile
+      
+      - name: 🗄️ 设置测试数据库
+        run: |
+          python scripts/setup-test-db.py --performance
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+      
+      - name: 🚀 启动应用
+        run: |
+          # 启动后端服务 (生产模式)
+          export NODE_ENV=production
+          python apps/community/server/main.py &
+          python apps/community/oidc-server/main.py &
+          
+          # 等待服务启动
+          sleep 10
+          
+          # 健康检查
+          curl -f http://localhost:8000/health
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+      
+      - name: 🔥 运行性能测试
+        run: |
+          cd tests/performance
+          chmod +x run-performance-tests.sh
+          ./run-performance-tests.sh --type=all --duration=5m --vus=50
+        env:
+          API_BASE_URL: http://localhost:8000
+          FRONTEND_BASE_URL: http://localhost:3000
+      
+      - name: 📊 生成性能报告
+        run: |
+          cd tests/performance
+          node scripts/generate-report.js --html --json
+      
+      - name: 📈 更新性能基准
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cd tests/performance
+          node scripts/update-benchmarks.js
+          
+          # 提交基准更新
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add benchmarks.json
+          git diff --staged --quiet || git commit -m "chore: 更新性能基准

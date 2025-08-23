@@ -1,0 +1,407 @@
+/* PhoenixCoder 宇宙主题样式 */
+
+/* 基础宇宙色彩变量 */
+:root {
+  /* 主色调 - 深空蓝 */
+  --cosmic-primary: #1e1e2f;
+  --cosmic-primary-light: #2a2a3e;
+  --cosmic-primary-dark: #16161f;
+
+  /* 次要色调 - 星云紫 */
+  --cosmic-secondary: #7b61ff;
+  --cosmic-secondary-light: #9b7fff;
+  --cosmic-secondary-dark: #5b41df;
+
+  /* 强调色 - 星光金 */
+  --cosmic-accent: #ffa940;
+  --cosmic-accent-light: #ffb960;
+  --cosmic-accent-dark: #df8920;
+
+  /* 成功色 - 生命绿 */
+  --cosmic-success: #00d9ff;
+  --cosmic-success-light: #20e9ff;
+  --cosmic-success-dark: #00b9df;
+
+  /* 警告色 - 恒星橙 */
+  --cosmic-warning: #ff6b35;
+  --cosmic-warning-light: #ff8b55;
+  --cosmic-warning-dark: #df4b15;
+
+  /* 错误色 - 超新星红 */
+  --cosmic-error: #ff3366;
+  --cosmic-error-light: #ff5386;
+  --cosmic-error-dark: #df1346;
+
+  /* 中性色 - 星际灰 */
+  --cosmic-neutral: #8b8b9a;
+  --cosmic-neutral-light: #ababba;
+  --cosmic-neutral-dark: #6b6b7a;
+
+  /* 背景色 */
+  --cosmic-bg-primary: #0f0f1a;
+  --cosmic-bg-secondary: #1a1a2e;
+  --cosmic-bg-tertiary: #16213e;
+
+  /* 文字色 */
+  --cosmic-text-primary: #ffffff;
+  --cosmic-text-secondary: #b8b8c8;
+  --cosmic-text-muted: #8b8b9a;
+
+  /* 边框色 */
+  --cosmic-border: #2a2a3e;
+  --cosmic-border-light: #3a3a4e;
+  --cosmic-border-dark: #1a1a2e;
+
+  /* 阴影 */
+  --cosmic-shadow-sm: 0 2px 4px rgba(123, 97, 255, 0.1);
+  --cosmic-shadow-md: 0 4px 8px rgba(123, 97, 255, 0.15);
+  --cosmic-shadow-lg: 0 8px 16px rgba(123, 97, 255, 0.2);
+  --cosmic-shadow-xl: 0 16px 32px rgba(123, 97, 255, 0.25);
+
+  /* 渐变 */
+  --cosmic-gradient-primary: linear-gradient(135deg, #7b61ff 0%, #00d9ff 100%);
+  --cosmic-gradient-secondary: linear-gradient(
+    135deg,
+    #ffa940 0%,
+    #ff6b35 100%
+  );
+  --cosmic-gradient-accent: linear-gradient(135deg, #ff3366 0%, #7b61ff 100%);
+
+  /* 智能玻璃效果 */
+  --cosmic-glass-bg: rgba(30, 30, 47, 0.8);
+  --cosmic-glass-border: rgba(123, 97, 255, 0.2);
+  --cosmic-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --cosmic-glass-backdrop: blur(16px);
+}
+
+/* 暗色模式适配 */
+[data-theme='dark'] {
+  --cosmic-bg-primary: #0f0f1a;
+  --cosmic-bg-secondary: #1a1a2e;
+  --cosmic-text-primary: #ffffff;
+  --cosmic-text-secondary: #b8b8c8;
+}
+
+/* 亮色模式适配 */
+[data-theme='light'] {
+  --cosmic-bg-primary: #f9fafb;
+  --cosmic-bg-secondary: #ffffff;
+  --cosmic-text-primary: #1e1e2f;
+  --cosmic-text-secondary: #6b6b7a;
+  --cosmic-glass-bg: rgba(255, 255, 255, 0.8);
+  --cosmic-glass-border: rgba(123, 97, 255, 0.1);
+}
+
+/* 智能玻璃效果类 */
+.cosmic-glass {
+  background: var(--cosmic-glass-bg);
+  border: 1px solid var(--cosmic-glass-border);
+  box-shadow: var(--cosmic-glass-shadow);
+  backdrop-filter: var(--cosmic-glass-backdrop);
+  -webkit-backdrop-filter: var(--cosmic-glass-backdrop);
+  position: relative;
+  overflow: hidden;
+}
+
+.cosmic-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(123, 97, 255, 0.5) 50%,
+    transparent 100%
+  );
+  z-index: 1;
+}
+
+/* 宇宙发光效果 */
+.cosmic-glow {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cosmic-glow:hover {
+  box-shadow:
+    0 0 20px rgba(123, 97, 255, 0.4),
+    0 0 40px rgba(123, 97, 255, 0.2),
+    0 0 60px rgba(123, 97, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.cosmic-glow:focus {
+  outline: none;
+  box-shadow:
+    0 0 0 2px rgba(123, 97, 255, 0.5),
+    0 0 20px rgba(123, 97, 255, 0.3);
+}
+
+/* 星空动画背景 */
+.cosmic-stars {
+  position: relative;
+  overflow: hidden;
+}
+
+.cosmic-stars::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(
+      2px 2px at 20px 30px,
+      rgba(255, 255, 255, 0.8),
+      transparent
+    ),
+    radial-gradient(2px 2px at 40px 70px, rgba(123, 97, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(0, 217, 255, 0.8), transparent),
+    radial-gradient(
+      1px 1px at 130px 80px,
+      rgba(255, 169, 64, 0.6),
+      transparent
+    ),
+    radial-gradient(
+      2px 2px at 160px 30px,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+  background-repeat: repeat;
+  background-size: 200px 100px;
+  animation: cosmic-twinkle 20s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes cosmic-twinkle {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-200px);
+  }
+}
+
+/* 脉冲动画 */
+.cosmic-pulse {
+  animation: cosmic-pulse-animation 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes cosmic-pulse-animation {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* 渐变文字 */
+.cosmic-gradient-text {
+  background: var(--cosmic-gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: bold;
+}
+
+/* 等宽字体 */
+.cosmic-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-feature-settings:
+    'liga' 1,
+    'calt' 1;
+}
+
+/* 卡片悬浮效果 */
+.cosmic-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--cosmic-border);
+  background: var(--cosmic-glass-bg);
+  backdrop-filter: var(--cosmic-glass-backdrop);
+}
+
+.cosmic-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--cosmic-shadow-xl);
+  border-color: var(--cosmic-secondary);
+}
+
+/* 按钮宇宙样式 */
+.cosmic-btn {
+  position: relative;
+  overflow: hidden;
+  background: var(--cosmic-gradient-primary);
+  border: none;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cosmic-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.cosmic-btn:hover::before {
+  left: 100%;
+}
+
+.cosmic-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--cosmic-shadow-lg);
+}
+
+/* 输入框宇宙样式 */
+.cosmic-input {
+  background: var(--cosmic-glass-bg);
+  border: 1px solid var(--cosmic-border);
+  color: var(--cosmic-text-primary);
+  backdrop-filter: var(--cosmic-glass-backdrop);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cosmic-input:focus {
+  border-color: var(--cosmic-secondary);
+  box-shadow:
+    0 0 0 2px rgba(123, 97, 255, 0.2),
+    var(--cosmic-shadow-md);
+  outline: none;
+}
+
+.cosmic-input::placeholder {
+  color: var(--cosmic-text-muted);
+}
+
+/* 表格宇宙样式 */
+.cosmic-table {
+  background: var(--cosmic-glass-bg);
+  backdrop-filter: var(--cosmic-glass-backdrop);
+  border: 1px solid var(--cosmic-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cosmic-table th {
+  background: var(--cosmic-bg-secondary);
+  color: var(--cosmic-text-primary);
+  font-weight: 600;
+  border-bottom: 1px solid var(--cosmic-border);
+}
+
+.cosmic-table td {
+  border-bottom: 1px solid var(--cosmic-border-light);
+  color: var(--cosmic-text-secondary);
+}
+
+.cosmic-table tr:hover {
+  background: rgba(123, 97, 255, 0.1);
+}
+
+/* 徽章宇宙样式 */
+.cosmic-badge {
+  background: var(--cosmic-gradient-primary);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cosmic-badge.success {
+  background: var(--cosmic-gradient-secondary);
+}
+
+.cosmic-badge.warning {
+  background: linear-gradient(
+    135deg,
+    var(--cosmic-warning) 0%,
+    var(--cosmic-accent) 100%
+  );
+}
+
+.cosmic-badge.error {
+  background: var(--cosmic-gradient-accent);
+}
+
+/* 加载动画 */
+.cosmic-loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--cosmic-border);
+  border-radius: 50%;
+  border-top-color: var(--cosmic-secondary);
+  animation: cosmic-spin 1s ease-in-out infinite;
+}
+
+@keyframes cosmic-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .cosmic-glass {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .cosmic-card:hover {
+    transform: translateY(-2px) scale(1.01);
+  }
+}
+
+/* 滚动条宇宙样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cosmic-bg-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--cosmic-gradient-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cosmic-secondary);
+}
+
+/* 选择文本样式 */
+::selection {
+  background: rgba(123, 97, 255, 0.3);
+  color: var(--cosmic-text-primary);
+}
+
+::-moz-selection {
+  background: rgba(123, 97, 255, 0.3);
+  color: var(--cosmic-text-primary);
+}

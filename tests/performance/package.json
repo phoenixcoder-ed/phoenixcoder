@@ -1,0 +1,125 @@
+{
+  "name": "phoenixcoder-performance-tests",
+  "version": "1.0.0",
+  "description": "PhoenixCoder 项目性能测试套件",
+  "main": "k6-config.js",
+  "scripts": {
+    "test": "./run-performance-tests.sh",
+    "test:load": "./run-performance-tests.sh load",
+    "test:stress": "./run-performance-tests.sh stress",
+    "test:spike": "./run-performance-tests.sh spike",
+    "test:volume": "./run-performance-tests.sh volume",
+    "test:api": "./run-performance-tests.sh api",
+    "test:frontend": "./run-performance-tests.sh frontend",
+    "test:auth": "./run-performance-tests.sh auth",
+    "test:tasks": "./run-performance-tests.sh tasks",
+    "test:all": "./run-performance-tests.sh all",
+    "test:parallel": "./run-performance-tests.sh all --parallel",
+    "test:quick": "./run-performance-tests.sh load --duration 2m --vus 5",
+    "test:ci": "./run-performance-tests.sh load stress --duration 3m --vus 10 --quiet",
+    "install-k6": "echo 'Please install k6 manually: https://k6.io/docs/getting-started/installation/'",
+    "check-k6": "k6 version || echo 'k6 not installed'",
+    "setup": "pnpm run check-k6 && mkdir -p ../../reports/performance",
+    "clean": "rm -rf ../../reports/performance/* && rm -f performance-*.html performance-*.json",
+    "benchmark:update": "node scripts/update-benchmarks.js",
+    "benchmark:compare": "node scripts/compare-benchmarks.js",
+    "report:generate": "node scripts/generate-report.js",
+    "report:serve": "python3 -m http.server 8080 -d ../../reports/performance",
+    "monitor:start": "node scripts/performance-monitor.js",
+    "validate:config": "node scripts/validate-config.js",
+    "help": "./run-performance-tests.sh --help"
+  },
+  "keywords": [
+    "performance",
+    "testing",
+    "k6",
+    "load-testing",
+    "stress-testing",
+    "benchmarking",
+    "phoenixcoder"
+  ],
+  "author": "PhoenixCoder Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.3.0",
+    "dotenv": "^16.3.0",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "fs-extra": "^11.2.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4",
+    "node-fetch": "^3.3.2",
+    "ora": "^7.0.1",
+    "table": "^6.8.1",
+    "yargs": "^17.7.2"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2"
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phoenixcoder/phoenixcoder.git",
+    "directory": "tests/performance"
+  },
+  "bugs": {
+    "url": "https://github.com/phoenixcoder/phoenixcoder/issues"
+  },
+  "homepage": "https://github.com/phoenixcoder/phoenixcoder#readme",
+  "config": {
+    "k6_version": "0.47.0",
+    "reports_dir": "../../reports/performance",
+    "benchmarks_file": "./benchmarks.json",
+    "default_duration": "5m",
+    "default_vus": 10
+  },
+  "performance": {
+    "thresholds": {
+      "http_req_duration": {
+        "p95": 500,
+        "p99": 1000
+      },
+      "http_req_failed": {
+        "rate": 0.01
+      },
+      "checks": {
+        "rate": 0.99
+      }
+    },
+    "scenarios": {
+      "load": {
+        "executor": "ramping-vus",
+        "startVUs": 1,
+        "stages": [
+          { "duration": "2m", "target": 10 },
+          { "duration": "5m", "target": 10 },
+          { "duration": "2m", "target": 0 }
+        ]
+      },
+      "stress": {
+        "executor": "ramping-vus",
+        "startVUs": 1,
+        "stages": [
+          { "duration": "2m", "target": 20 },
+          { "duration": "5m", "target": 50 },
+          { "duration": "2m", "target": 100 },
+          { "duration": "3m", "target": 100 },
+          { "duration": "2m", "target": 0 }
+        ]
+      }
+    }
+  },
+  "files": [
+    "k6-config.js",
+    "run-performance-tests.sh",
+    "benchmarks.json",
+    ".env.performance",
+    "scripts/",
+    "README.md"
+  ]
+}

@@ -1,0 +1,87 @@
+.phoenix-icon {
+    display: inline-block;
+    vertical-align: middle;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.icon-like,
+.icon-comment,
+.icon-share,
+.icon-user,
+.icon-settings,
+.icon-menu,
+.icon-arrowRight,
+.icon-search,
+.icon-star,
+.icon-check {
+    // 基础样式，确保SVG图标正确显示
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+}
+
+// 可点击图标hover效果
+.phoenix-icon:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+// 禁用状态
+.phoenix-icon.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+// 自定义颜色主题
+.phoenix-icon.primary {
+    color: #3d5afe;
+}
+
+.phoenix-icon.success {
+    color: #00c853;
+}
+
+.phoenix-icon.warning {
+    color: #ff9800;
+}
+
+.phoenix-icon.danger {
+    color: #f44336;
+}
+
+.phoenix-icon.info {
+    color: #2196f3;
+}
+
+// 旋转动画
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.phoenix-icon.rotate {
+    animation: rotate 2s linear infinite;
+}
+
+// 脉冲动画
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.phoenix-icon.pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+}

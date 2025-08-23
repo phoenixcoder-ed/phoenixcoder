@@ -1,0 +1,67 @@
+# PostgreSQL安全配置
+# 基于postgresql.conf的安全加固设置
+
+# 连接和认证设置
+listen_addresses = 'localhost'          # 只监听本地连接
+port = 5432                             # 默认端口
+max_connections = 100                   # 限制最大连接数
+superuser_reserved_connections = 3      # 为超级用户保留连接
+
+# SSL设置
+ssl = on                                # 启用SSL
+ssl_cert_file = 'server.crt'          # SSL证书文件
+ssl_key_file = 'server.key'           # SSL私钥文件
+ssl_ca_file = 'ca.crt'                 # CA证书文件
+ssl_crl_file = ''                      # 证书撤销列表
+ssl_prefer_server_ciphers = on         # 优先使用服务器密码套件
+ssl_ciphers = 'HIGH:MEDIUM:+3DES:!aNULL' # 安全密码套件
+ssl_ecdh_curve = 'prime256v1'          # ECDH曲线
+
+# 认证设置
+password_encryption = scram-sha-256     # 使用SCRAM-SHA-256加密
+db_user_namespace = off                 # 禁用用户命名空间
+
+# 日志设置
+logging_collector = on                  # 启用日志收集
+log_destination = 'stderr'              # 日志输出到stderr
+log_directory = 'log'                   # 日志目录
+log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log' # 日志文件名格式
+log_file_mode = 0600                    # 日志文件权限
+log_truncate_on_rotation = on           # 轮转时截断日志
+log_rotation_age = 1d                   # 日志轮转周期
+log_rotation_size = 10MB                # 日志轮转大小
+
+# 审计日志
+log_connections = on                    # 记录连接
+log_disconnections = on                 # 记录断开连接
+log_checkpoints = on                    # 记录检查点
+log_lock_waits = on                     # 记录锁等待
+log_statement = 'mod'                   # 记录修改语句
+log_min_duration_statement = 1000       # 记录慢查询(1秒)
+
+# 安全设置
+shared_preload_libraries = 'pg_stat_statements' # 预加载统计模块
+track_activities = on                   # 跟踪活动
+track_counts = on                       # 跟踪计数
+track_io_timing = on                    # 跟踪IO时间
+track_functions = all                   # 跟踪函数
+
+# 内存和性能设置
+shared_buffers = 256MB                  # 共享缓冲区
+effective_cache_size = 1GB              # 有效缓存大小
+work_mem = 4MB                          # 工作内存
+maintenance_work_mem = 64MB             # 维护工作内存
+wal_buffers = 16MB                      # WAL缓冲区
+
+# WAL设置
+wal_level = replica                     # WAL级别
+max_wal_senders = 3                     # 最大WAL发送者
+wal_keep_segments = 32                  # 保留WAL段数
+archive_mode = on                       # 启用归档模式
+archive_command = 'test ! -f /var/lib/postgresql/archive/%f && cp %p /var/lib/postgresql/archive/%f'
+
+# 检查点设置
+checkpoint_completion_target = 0.9      # 检查点完成目标
+checkpoint_timeout = 5min               # 检查点超时
+max_wal_size = 1GB                      # 最大WAL大小
+min_wal_size = 80MB                     # 最小WAL大小

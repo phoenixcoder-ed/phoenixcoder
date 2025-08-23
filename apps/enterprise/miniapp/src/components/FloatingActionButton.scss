@@ -1,0 +1,33 @@
+.floating-action-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 30px;
+    background-color: #3d5afe;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    z-index: 999;
+    cursor: pointer;
+
+    &__content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    &__icon {
+        color: #fff;
+        font-size: 24px;
+    }
+
+    &__text {
+        color: #fff;
+        font-size: 14px;
+        margin-top: 4px;
+    }
+}

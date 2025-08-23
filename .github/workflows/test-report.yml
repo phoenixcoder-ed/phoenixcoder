@@ -1,0 +1,489 @@
+name: Test Report Generator
+
+# 在CI工作流完成后运行
+on:
+  workflow_run:
+    workflows: ["PhoenixCoder CI/CD Pipeline"]
+    types:
+      - completed
+
+jobs:
+  generate-test-report:
+    name: 生成测试报告
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion != 'cancelled' }}
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      
+      - name: 下载工作流产物
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: ${{ github.event.workflow_run.id }}
+            });
+            
+            for (const artifact of artifacts.data.artifacts) {
+              const download = await github.rest.actions.downloadArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id,
+                archive_format: 'zip'
+              });
+              
+              const fs = require('fs');
+              fs.writeFileSync(`${artifact.name}.zip`, Buffer.from(download.data));
+            }
+      
+      - name: 解压产物
+        run: |
+          mkdir -p artifacts
+          for file in *.zip; do
+            if [ -f "$file" ]; then
+              unzip -q "$file" -d "artifacts/$(basename "$file" .zip)"
+            fi
+          done
+      
+      - name: 生成综合测试报告
+        run: |
+          node << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
+          
+          // 收集所有测试结果
+          const testResults = {
+            summary: {
+              total: 0,
+              passed: 0,
+              failed: 0,
+              skipped: 0,
+              coverage: {}
+            },
+            details: {
+              backend: {},
+              frontend: {},
+              integration: {},
+              e2e: {},
+              performance: {}
+            },
+            timestamp: new Date().toISOString(),
+            workflow_run_id: '${{ github.event.workflow_run.id }}',
+            commit_sha: '${{ github.event.workflow_run.head_sha }}',
+            branch: '${{ github.event.workflow_run.head_branch }}'
+          };
+          
+          // 解析测试结果文件
+          function parseJUnitXML(xmlPath) {
+            if (!fs.existsSync(xmlPath)) return null;
+            
+            const xml = fs.readFileSync(xmlPath, 'utf8');
+            const testsuiteMatch = xml.match(/<testsuite[^>]*tests="(\d+)"[^>]*failures="(\d+)"[^>]*skipped="(\d+)"/);
+            
+            if (testsuiteMatch) {
+              return {
+                total: parseInt(testsuiteMatch[1]),
+                failed: parseInt(testsuiteMatch[2]),
+                skipped: parseInt(testsuiteMatch[3]),
+                passed: parseInt(testsuiteMatch[1]) - parseInt(testsuiteMatch[2]) - parseInt(testsuiteMatch[3])
+              };
+            }
+            return null;
+          }
+          
+          // 解析覆盖率报告
+          function parseCoverageXML(xmlPath) {
+            if (!fs.existsSync(xmlPath)) return null;
+            
+            const xml = fs.readFileSync(xmlPath, 'utf8');
+            const coverageMatch = xml.match(/<coverage[^>]*line-rate="([0-9.]+)"[^>]*branch-rate="([0-9.]+)"/);
+            
+            if (coverageMatch) {
+              return {
+                lines: Math.round(parseFloat(coverageMatch[1]) * 100),
+                branches: Math.round(parseFloat(coverageMatch[2]) * 100)
+              };
+            }
+            return null;
+          }
+          
+          // 收集后端测试结果
+          ['server', 'oidc-server'].forEach(service => {
+            const testFile = `artifacts/${service}-test-results/test-results.xml`;
+            const coverageFile = `artifacts/${service}-test-results/coverage.xml`;
+            
+            const testResult = parseJUnitXML(testFile);
+            const coverage = parseCoverageXML(coverageFile);
+            
+            if (testResult) {
+              testResults.details.backend[service] = {
+                tests: testResult,
+                coverage: coverage
+              };
+              
+              testResults.summary.total += testResult.total;
+              testResults.summary.passed += testResult.passed;
+              testResults.summary.failed += testResult.failed;
+              testResults.summary.skipped += testResult.skipped;
+              
+              if (coverage) {
+                testResults.summary.coverage[service] = coverage;
+              }
+            }
+          });
+          
+          // 收集前端测试结果
+          ['admin', 'miniapp'].forEach(app => {
+            const testFile = `artifacts/${app}-test-results/test-results.xml`;
+            const coverageFile = `artifacts/${app}-test-results/coverage/lcov.info`;
+            
+            const testResult = parseJUnitXML(testFile);
+            
+            if (testResult) {
+              testResults.details.frontend[app] = {
+                tests: testResult,
+                coverage: fs.existsSync(coverageFile) ? 'Available' : 'Not Available'
+              };
+              
+              testResults.summary.total += testResult.total;
+              testResults.summary.passed += testResult.passed;
+              testResults.summary.failed += testResult.failed;
+              testResults.summary.skipped += testResult.skipped;
+            }
+          });
+          
+          // 收集集成测试结果
+          const integrationTestFile = 'artifacts/integration-test-results/integration-test-results.xml';
+          const integrationResult = parseJUnitXML(integrationTestFile);
+          
+          if (integrationResult) {
+            testResults.details.integration = {
+              tests: integrationResult
+            };
+            
+            testResults.summary.total += integrationResult.total;
+            testResults.summary.passed += integrationResult.passed;
+            testResults.summary.failed += integrationResult.failed;
+            testResults.summary.skipped += integrationResult.skipped;
+          }
+          
+          // 生成HTML报告
+          const htmlReport = `
+          <!DOCTYPE html>
+          <html lang="zh-CN">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>PhoenixCoder 测试报告</title>
+              <style>
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                      margin: 0;
+                      padding: 20px;
+                      background-color: #f5f5f5;
+                  }
+                  .container {
+                      max-width: 1200px;
+                      margin: 0 auto;
+                      background: white;
+                      border-radius: 8px;
+                      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                      overflow: hidden;
+                  }
+                  .header {
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      color: white;
+                      padding: 30px;
+                      text-align: center;
+                  }
+                  .header h1 {
+                      margin: 0;
+                      font-size: 2.5em;
+                  }
+                  .header p {
+                      margin: 10px 0 0 0;
+                      opacity: 0.9;
+                  }
+                  .summary {
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                      gap: 20px;
+                      padding: 30px;
+                      background: #f8f9fa;
+                  }
+                  .summary-card {
+                      background: white;
+                      padding: 20px;
+                      border-radius: 8px;
+                      text-align: center;
+                      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                  }
+                  .summary-card h3 {
+                      margin: 0 0 10px 0;
+                      color: #333;
+                  }
+                  .summary-card .number {
+                      font-size: 2em;
+                      font-weight: bold;
+                      margin: 10px 0;
+                  }
+                  .passed { color: #28a745; }
+                  .failed { color: #dc3545; }
+                  .skipped { color: #ffc107; }
+                  .total { color: #007bff; }
+                  .details {
+                      padding: 30px;
+                  }
+                  .section {
+                      margin-bottom: 30px;
+                  }
+                  .section h2 {
+                      color: #333;
+                      border-bottom: 2px solid #667eea;
+                      padding-bottom: 10px;
+                  }
+                  .test-grid {
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                      gap: 20px;
+                      margin-top: 20px;
+                  }
+                  .test-card {
+                      background: #f8f9fa;
+                      border: 1px solid #dee2e6;
+                      border-radius: 8px;
+                      padding: 20px;
+                  }
+                  .test-card h4 {
+                      margin: 0 0 15px 0;
+                      color: #495057;
+                  }
+                  .test-stats {
+                      display: flex;
+                      justify-content: space-between;
+                      margin-bottom: 10px;
+                  }
+                  .coverage-bar {
+                      background: #e9ecef;
+                      border-radius: 10px;
+                      height: 20px;
+                      overflow: hidden;
+                      margin-top: 10px;
+                  }
+                  .coverage-fill {
+                      height: 100%;
+                      background: linear-gradient(90deg, #28a745, #20c997);
+                      transition: width 0.3s ease;
+                  }
+                  .footer {
+                      background: #343a40;
+                      color: white;
+                      padding: 20px;
+                      text-align: center;
+                  }
+                  .status-badge {
+                      display: inline-block;
+                      padding: 4px 8px;
+                      border-radius: 4px;
+                      font-size: 0.8em;
+                      font-weight: bold;
+                      text-transform: uppercase;
+                  }
+                  .status-success { background: #d4edda; color: #155724; }
+                  .status-failure { background: #f8d7da; color: #721c24; }
+                  .status-warning { background: #fff3cd; color: #856404; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <div class="header">
+                      <h1>🧪 PhoenixCoder 测试报告</h1>
+                      <p>构建时间: ${new Date(testResults.timestamp).toLocaleString('zh-CN')}</p>
+                      <p>提交: ${testResults.commit_sha?.substring(0, 8)} | 分支: ${testResults.branch}</p>
+                      <span class="status-badge ${testResults.summary.failed > 0 ? 'status-failure' : 'status-success'}">
+                          ${testResults.summary.failed > 0 ? '测试失败' : '测试通过'}
+                      </span>
+                  </div>
+                  
+                  <div class="summary">
+                      <div class="summary-card">
+                          <h3>总测试数</h3>
+                          <div class="number total">${testResults.summary.total}</div>
+                      </div>
+                      <div class="summary-card">
+                          <h3>通过</h3>
+                          <div class="number passed">${testResults.summary.passed}</div>
+                      </div>
+                      <div class="summary-card">
+                          <h3>失败</h3>
+                          <div class="number failed">${testResults.summary.failed}</div>
+                      </div>
+                      <div class="summary-card">
+                          <h3>跳过</h3>
+                          <div class="number skipped">${testResults.summary.skipped}</div>
+                      </div>
+                  </div>
+                  
+                  <div class="details">
+                      <div class="section">
+                          <h2>🔧 后端服务测试</h2>
+                          <div class="test-grid">
+                              ${Object.entries(testResults.details.backend).map(([service, data]) => `
+                                  <div class="test-card">
+                                      <h4>${service}</h4>
+                                      <div class="test-stats">
+                                          <span>通过: <strong class="passed">${data.tests.passed}</strong></span>
+                                          <span>失败: <strong class="failed">${data.tests.failed}</strong></span>
+                                          <span>跳过: <strong class="skipped">${data.tests.skipped}</strong></span>
+                                      </div>
+                                      ${data.coverage ? `
+                                          <div>行覆盖率: ${data.coverage.lines}%</div>
+                                          <div class="coverage-bar">
+                                              <div class="coverage-fill" style="width: ${data.coverage.lines}%"></div>
+                                          </div>
+                                          <div>分支覆盖率: ${data.coverage.branches}%</div>
+                                          <div class="coverage-bar">
+                                              <div class="coverage-fill" style="width: ${data.coverage.branches}%"></div>
+                                          </div>
+                                      ` : ''}
+                                  </div>
+                              `).join('')}
+                          </div>
+                      </div>
+                      
+                      <div class="section">
+                          <h2>🎨 前端应用测试</h2>
+                          <div class="test-grid">
+                              ${Object.entries(testResults.details.frontend).map(([app, data]) => `
+                                  <div class="test-card">
+                                      <h4>${app}</h4>
+                                      <div class="test-stats">
+                                          <span>通过: <strong class="passed">${data.tests.passed}</strong></span>
+                                          <span>失败: <strong class="failed">${data.tests.failed}</strong></span>
+                                          <span>跳过: <strong class="skipped">${data.tests.skipped}</strong></span>
+                                      </div>
+                                      <div>覆盖率: ${data.coverage}</div>
+                                  </div>
+                              `).join('')}
+                          </div>
+                      </div>
+                      
+                      ${testResults.details.integration.tests ? `
+                          <div class="section">
+                              <h2>🔗 集成测试</h2>
+                              <div class="test-card">
+                                  <div class="test-stats">
+                                      <span>通过: <strong class="passed">${testResults.details.integration.tests.passed}</strong></span>
+                                      <span>失败: <strong class="failed">${testResults.details.integration.tests.failed}</strong></span>
+                                      <span>跳过: <strong class="skipped">${testResults.details.integration.tests.skipped}</strong></span>
+                                  </div>
+                              </div>
+                          </div>
+                      ` : ''}
+                  </div>
+                  
+                  <div class="footer">
+                      <p>📊 由 PhoenixCoder CI/CD 自动生成</p>
+                      <p>工作流运行ID: ${testResults.workflow_run_id}</p>
+                  </div>
+              </div>
+          </body>
+          </html>
+          `;
+          
+          // 保存报告
+          fs.writeFileSync('test-report.json', JSON.stringify(testResults, null, 2));
+          fs.writeFileSync('test-report.html', htmlReport);
+          
+          console.log('✅ 测试报告生成完成');
+          console.log(`📊 总测试数: ${testResults.summary.total}`);
+          console.log(`✅ 通过: ${testResults.summary.passed}`);
+          console.log(`❌ 失败: ${testResults.summary.failed}`);
+          console.log(`⏭️ 跳过: ${testResults.summary.skipped}`);
+          EOF
+      
+      - name: 上传测试报告
+        uses: actions/upload-artifact@v3
+        with:
+          name: comprehensive-test-report
+          path: |
+            test-report.json
+            test-report.html
+      
+      - name: 部署测试报告到GitHub Pages
+        if: github.event.workflow_run.head_branch == 'main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          destination_dir: test-reports/${{ github.event.workflow_run.id }}
+          keep_files: true
+      
+      - name: 发送测试报告通知
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            
+            if (fs.existsSync('test-report.json')) {
+              const report = JSON.parse(fs.readFileSync('test-report.json', 'utf8'));
+              
+              const status = report.summary.failed > 0 ? '❌ 失败' : '✅ 通过';
+              const successRate = Math.round((report.summary.passed / report.summary.total) * 100);
+              
+              const message = `## 🧪 测试报告 ${status}
+              
+              **📊 测试统计**
+              - 总测试数: ${report.summary.total}
+              - 通过: ${report.summary.passed}
+              - 失败: ${report.summary.failed}
+              - 跳过: ${report.summary.skipped}
+              - 成功率: ${successRate}%
+              
+              **🔧 后端服务**
+              ${Object.entries(report.details.backend).map(([service, data]) => 
+                `- ${service}: ${data.tests.passed}/${data.tests.total} 通过${data.coverage ? ` (覆盖率: ${data.coverage.lines}%)` : ''}`
+              ).join('\n')}
+              
+              **🎨 前端应用**
+              ${Object.entries(report.details.frontend).map(([app, data]) => 
+                `- ${app}: ${data.tests.passed}/${data.tests.total} 通过`
+              ).join('\n')}
+              
+              **📅 构建信息**
+              - 时间: ${new Date(report.timestamp).toLocaleString('zh-CN')}
+              - 提交: ${report.commit_sha?.substring(0, 8)}
+              - 分支: ${report.branch}
+              
+              📋 [查看详细报告](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})`;
+              
+              // 如果是PR，添加评论
+              if (context.payload.workflow_run.event === 'pull_request') {
+                const pulls = await github.rest.pulls.list({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  head: `${context.repo.owner}:${report.branch}`,
+                  state: 'open'
+                });
+                
+                if (pulls.data.length > 0) {
+                  await github.rest.issues.createComment({
+                    issue_number: pulls.data[0].number,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    body: message
+                  });
+                }
+              }
+              
+              console.log(message);
+            }

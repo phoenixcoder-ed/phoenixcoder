@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: phoenixcoder-config
+  namespace: staging
+  labels:
+    app: phoenixcoder
+    environment: staging
+data:
+  # OIDC配置
+  oidc-client-id: "phoenixcoder-staging"
+  oidc-issuer: "https://staging-oidc.phoenixcoder.dev"
+  
+  # API配置
+  api-base-url: "https://staging-api.phoenixcoder.dev"
+  
+  # 应用配置
+  app-name: "PhoenixCoder Staging"
+  app-version: "1.0.0"
+  log-level: "debug"
+  
+  # 数据库配置
+  db-pool-size: "10"
+  db-timeout: "30"
+  
+  # Redis配置
+  redis-timeout: "5"
+  redis-pool-size: "10"
+  
+  # 文件上传配置
+  max-file-size: "10MB"
+  allowed-file-types: "jpg,jpeg,png,gif,pdf,doc,docx"
+  
+  # 邮件配置
+  smtp-host: "smtp.gmail.com"
+  smtp-port: "587"
+  
+  # 微信小程序配置
+  wechat-app-id: "wx1234567890abcdef"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: staging
+  labels:
+    app: phoenixcoder-admin
+    environment: staging
+data:
+  default.conf: |
+    server {
+        listen 80;
+        server_name _;
+        root /usr/share/nginx/html;
+        index index.html;
+        
+        # 启用gzip压缩
+        gzip on;
+        gzip_vary on;
+        gzip_min_length 1024;
+        gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
+        
+        # 静态资源缓存
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+        
+        # SPA路由支持
+        location / {
+            try_files $uri $uri/ /index.html;
+            add_header X-Frame-Options "SAMEORIGIN" always;
+            add_header X-Content-Type-Options "nosniff" always;
+            add_header X-XSS-Protection "1; mode=block" always;
+            add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        }
+        
+        # API代理
+        location /api/ {
+            proxy_pass https://staging-api.phoenixcoder.dev/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        
+        # 健康检查
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+    }

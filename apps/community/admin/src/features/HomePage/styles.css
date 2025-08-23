@@ -1,0 +1,804 @@
+/* PhoenixCoder 宇宙主题样式 */
+
+/* 自定义CSS变量 - 与设计原型保持一致 */
+:root {
+  /* DaisyUI主题变量定制 */
+  --rounded-box: 1rem;
+  --rounded-btn: 0.5rem;
+  --rounded-badge: 1.9rem;
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+  --btn-text-case: uppercase;
+  --btn-focus-scale: 0.95;
+  --border-btn: 1px;
+  --tab-border: 1px;
+  --tab-radius: 0.5rem;
+
+  --color-primary: #6a00ff;
+  --color-secondary: #00e4ff;
+  --color-accent: #00ffb3;
+  --color-warning: #ffa940;
+  --color-error: #ff6b6b;
+  --color-success: #00ffb3;
+  --color-info: #00e4ff;
+  --color-background: #0d0d17;
+  --color-surface: #1a1a2e;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b0b0c0;
+  --color-border: #2a2a3e;
+
+  /* 渐变定义 */
+  --quantum-gradient: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-secondary)
+  );
+  --accent-gradient: linear-gradient(
+    135deg,
+    var(--color-secondary),
+    var(--color-accent)
+  );
+  --warning-gradient: linear-gradient(
+    135deg,
+    var(--color-warning),
+    var(--color-error)
+  );
+
+  /* 字体定义 */
+  --font-heading: 'Orbitron', 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* 基础样式 */
+.bg-cosmic-black {
+  background-color: var(--color-background);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-secondary {
+  color: var(--color-secondary);
+}
+
+.text-accent {
+  color: var(--color-accent);
+}
+
+.text-warning {
+  color: var(--color-warning);
+}
+
+.text-error {
+  color: var(--color-error);
+}
+
+.bg-quantum-gradient {
+  background: var(--quantum-gradient);
+}
+
+/* 粒子背景动画 */
+.particle-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particle-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, rgba(106, 0, 255, 0.8), transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(0, 228, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(0, 255, 179, 0.8), transparent),
+    radial-gradient(
+      1px 1px at 130px 80px,
+      rgba(255, 169, 64, 0.6),
+      transparent
+    ),
+    radial-gradient(
+      2px 2px at 160px 30px,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+  background-repeat: repeat;
+  background-size: 200px 100px;
+  animation: particle-float 20s linear infinite;
+}
+
+@keyframes particle-float {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(-200px, -100px);
+  }
+}
+
+/* 数据流背景 */
+.data-streams {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(106, 0, 255, 0.1) 50%,
+      transparent 100%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 0%,
+      rgba(0, 228, 255, 0.1) 50%,
+      transparent 100%
+    );
+  background-size:
+    100px 100%,
+    100% 100px;
+  animation: data-flow 15s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes data-flow {
+  0% {
+    background-position:
+      0% 0%,
+      0% 0%;
+  }
+  100% {
+    background-position:
+      100% 0%,
+      0% 100%;
+  }
+}
+
+/* 字体样式 */
+.font-heading {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.font-body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+/* 标题发光效果 */
+.title-glow {
+  text-shadow:
+    0 0 10px rgba(106, 0, 255, 0.8),
+    0 0 20px rgba(106, 0, 255, 0.6),
+    0 0 30px rgba(106, 0, 255, 0.4),
+    0 0 40px rgba(106, 0, 255, 0.2);
+  color: var(--color-text-primary);
+}
+
+.title-glow-secondary {
+  text-shadow:
+    0 0 10px rgba(0, 228, 255, 0.8),
+    0 0 20px rgba(0, 228, 255, 0.6),
+    0 0 30px rgba(0, 228, 255, 0.4);
+  color: var(--color-secondary);
+}
+
+.title-glow-accent {
+  text-shadow:
+    0 0 10px rgba(0, 255, 179, 0.8),
+    0 0 20px rgba(0, 255, 179, 0.6),
+    0 0 30px rgba(0, 255, 179, 0.4);
+  color: var(--color-accent);
+}
+
+/* 智能玻璃效果 */
+.smart-glass {
+  background: rgba(26, 26, 46, 0.3);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(106, 0, 255, 0.2);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 20px rgba(106, 0, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.smart-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(106, 0, 255, 0.1),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.smart-glass:hover::before {
+  left: 100%;
+}
+
+.smart-glass:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.smart-glass-secondary {
+  background: rgba(26, 26, 46, 0.3);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 228, 255, 0.2);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 20px rgba(0, 228, 255, 0.1);
+}
+
+/* 几何网格背景 */
+.geometric-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: grid-move 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes grid-move {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(50px, 50px);
+  }
+}
+
+/* 数据标签动画 */
+.data-label {
+  animation: data-pulse 2s ease-in-out infinite;
+}
+
+@keyframes data-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* 功能卡片悬停效果 */
+.feature-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow:
+    0 20px 40px rgba(99, 102, 241, 0.2),
+    0 10px 20px rgba(139, 92, 246, 0.15);
+}
+
+/* 渐变边框效果 */
+.gradient-border {
+  position: relative;
+  background: var(--cosmic-black);
+  border-radius: 12px;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: var(--quantum-gradient);
+  border-radius: inherit;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: xor;
+}
+
+/* 粒子动画容器 */
+.particle-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/* 悬停光效 */
+.hover-glow {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.hover-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(99, 102, 241, 0.4),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.hover-glow:hover::before {
+  left: 100%;
+}
+
+/* 脉冲动画 */
+.pulse-animation {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 呼吸灯效果 */
+.breathing-light {
+  animation: breathing 3s ease-in-out infinite;
+}
+
+@keyframes breathing {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+  }
+}
+
+/* 液态金属按钮效果 */
+.liquid-metal-btn {
+  background: var(--quantum-gradient);
+  border: none;
+  border-radius: 12px;
+  color: var(--color-text-primary);
+  padding: 14px 28px;
+  font-weight: 600;
+  font-family: var(--font-heading);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow:
+    0 4px 15px rgba(106, 0, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.liquid-metal-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.liquid-metal-btn:hover::before {
+  left: 100%;
+}
+
+.liquid-metal-btn:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 15px 35px rgba(106, 0, 255, 0.4),
+    0 0 30px rgba(0, 228, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.liquid-metal-btn:active {
+  transform: translateY(-1px);
+}
+
+/* 按钮变体 */
+.liquid-metal-btn-secondary {
+  background: var(--accent-gradient);
+  box-shadow:
+    0 4px 15px rgba(0, 228, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.liquid-metal-btn-secondary:hover {
+  box-shadow:
+    0 15px 35px rgba(0, 228, 255, 0.4),
+    0 0 30px rgba(0, 255, 179, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.liquid-metal-btn-warning {
+  background: var(--warning-gradient);
+  box-shadow:
+    0 4px 15px rgba(255, 169, 64, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.liquid-metal-btn-warning:hover {
+  box-shadow:
+    0 15px 35px rgba(255, 169, 64, 0.4),
+    0 0 30px rgba(255, 107, 107, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* 数据流动画 */
+.data-stream {
+  position: relative;
+  overflow: hidden;
+}
+
+.data-stream::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 10px,
+    rgba(6, 182, 212, 0.1) 10px,
+    rgba(6, 182, 212, 0.1) 20px
+  );
+  animation: data-flow 2s linear infinite;
+}
+
+@keyframes data-flow {
+  0% {
+    transform: translateX(-20px);
+  }
+  100% {
+    transform: translateX(20px);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .smart-glass {
+    padding: 1rem;
+  }
+
+  .title-glow {
+    font-size: 1.5rem;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-4px) scale(1.01);
+  }
+}
+
+/* 暗色主题优化 */
+@media (prefers-color-scheme: dark) {
+  .smart-glass {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .smart-glass {
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .text-nebula-white {
+    color: #ffffff;
+  }
+}
+
+/* 减少动画模式 */
+@media (prefers-reduced-motion: reduce) {
+  .geometric-grid,
+  .data-label,
+  .pulse-animation,
+  .breathing-light,
+  .data-stream::after {
+    animation: none;
+  }
+
+  .feature-card,
+  .hover-glow,
+  .liquid-metal-btn {
+    transition: none;
+  }
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--quantum-gradient);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+}
+
+/* 选择文本样式 */
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: var(--nebula-white);
+}
+
+/* 焦点样式 */
+*:focus {
+  outline: 2px solid var(--quantum-blue);
+  outline-offset: 2px;
+}
+
+/* 加载动画 */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(99, 102, 241, 0.3);
+  border-top: 4px solid var(--quantum-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 粒子动画 */
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--quantum-blue);
+  border-radius: 50%;
+  animation: particle-float 6s ease-in-out infinite;
+}
+
+@keyframes particle-float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-100px) rotate(180deg);
+  }
+}
+
+/* 悬停发光卡片 */
+.hover-glow-card {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-glow-card:hover {
+  box-shadow:
+    0 0 20px rgba(99, 102, 241, 0.3),
+    0 0 40px rgba(139, 92, 246, 0.2),
+    0 0 60px rgba(6, 182, 212, 0.1);
+  transform: translateY(-4px);
+}
+
+/* 量子进度条 */
+.quantum-progress {
+  position: relative;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.quantum-progress::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--quantum-gradient);
+  border-radius: 4px;
+  animation: quantum-pulse 2s ease-in-out infinite;
+}
+
+@keyframes quantum-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.8);
+  }
+}
+
+/* 神经网络连接线 */
+.neural-connection {
+  position: absolute;
+  width: 1px;
+  height: 100px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(6, 182, 212, 0.5),
+    transparent
+  );
+  animation: neural-pulse 3s ease-in-out infinite;
+}
+
+@keyframes neural-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1.2);
+  }
+}
+
+/* 全息投影效果 */
+.hologram {
+  position: relative;
+  background: linear-gradient(
+    45deg,
+    rgba(99, 102, 241, 0.1),
+    rgba(139, 92, 246, 0.1),
+    rgba(6, 182, 212, 0.1)
+  );
+  background-size: 200% 200%;
+  animation: hologram-shift 4s ease-in-out infinite;
+}
+
+@keyframes hologram-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* 数字雨效果 */
+.digital-rain {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    rgba(6, 182, 212, 0.03) 1px,
+    transparent 2px
+  );
+  animation: rain-fall 10s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes rain-fall {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+/* 能量脉冲 */
+.energy-pulse {
+  position: relative;
+  overflow: hidden;
+}
+
+.energy-pulse::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(
+    circle,
+    rgba(99, 102, 241, 0.6) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: energy-expand 2s ease-out infinite;
+}
+
+@keyframes energy-expand {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+  }
+}
+
+/* 技能标签动画 */
+.skill-tag {
+  position: relative;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.skill-tag:hover {
+  background: rgba(99, 102, 241, 0.3);
+  border-color: rgba(99, 102, 241, 0.6);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}

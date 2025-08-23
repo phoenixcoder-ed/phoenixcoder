@@ -1,0 +1,49 @@
+# Redis安全配置
+# 基于redis.conf的安全加固设置
+
+# 网络设置
+bind 127.0.0.1                         # 只绑定本地地址
+port 6379                               # 默认端口
+tcp-backlog 511                         # TCP监听队列长度
+tcp-keepalive 300                       # TCP keepalive时间
+
+# 安全设置
+protected-mode yes                      # 启用保护模式
+requirepass ${REDIS_PASSWORD}           # 设置密码
+rename-command FLUSHDB ""               # 禁用危险命令
+rename-command FLUSHALL ""              # 禁用危险命令
+rename-command KEYS ""                  # 禁用危险命令
+rename-command CONFIG "CONFIG_b840fc02d524045429941cc15f59e41cb7be6c52"
+rename-command SHUTDOWN "SHUTDOWN_b840fc02d524045429941cc15f59e41cb7be6c52"
+rename-command DEBUG ""                 # 禁用调试命令
+rename-command EVAL ""                  # 禁用EVAL命令
+rename-command SCRIPT ""                # 禁用SCRIPT命令
+
+# 持久化设置
+save 900 1                              # 900秒内至少1个key变化时保存
+save 300 10                             # 300秒内至少10个key变化时保存
+save 60 10000                           # 60秒内至少10000个key变化时保存
+stop-writes-on-bgsave-error yes         # 后台保存出错时停止写入
+rdbcompression yes                      # 启用RDB压缩
+rdbchecksum yes                         # 启用RDB校验和
+dbfilename dump.rdb                     # RDB文件名
+dir ./                                  # 数据目录
+
+# 日志设置
+loglevel notice                         # 日志级别
+logfile "/var/log/redis/redis-server.log" # 日志文件
+syslog-enabled yes                      # 启用系统日志
+syslog-ident redis                      # 系统日志标识
+
+# 客户端设置
+timeout 300                             # 客户端空闲超时时间
+tcp-keepalive 300                       # TCP keepalive时间
+maxclients 10000                        # 最大客户端连接数
+
+# 内存设置
+maxmemory 256mb                         # 最大内存使用
+maxmemory-policy allkeys-lru            # 内存淘汰策略
+
+# 慢查询日志
+slowlog-log-slower-than 10000           # 慢查询阈值(微秒)
+slowlog-max-len 128                     # 慢查询日志最大长度

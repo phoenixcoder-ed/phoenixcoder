@@ -1,0 +1,14 @@
+# 本地开发引用 - 已移除Node.js包引用
+# 注意：shared-types, shared-utils, shared-services 是Node.js包，不适用于Python项目
+
+fastapi==0.116.1
+uvicorn==0.35.0
+python-jose[cryptography]==3.5.0
+httpx==0.28.1
+aiohttp==3.9.1
+python-dotenv==1.1.1
+psycopg2-binary==2.9.10
+redis==6.2.0
+pydantic[email]==2.8.2
+python-multipart==0.0.9
+bcrypt==4.1.2

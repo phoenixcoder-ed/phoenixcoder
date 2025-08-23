@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: phoenixcoder-config
+  namespace: phoenixcoder
+data:
+  # PostgreSQL配置
+  POSTGRES_HOST: "postgresql.default.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "phoenixcoder"
+  POSTGRES_USER: "postgres"
+  
+  # Redis配置
+  REDIS_HOST: "redis-master.default.svc.cluster.local"
+  REDIS_PORT: "6379"
+  
+  # OIDC服务配置
+  OIDC_ISSUER: "http://community-oidc-server.phoenixcoder.svc.cluster.local:8000"
+  OIDC_CLIENT_ID: "phoenixcoder-client"
+  OIDC_REDIRECT_URI: "http://community-admin.phoenixcoder.svc.cluster.local/auth/callback"
+  
+  # 应用环境
+  APP_ENV: "production"
+  DEBUG: "false"
+  
+  # 前端配置
+  REACT_APP_API_URL: "http://community-server.phoenixcoder.svc.cluster.local:8000"
+  REACT_APP_OIDC_ISSUER: "http://community-oidc-server.phoenixcoder.svc.cluster.local:8000"
+  REACT_APP_CLIENT_ID: "community-admin"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: phoenixcoder-secrets
+  namespace: phoenixcoder
+type: Opaque
+data:
+  # 强密码（Base64编码）
+  POSTGRES_PASSWORD: dzhycDBSRnJ2NWhTc1FaRkpzNlZ1RWZyS3djWWNUTmE=
+  REDIS_PASSWORD: Q2xjaVRKODVpdnNUV0RQRHZZMkN2YnQxSmo1ZjZkeUs=
+  JWT_SECRET: VHA5b2k4Z0JackhtSVhKdHFLdm80ZVBYOERpSWpqeGNkMngrZVI2VDBKYXZuSkcrUjZUOU0xYjN4Y1VCcWdyREszWkhONHJRTTJkLzFWbHVPdVhha0E9PQ==
+  OIDC_CLIENT_SECRET: YzczODQ3N2E3NzRhOTRjMTJiN2I2OWUwN2VjZThjNmMzN2FjOTYyMzNiNDE2NjExYWZlYmZiOWJlMzY4NWU2NQ==

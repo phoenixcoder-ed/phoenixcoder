@@ -1,0 +1,21 @@
+# 测试依赖
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.0
+httpx>=0.24.0
+faker>=19.0.0
+
+# 开发依赖
+black>=23.0.0
+flake8>=6.0.0
+isort>=5.12.0
+mypy>=1.5.0
+
+# 基础依赖（从主requirements.txt继承）
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+pydantic>=2.0.0
+python-jose[cryptography]>=3.3.0
+python-multipart>=0.0.6
+requests>=2.31.0

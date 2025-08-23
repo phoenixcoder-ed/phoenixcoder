@@ -1,0 +1,104 @@
+.phoenix-tag-input {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+.phoenix-tag-input:hover {
+    border-color: #1890ff;
+}
+
+.phoenix-tag-input:focus-within {
+    border-color: #1890ff;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    outline: none;
+}
+
+.phoenix-tag-input.disabled {
+    background-color: #f5f5f5;
+    border-color: #d9d9d9;
+    cursor: not-allowed;
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    background-color: #f0f2f5;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #595959;
+}
+
+.tag-text {
+    margin-right: 4px;
+}
+
+.tag-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: transparent;
+    transition: all 0.2s ease;
+}
+
+.tag-remove:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.tag-input {
+    flex: 1;
+    min-width: 120px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    background-color: transparent;
+}
+
+.tag-input::placeholder {
+    color: #bfbfbf;
+}
+
+.tag-input:disabled {
+    color: #999;
+    cursor: not-allowed;
+}
+
+/* 暗黑模式适配 */
+.dark .phoenix-tag-input {
+    border-color: #434343;
+    background-color: #1e1e1e;
+}
+
+.dark .phoenix-tag-input:hover,
+.dark .phoenix-tag-input:focus-within {
+    border-color: #40a9ff;
+}
+
+.dark .tag-item {
+    background-color: #333;
+    color: #d9d9d9;
+}
+
+.dark .tag-input {
+    color: #d9d9d9;
+}
+
+.dark .tag-input::placeholder {
+    color: #666;
+}

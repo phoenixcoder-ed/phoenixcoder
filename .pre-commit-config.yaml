@@ -1,0 +1,223 @@
+# PhoenixCoder 预提交钩子配置
+# 确保代码质量、测试覆盖率和安全性
+
+repos:
+  # 通用代码格式化和检查
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: 移除行尾空格
+      - id: end-of-file-fixer
+        name: 确保文件以换行符结尾
+      - id: check-yaml
+        name: 检查YAML语法
+      - id: check-json
+        name: 检查JSON语法
+      - id: check-toml
+        name: 检查TOML语法
+      - id: check-xml
+        name: 检查XML语法
+      - id: check-merge-conflict
+        name: 检查合并冲突标记
+      - id: check-case-conflict
+        name: 检查文件名大小写冲突
+      - id: check-added-large-files
+        name: 检查大文件
+        args: ['--maxkb=1000']
+      - id: detect-private-key
+        name: 检测私钥泄露
+      - id: mixed-line-ending
+        name: 检查混合行结束符
+        args: ['--fix=lf']
+
+  # Python 代码质量检查
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        name: Python代码格式化
+        files: ^apps/community/(server|oidc-server)/.*\.py$
+        args: [--line-length=88]
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: Python导入排序
+        files: ^apps/community/(server|oidc-server)/.*\.py$
+        args: [--profile=black]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        name: Python代码风格检查
+        files: ^apps/community/(server|oidc-server)/.*\.py$
+        args: [--max-line-length=88, --extend-ignore=E203,W503]
+
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        name: Python安全检查
+        files: ^apps/community/(server|oidc-server)/.*\.py$
+        args: [-r, --skip=B101,B601]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        name: Python类型检查
+        files: ^apps/community/(server|oidc-server)/.*\.py$
+        additional_dependencies: [types-all]
+        args: [--ignore-missing-imports, --no-strict-optional]
+
+  # JavaScript/TypeScript 代码质量检查
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.56.0
+    hooks:
+      - id: eslint
+        name: JavaScript/TypeScript代码检查
+        files: ^apps/community/(admin|miniapp)/.*\.(js|ts|jsx|tsx)$
+        additional_dependencies:
+          - eslint@8.56.0
+          - '@typescript-eslint/eslint-plugin@6.19.0'
+          - '@typescript-eslint/parser@6.19.0'
+          - eslint-plugin-react@7.33.2
+          - eslint-plugin-react-hooks@4.6.0
+        args: [--fix]
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: 前端代码格式化
+        files: ^apps/community/(admin|miniapp)/.*\.(js|ts|jsx|tsx|json|css|scss|md)$
+        args: [--write]
+
+  # 自定义钩子
+  - repo: local
+    hooks:
+      # 后端测试钩子
+      - id: backend-tests
+        name: 运行后端测试
+        entry: bash -c 'cd apps/community/server && python -m pytest tests/ -x --tb=short'
+        language: system
+        files: ^apps/community/server/.*\.(py)$
+        pass_filenames: false
+        stages: [commit]
+
+      - id: oidc-tests
+        name: 运行OIDC服务测试
+        entry: bash -c 'cd apps/community/oidc-server && python -m pytest tests/ -x --tb=short'
+        language: system
+        files: ^apps/community/oidc-server/.*\.(py)$
+        pass_filenames: false
+        stages: [commit]
+
+      # 前端测试钩子
+      - id: admin-tests
+        name: 运行管理前端测试
+        entry: bash -c 'cd apps/community/admin && pnpm run test:unit'
+        language: system
+        files: ^apps/community/admin/.*\.(js|ts|jsx|tsx)$
+        pass_filenames: false
+        stages: [commit]
+
+      - id: miniapp-tests
+        name: 运行小程序测试
+        entry: bash -c 'cd apps/community/miniapp && pnpm run test:unit'
+        language: system
+        files: ^apps/community/miniapp/.*\.(js|ts|jsx|tsx)$
+        pass_filenames: false
+        stages: [commit]
+
+      # 覆盖率检查钩子
+      - id: coverage-check
+        name: 检查测试覆盖率
+        entry: node coverage-monitor.js --check-thresholds
+        language: system
+        files: ^apps/community/.*\.(py|js|ts|jsx|tsx)$
+        pass_filenames: false
+        stages: [commit]
+
+      # 性能回归检查
+      - id: performance-regression
+        name: 性能回归检测
+        entry: node performance-regression-detector.js
+        language: system
+        files: ^apps/community/.*\.(py|js|ts|jsx|tsx)$
+        pass_filenames: false
+        stages: [push]
+
+      # 依赖安全检查
+      - id: python-security-audit
+        name: Python依赖安全审计
+        entry: bash -c 'cd apps/community/server && pip-audit --desc'
+        language: system
+        files: ^apps/community/(server|oidc-server)/(requirements.*\.txt|pyproject\.toml)$
+        pass_filenames: false
+        stages: [commit]
+
+      - id: npm-security-audit
+        name: NPM依赖安全审计
+        entry: bash -c 'cd apps/community/admin && pnpm audit --audit-level=moderate'
+        language: system
+        files: ^apps/community/(admin|miniapp)/package.*\.json$
+        pass_filenames: false
+        stages: [commit]
+
+      # 代码复杂度检查
+      - id: python-complexity
+        name: Python代码复杂度检查
+        entry: bash -c 'cd apps/community/server && radon cc --min=C .'
+        language: system
+        files: ^apps/community/(server|oidc-server)/.*\.py$
+        pass_filenames: false
+        stages: [commit]
+
+      # 文档检查
+      - id: docs-check
+        name: 检查文档完整性
+        entry: bash -c 'python scripts/check-docs.py'
+        language: system
+        files: ^(README\.md|docs/.*\.md|apps/.*/README\.md)$
+        pass_filenames: false
+        stages: [commit]
+
+      # 数据库迁移检查
+      - id: migration-check
+        name: 检查数据库迁移
+        entry: bash -c 'python scripts/check-migrations.py'
+        language: system
+        files: ^(supabase/migrations/.*\.sql|apps/.*/migrations/.*\.(py|sql))$
+        pass_filenames: false
+        stages: [commit]
+
+      # API文档同步检查
+      - id: api-docs-sync
+        name: 检查API文档同步
+        entry: bash -c 'python scripts/check-api-docs.py'
+        language: system
+        files: ^apps/community/server/.*\.(py)$
+        pass_filenames: false
+        stages: [commit]
+
+# 全局配置
+default_stages: [commit]
+fail_fast: false
+minimum_pre_commit_version: '3.0.0'
+
+# CI配置
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false

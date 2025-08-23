@@ -1,0 +1,37 @@
+.chartContainer {
+    padding: 20px;
+    background-color: #1e1e2f;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.chartSection {
+    margin-bottom: 30px;
+}
+
+.chartTitle {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 15px;
+    padding-left: 5px;
+    border-left: 3px solid #3d5afe;
+}
+
+// 适配深色模式的样式
+@media (prefers-color-scheme: dark) {
+    .chartContainer {
+        background-color: #1e1e2f;
+    }
+}
+
+// 适配亮色模式的样式
+@media (prefers-color-scheme: light) {
+    .chartContainer {
+        background-color: #f9fafb;
+    }
+
+    .chartTitle {
+        color: #1e1e2f;
+    }
+}

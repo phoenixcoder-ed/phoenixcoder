@@ -1,0 +1,68 @@
+{
+  "name": "@phoenixcoder/enterprise",
+  "version": "1.0.0",
+  "description": "PhoenixCoder Enterprise Edition - Advanced features for teams and organizations",
+  "private": true,
+  "workspaces": [
+    "admin",
+    "server",
+    "miniapp",
+    "oidc-server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter @phoenixcoder/enterprise-admin dev\" \"pnpm --filter @phoenixcoder/enterprise-server dev\"",
+    "dev:admin": "pnpm --filter @phoenixcoder/enterprise-admin dev",
+    "dev:server": "pnpm --filter @phoenixcoder/enterprise-server dev",
+    "dev:miniapp": "pnpm --filter @phoenixcoder/enterprise-miniapp dev",
+    "dev:oidc": "pnpm --filter @phoenixcoder/enterprise-oidc-server dev",
+    "build": "pnpm --filter @phoenixcoder/enterprise-* build",
+    "build:admin": "pnpm --filter @phoenixcoder/enterprise-admin build",
+    "build:server": "pnpm --filter @phoenixcoder/enterprise-server build",
+    "build:miniapp": "pnpm --filter @phoenixcoder/enterprise-miniapp build",
+    "build:oidc": "pnpm --filter @phoenixcoder/enterprise-oidc-server build",
+    "test": "pnpm --filter @phoenixcoder/enterprise-* test",
+    "test:admin": "pnpm --filter @phoenixcoder/enterprise-admin test",
+    "test:server": "pnpm --filter @phoenixcoder/enterprise-server test",
+    "test:miniapp": "pnpm --filter @phoenixcoder/enterprise-miniapp test",
+    "test:oidc": "pnpm --filter @phoenixcoder/enterprise-oidc-server test",
+    "lint": "pnpm --filter @phoenixcoder/enterprise-* lint",
+    "lint:fix": "pnpm --filter @phoenixcoder/enterprise-* lint:fix",
+    "docker:build": "docker-compose -f ../../docker-compose.yml build",
+    "docker:up": "docker-compose -f ../../docker-compose.yml up -d",
+    "docker:down": "docker-compose -f ../../docker-compose.yml down",
+    "k8s:deploy": "kubectl apply -f ../../k8s/",
+    "k8s:delete": "kubectl delete -f ../../k8s/",
+    "install:python-deps": "cd server && pip install -r requirements.txt && cd ../oidc-server && pip install -r requirements.txt",
+    "clean": "pnpm run clean:admin && pnpm run clean:miniapp",
+    "clean:admin": "cd admin && rm -rf dist node_modules",
+    "clean:miniapp": "cd miniapp && rm -rf dist node_modules",
+    "clean:deps": "rm -rf node_modules && pnpm --filter @phoenixcoder/enterprise-* exec rm -rf node_modules"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3"
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "python": ">=3.11.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/phoenixcoder.git",
+    "directory": "apps/enterprise"
+  },
+  "keywords": [
+    "phoenixcoder",
+    "enterprise",
+    "task-platform",
+    "programmer",
+    "teams",
+    "organizations",
+    "fastapi",
+    "react",
+    "taro",
+    "miniapp"
+  ],
+  "author": "PhoenixCoder Team",
+  "license": "MIT"
+}

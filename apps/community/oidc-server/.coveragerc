@@ -1,0 +1,326 @@
+# PhoenixCoder OIDC服务 pytest 覆盖率配置
+# 智能测试覆盖率监控配置文件
+
+[run]
+# 指定要测量覆盖率的源代码目录
+source = .
+
+# 排除不需要测量覆盖率的文件和目录
+omit = 
+    */tests/*
+    */test_*
+    */__pycache__/*
+    */venv/*
+    */env/*
+    */.pytest_cache/*
+    */conftest.py
+    */setup.py
+    */__init__.py
+    */alembic/*
+    */versions/*
+    */scripts/*
+    */docs/*
+    */build/*
+    */dist/*
+    */.tox/*
+    */.coverage*
+    */htmlcov/*
+    */coverage.xml
+    */coverage.json
+    */lcov.info
+    */node_modules/*
+    */.git/*
+    */.pytest_cache/*
+    */.mypy_cache/*
+    */tmp/*
+    */temp/*
+    */logs/*
+    */log/*
+    */.env*
+    */config/local.py
+    */config/test.py
+    */config/development.py
+    */config/production.py
+    */migrations/*
+
+# 包含特定的文件模式
+include = 
+    app/*
+    core/*
+    models/*
+    services/*
+    utils/*
+    api/*
+    auth/*
+    database/*
+    middleware/*
+    schemas/*
+    dependencies/*
+    routers/*
+    providers/*
+    clients/*
+    tokens/*
+    grants/*
+    scopes/*
+    *.py
+
+# 启用分支覆盖率测量
+branch = True
+
+# 启用并发测量（支持多进程/多线程）
+concurrency = 
+    thread
+    multiprocessing
+
+# 数据文件位置
+data_file = .coverage
+
+# 启用上下文测量（用于更详细的覆盖率分析）
+context = ${COVERAGE_CONTEXT}
+
+# 动态上下文（测试函数名）
+dynamic_context = test_function
+
+# 并行模式设置
+parallel = True
+
+# 插件配置
+plugins = 
+    coverage_conditional_plugin
+
+[report]
+# 报告精度（小数位数）
+precision = 2
+
+# 显示缺失的行号
+show_missing = True
+
+# 跳过已完全覆盖的文件
+skip_covered = False
+
+# 跳空行
+skip_empty = True
+
+# 排序方式：Name, Stmts, Miss, Cover
+sort = Cover
+
+# 失败阈值（低于此覆盖率将导致失败）
+fail_under = 85
+
+# 排除报告中的文件
+exclude_lines =
+    # 标准排除模式
+    pragma: no cover
+    pragma: nocover
+    
+    # 调试代码
+    def __repr__
+    if self\.debug:
+    
+    # 异常处理
+    raise AssertionError
+    raise NotImplementedError
+    
+    # 类型检查
+    if TYPE_CHECKING:
+    if typing\.TYPE_CHECKING:
+    
+    # 抽象方法
+    @(abc\.)?abstractmethod
+    
+    # 主程序入口
+    if __name__ == .__main__.:
+    
+    # 平台特定代码
+    if sys\.platform
+    if platform\.system
+    
+    # 版本检查
+    if sys\.version_info
+    
+    # 日志记录
+    logger\.
+    logging\.
+    
+    # 开发环境代码
+    if settings\.DEBUG
+    if DEBUG
+    
+    # 测试相关
+    # pragma: test
+    # test only
+    
+    # 临时代码
+    # TODO
+    # FIXME
+    # XXX
+    
+    # 类型注解
+    -> NoReturn
+    
+    # 异步上下文管理器
+    async def __aenter__
+    async def __aexit__
+    
+    # OIDC特定排除
+    # OAuth2/OIDC调试端点
+    if settings\.OIDC_DEBUG
+    # 开发环境OIDC配置
+    if settings\.ENVIRONMENT == .development.
+    # OIDC提供商特定代码
+    # pragma: provider-specific
+
+# 部分分支排除
+partial_branches =
+    pragma: no branch
+    pragma: nobranch
+    if TYPE_CHECKING:
+    if typing\.TYPE_CHECKING:
+    if settings\.OIDC_DEBUG
+
+[html]
+# HTML报告输出目录
+directory = ../../coverage-reports/oidcServer/html
+
+# HTML报告标题
+title = PhoenixCoder OIDC服务覆盖率报告
+
+# 显示上下文
+show_contexts = True
+
+# 额外的CSS文件
+extra_css = 
+
+# 跳过已覆盖的文件
+skip_covered = False
+
+# 跳空文件
+skip_empty = True
+
+[xml]
+# XML报告输出文件
+output = ../../coverage-reports/oidcServer/coverage.xml
+
+# 包路径映射（用于CI/CD系统）
+package_depth = 2
+
+[json]
+# JSON报告输出文件
+output = ../../coverage-reports/oidcServer/coverage.json
+
+# 美化JSON输出
+pretty_print = True
+
+# 显示上下文
+show_contexts = True
+
+[lcov]
+# LCOV报告输出文件
+output = ../../coverage-reports/oidcServer/lcov.info
+
+[paths]
+# 路径映射（用于不同环境下的路径统一）
+source =
+    .
+    /app
+    /code
+    /workspace
+    /home/runner/work/phoenixcoder/phoenixcoder/apps/community/oidc-server
+    C:\\workspace\\phoenixcoder\\apps\\community\\oidc-server
+
+# 测试路径映射
+tests =
+    tests/
+    */tests/
+    test_*/
+    */test_*/
+
+[coverage:paths]
+# 源代码路径别名
+source =
+    app/
+    */app/
+    core/
+    */core/
+    models/
+    */models/
+    services/
+    */services/
+    utils/
+    */utils/
+    api/
+    */api/
+    auth/
+    */auth/
+    providers/
+    */providers/
+    clients/
+    */clients/
+    tokens/
+    */tokens/
+    grants/
+    */grants/
+    scopes/
+    */scopes/
+
+[coverage:run]
+# 运行时配置
+# 启用调试模式
+debug = file,trace
+
+# 警告配置
+disable_warnings = 
+    no-data-collected
+    module-not-python
+
+# 时间戳
+timid = True
+
+[coverage:report]
+# 报告配置
+# 输出格式
+format = text
+
+# 显示行号
+show_missing = True
+
+# 显示上下文
+show_contexts = True
+
+# 忽略错误
+ignore_errors = False
+
+# 包含空文件
+include_empty = False
+
+[coverage:html]
+# HTML报告配置
+# 自定义CSS
+extra_css = 
+
+# 显示上下文
+show_contexts = True
+
+# 显示文件列表
+show_file_list = True
+
+[coverage:xml]
+# XML报告配置
+# 包深度
+package_depth = 3
+
+[coverage:json]
+# JSON报告配置
+# 美化输出
+pretty_print = True
+
+# 显示上下文
+show_contexts = True
+
+# 显示文件
+show_files = True
+
+[coverage:lcov]
+# LCOV报告配置
+# 输出详细信息
+verbose = True

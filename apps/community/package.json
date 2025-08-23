@@ -1,0 +1,65 @@
+{
+  "name": "@phoenixcoder/community",
+  "version": "1.0.0",
+  "description": "PhoenixCoder Community Edition - 程序员任务平台社区版",
+  "private": true,
+  "workspaces": [
+    "admin",
+    "server",
+    "miniapp",
+    "oidc-server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"pnpm run dev:server\" \"pnpm run dev:admin\" \"pnpm run dev:oidc\"",
+    "dev:server": "cd server && python main.py",
+    "dev:admin": "cd admin && pnpm run dev",
+    "dev:miniapp": "cd miniapp && pnpm run dev:weapp",
+    "dev:oidc": "cd oidc-server && python main.py",
+    "build": "pnpm run build:admin && pnpm run build:miniapp",
+    "build:admin": "cd admin && pnpm run build",
+    "build:miniapp": "cd miniapp && pnpm run build:weapp",
+    "test": "pnpm run test:server && pnpm run test:admin && pnpm run test:miniapp && pnpm run test:oidc",
+    "test:server": "cd server && python -m pytest",
+    "test:admin": "cd admin && pnpm run test",
+    "test:miniapp": "cd miniapp && pnpm run test",
+    "test:oidc": "cd oidc-server && python -m pytest",
+    "lint": "pnpm run lint:admin && pnpm run lint:miniapp",
+    "lint:admin": "cd admin && pnpm run lint",
+    "lint:miniapp": "cd miniapp && pnpm run lint",
+    "docker:build": "docker-compose -f ../../docker-compose.yml build",
+    "docker:up": "docker-compose -f ../../docker-compose.yml up -d",
+    "docker:down": "docker-compose -f ../../docker-compose.yml down",
+    "k8s:deploy": "kubectl apply -f ../../k8s/",
+    "k8s:delete": "kubectl delete -f ../../k8s/",
+    "install:python-deps": "cd server && pip install -r requirements.txt && cd ../oidc-server && pip install -r requirements.txt",
+    "clean": "pnpm run clean:admin && pnpm run clean:miniapp",
+    "clean:admin": "cd admin && rm -rf dist node_modules",
+    "clean:miniapp": "cd miniapp && rm -rf dist node_modules"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3"
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "python": ">=3.11.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/phoenixcoder.git",
+    "directory": "apps/community"
+  },
+  "keywords": [
+    "phoenixcoder",
+    "community",
+    "task-platform",
+    "programmer",
+    "freelance",
+    "fastapi",
+    "react",
+    "taro",
+    "miniapp"
+  ],
+  "author": "PhoenixCoder Team",
+  "license": "MIT"
+}

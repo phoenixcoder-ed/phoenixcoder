@@ -1,0 +1,30 @@
+# PhoenixCoder Multi-Edition Namespaces
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: phoenixcoder-community
+  labels:
+    name: phoenixcoder-community
+    edition: community
+    environment: production
+    app: phoenixcoder
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: phoenixcoder-enterprise
+  labels:
+    name: phoenixcoder-enterprise
+    edition: enterprise
+    environment: production
+    app: phoenixcoder
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: phoenixcoder-system
+  labels:
+    name: phoenixcoder-system
+    environment: production
+    app: phoenixcoder
+    purpose: shared-infrastructure

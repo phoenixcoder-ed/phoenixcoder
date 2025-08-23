@@ -1,0 +1,41 @@
+{
+  "extends": [
+    "../../../tsconfig.base.json"
+  ],
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "noImplicitAny": false,
+    "typeRoots": [
+      "node_modules/@types",
+      "global.d.ts"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/pages/*": ["./src/pages/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/services/*": ["./src/services/*"],
+      "@/store/*": ["./src/store/*"],
+      "@/assets/*": ["./src/assets/*"],
+      "@phoenixcoder/shared-types": ["../../../packages/shared-types/src/index.ts"],
+      "@phoenixcoder/shared-utils": ["../../../packages/shared-utils/src/index.ts"],
+      "@phoenixcoder/shared-components": ["../../../packages/shared-components/src/index.ts"],
+      "@phoenixcoder/shared-services": ["../../../packages/shared-services/src/index.ts"]
+    }
+  },
+  "include": [
+    "./src",
+    "./types",
+    "./tests"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

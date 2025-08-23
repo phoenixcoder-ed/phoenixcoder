@@ -1,0 +1,106 @@
+.register-container {
+    padding: 40px 30px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f7;
+}
+
+.register-form {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 30px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+}
+
+.register-tabs {
+    display: flex;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.tab-item {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 16px;
+    color: #8e8e93;
+    position: relative;
+}
+
+.tab-item.active {
+    color: #3d5afe;
+}
+
+.tab-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 20%;
+    width: 60%;
+    height: 3px;
+    background-color: #3d5afe;
+    border-radius: 3px;
+}
+
+.form-content {
+    margin-bottom: 20px;
+}
+
+.code-input-container {
+    display: flex;
+    gap: 10px;
+}
+
+.code-input {
+    flex: 1;
+}
+
+.send-code-btn {
+    width: 120px;
+    height: 80px;
+}
+
+.user-type-selector {
+    margin: 25px 0;
+}
+
+.selector-title {
+    display: block;
+    margin-bottom: 15px;
+    font-size: 15px;
+    color: #333333;
+}
+
+.register-btn {
+    margin-top: 20px;
+    background-color: #3d5afe;
+    border-radius: 8px;
+    height: 50px;
+    line-height: 50px;
+    font-size: 16px;
+}
+
+.login-link {
+    text-align: center;
+    font-size: 14px;
+    color: #8e8e93;
+    margin-top: auto;
+    padding-bottom: 20px;
+}
+
+.link {
+    color: #3d5afe;
+    font-weight: 500;
+}
+
+.at-input {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background-color: #f5f5f7;
+}
+
+.at-radio {
+    margin-bottom: 15px;
+}

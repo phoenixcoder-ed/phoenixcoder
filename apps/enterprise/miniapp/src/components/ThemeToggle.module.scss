@@ -1,0 +1,41 @@
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    border-radius: 8px;
+    background-color: #2d2d42;
+}
+
+.themeLabel {
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.darkLabel {
+    color: #ffffff;
+}
+
+.lightLabel {
+    color: #1e1e2f;
+}
+
+.switch {
+    transform: scale(1.1);
+}
+
+// 适配亮色模式
+@media (prefers-color-scheme: light) {
+    .container {
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+    }
+}
+
+// 适配深色模式
+@media (prefers-color-scheme: dark) {
+    .container {
+        background-color: #2d2d42;
+    }
+}

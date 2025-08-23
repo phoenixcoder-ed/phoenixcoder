@@ -1,0 +1,412 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2024-01-01T00:00:00Z",
+  "description": "PhoenixCoder 性能测试基准数据",
+  "environment": {
+    "os": "macOS",
+    "node_version": "24.x",
+    "python_version": "3.13",
+    "database": "PostgreSQL 16",
+    "redis": "Redis 7"
+  },
+  "benchmarks": {
+    "api": {
+      "auth": {
+        "login": {
+          "avg_response_time": 150,
+          "p95_response_time": 300,
+          "p99_response_time": 500,
+          "success_rate": 99.5,
+          "throughput": 100,
+          "description": "用户登录接口性能基准"
+        },
+        "register": {
+          "avg_response_time": 200,
+          "p95_response_time": 400,
+          "p99_response_time": 600,
+          "success_rate": 99.0,
+          "throughput": 80,
+          "description": "用户注册接口性能基准"
+        },
+        "logout": {
+          "avg_response_time": 100,
+          "p95_response_time": 200,
+          "p99_response_time": 300,
+          "success_rate": 99.8,
+          "throughput": 150,
+          "description": "用户登出接口性能基准"
+        }
+      },
+      "tasks": {
+        "list": {
+          "avg_response_time": 120,
+          "p95_response_time": 250,
+          "p99_response_time": 400,
+          "success_rate": 99.7,
+          "throughput": 200,
+          "description": "任务列表接口性能基准"
+        },
+        "create": {
+          "avg_response_time": 180,
+          "p95_response_time": 350,
+          "p99_response_time": 500,
+          "success_rate": 99.2,
+          "throughput": 120,
+          "description": "创建任务接口性能基准"
+        },
+        "update": {
+          "avg_response_time": 160,
+          "p95_response_time": 320,
+          "p99_response_time": 450,
+          "success_rate": 99.3,
+          "throughput": 130,
+          "description": "更新任务接口性能基准"
+        },
+        "delete": {
+          "avg_response_time": 140,
+          "p95_response_time": 280,
+          "p99_response_time": 400,
+          "success_rate": 99.5,
+          "throughput": 140,
+          "description": "删除任务接口性能基准"
+        },
+        "search": {
+          "avg_response_time": 200,
+          "p95_response_time": 400,
+          "p99_response_time": 600,
+          "success_rate": 99.0,
+          "throughput": 100,
+          "description": "搜索任务接口性能基准"
+        }
+      },
+      "users": {
+        "profile": {
+          "avg_response_time": 100,
+          "p95_response_time": 200,
+          "p99_response_time": 300,
+          "success_rate": 99.8,
+          "throughput": 180,
+          "description": "用户资料接口性能基准"
+        },
+        "growth": {
+          "avg_response_time": 150,
+          "p95_response_time": 300,
+          "p99_response_time": 450,
+          "success_rate": 99.5,
+          "throughput": 150,
+          "description": "用户成长数据接口性能基准"
+        },
+        "skills": {
+          "avg_response_time": 120,
+          "p95_response_time": 240,
+          "p99_response_time": 360,
+          "success_rate": 99.6,
+          "throughput": 160,
+          "description": "用户技能接口性能基准"
+        }
+      },
+      "notifications": {
+        "list": {
+          "avg_response_time": 80,
+          "p95_response_time": 160,
+          "p99_response_time": 240,
+          "success_rate": 99.9,
+          "throughput": 220,
+          "description": "通知列表接口性能基准"
+        },
+        "mark_read": {
+          "avg_response_time": 60,
+          "p95_response_time": 120,
+          "p99_response_time": 180,
+          "success_rate": 99.9,
+          "throughput": 250,
+          "description": "标记通知已读接口性能基准"
+        }
+      },
+      "files": {
+        "upload": {
+          "avg_response_time": 500,
+          "p95_response_time": 1000,
+          "p99_response_time": 1500,
+          "success_rate": 98.5,
+          "throughput": 50,
+          "description": "文件上传接口性能基准"
+        },
+        "download": {
+          "avg_response_time": 300,
+          "p95_response_time": 600,
+          "p99_response_time": 900,
+          "success_rate": 99.2,
+          "throughput": 80,
+          "description": "文件下载接口性能基准"
+        }
+      }
+    },
+    "frontend": {
+      "pages": {
+        "home": {
+          "load_time": 1200,
+          "fcp": 800,
+          "lcp": 1500,
+          "cls": 0.05,
+          "fid": 50,
+          "description": "首页性能基准"
+        },
+        "tasks": {
+          "load_time": 1500,
+          "fcp": 900,
+          "lcp": 1800,
+          "cls": 0.08,
+          "fid": 60,
+          "description": "任务大厅页面性能基准"
+        },
+        "login": {
+          "load_time": 800,
+          "fcp": 500,
+          "lcp": 1000,
+          "cls": 0.02,
+          "fid": 30,
+          "description": "登录页面性能基准"
+        },
+        "profile": {
+          "load_time": 1000,
+          "fcp": 600,
+          "lcp": 1200,
+          "cls": 0.06,
+          "fid": 40,
+          "description": "用户资料页面性能基准"
+        },
+        "growth": {
+          "load_time": 1800,
+          "fcp": 1000,
+          "lcp": 2200,
+          "cls": 0.10,
+          "fid": 80,
+          "description": "成长页面性能基准"
+        }
+      },
+      "components": {
+        "task_card": {
+          "render_time": 50,
+          "memory_usage": 2048,
+          "description": "任务卡片组件性能基准"
+        },
+        "skill_chart": {
+          "render_time": 200,
+          "memory_usage": 4096,
+          "description": "技能图表组件性能基准"
+        },
+        "notification_list": {
+          "render_time": 100,
+          "memory_usage": 3072,
+          "description": "通知列表组件性能基准"
+        }
+      }
+    },
+    "database": {
+      "queries": {
+        "user_login": {
+          "avg_execution_time": 5,
+          "p95_execution_time": 10,
+          "p99_execution_time": 15,
+          "description": "用户登录查询性能基准"
+        },
+        "task_list": {
+          "avg_execution_time": 8,
+          "p95_execution_time": 15,
+          "p99_execution_time": 25,
+          "description": "任务列表查询性能基准"
+        },
+        "task_search": {
+          "avg_execution_time": 20,
+          "p95_execution_time": 40,
+          "p99_execution_time": 60,
+          "description": "任务搜索查询性能基准"
+        },
+        "user_growth_stats": {
+          "avg_execution_time": 15,
+          "p95_execution_time": 30,
+          "p99_execution_time": 45,
+          "description": "用户成长统计查询性能基准"
+        },
+        "complex_analytics": {
+          "avg_execution_time": 100,
+          "p95_execution_time": 200,
+          "p99_execution_time": 300,
+          "description": "复杂分析查询性能基准"
+        }
+      },
+      "connections": {
+        "pool_size": 20,
+        "max_connections": 100,
+        "connection_time": 10,
+        "description": "数据库连接性能基准"
+      }
+    },
+    "cache": {
+      "redis": {
+        "get": {
+          "avg_response_time": 1,
+          "p95_response_time": 2,
+          "p99_response_time": 5,
+          "throughput": 10000,
+          "description": "Redis GET 操作性能基准"
+        },
+        "set": {
+          "avg_response_time": 1,
+          "p95_response_time": 3,
+          "p99_response_time": 6,
+          "throughput": 8000,
+          "description": "Redis SET 操作性能基准"
+        },
+        "del": {
+          "avg_response_time": 1,
+          "p95_response_time": 2,
+          "p99_response_time": 4,
+          "throughput": 9000,
+          "description": "Redis DEL 操作性能基准"
+        }
+      }
+    },
+    "system": {
+      "resources": {
+        "cpu_usage": {
+          "idle": 15,
+          "load": 45,
+          "stress": 75,
+          "description": "CPU 使用率基准（百分比）"
+        },
+        "memory_usage": {
+          "idle": 30,
+          "load": 60,
+          "stress": 85,
+          "description": "内存使用率基准（百分比）"
+        },
+        "disk_io": {
+          "read_iops": 1000,
+          "write_iops": 800,
+          "read_throughput": 100,
+          "write_throughput": 80,
+          "description": "磁盘 I/O 性能基准"
+        },
+        "network": {
+          "bandwidth_in": 100,
+          "bandwidth_out": 80,
+          "latency": 10,
+          "packet_loss": 0.01,
+          "description": "网络性能基准"
+        }
+      }
+    },
+    "scenarios": {
+      "load_test": {
+        "concurrent_users": 20,
+        "duration": "10m",
+        "avg_response_time": 200,
+        "p95_response_time": 400,
+        "error_rate": 0.5,
+        "throughput": 150,
+        "description": "负载测试场景基准"
+      },
+      "stress_test": {
+        "concurrent_users": 100,
+        "duration": "15m",
+        "avg_response_time": 500,
+        "p95_response_time": 1000,
+        "error_rate": 2.0,
+        "throughput": 300,
+        "description": "压力测试场景基准"
+      },
+      "spike_test": {
+        "concurrent_users": 200,
+        "duration": "10m",
+        "avg_response_time": 800,
+        "p95_response_time": 1500,
+        "error_rate": 5.0,
+        "throughput": 400,
+        "description": "峰值测试场景基准"
+      },
+      "volume_test": {
+        "concurrent_users": 50,
+        "duration": "30m",
+        "avg_response_time": 300,
+        "p95_response_time": 600,
+        "error_rate": 1.0,
+        "throughput": 200,
+        "description": "容量测试场景基准"
+      }
+    }
+  },
+  "thresholds": {
+    "response_time": {
+      "excellent": 100,
+      "good": 300,
+      "acceptable": 500,
+      "poor": 1000
+    },
+    "error_rate": {
+      "excellent": 0.1,
+      "good": 0.5,
+      "acceptable": 1.0,
+      "poor": 5.0
+    },
+    "throughput": {
+      "minimum": 50,
+      "target": 100,
+      "optimal": 200
+    },
+    "availability": {
+      "minimum": 99.0,
+      "target": 99.5,
+      "optimal": 99.9
+    }
+  },
+  "regression_detection": {
+    "enabled": true,
+    "threshold_percentage": 10,
+    "comparison_window": "7d",
+    "metrics": [
+      "avg_response_time",
+      "p95_response_time",
+      "error_rate",
+      "throughput"
+    ]
+  },
+  "alerts": {
+    "response_time_degradation": {
+      "threshold": 20,
+      "enabled": true,
+      "description": "响应时间退化超过 20%"
+    },
+    "error_rate_increase": {
+      "threshold": 50,
+      "enabled": true,
+      "description": "错误率增加超过 50%"
+    },
+    "throughput_decrease": {
+      "threshold": 15,
+      "enabled": true,
+      "description": "吞吐量下降超过 15%"
+    }
+  },
+  "metadata": {
+    "test_environment": "local",
+    "hardware_specs": {
+      "cpu": "Apple M1 Pro",
+      "memory": "16GB",
+      "storage": "SSD"
+    },
+    "software_versions": {
+      "k6": "0.47.0",
+      "node": "24.4.1",
+      "python": "3.13",
+      "postgresql": "16",
+      "redis": "7"
+    },
+    "notes": [
+      "基准数据基于本地开发环境",
+      "生产环境可能有不同的性能特征",
+      "定期更新基准数据以反映代码变更"
+    ]
+  }
+}

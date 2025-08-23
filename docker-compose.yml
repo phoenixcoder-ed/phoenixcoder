@@ -1,27 +1,32 @@
-version: '3.8'
-
 services:
   # OIDC 认证服务
   oidc-server:
-    build: ./phoenixcoder-oidc-server
-    container_name: phoenixcoder-oidc-server
+    build: ./apps/${EDITION:-community}/oidc-server
+    image: localhost:32000/${EDITION:-community}-oidc-server:latest
+    container_name: ${EDITION:-community}-oidc-server
     ports:
-      - "8001:8000"
+      - "${OIDC_PORT:-8000}:8000"
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
-      POSTGRES_DB: phoenixcoder
+      POSTGRES_DB: phoenixcoder_${EDITION:-community}
       POSTGRES_USER: phoenixcoder
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-your_strong_postgres_password_here}
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-your_redis_password_here}
       WECHAT_APPID: ${WECHAT_APPID}
       WECHAT_APPSECRET: ${WECHAT_APPSECRET}
-      WECHAT_REDIRECT_URI: http://localhost:8001/wechat/callback
-      JWT_SECRET: dev-jwt-secret-key-change-in-production
-      ISSUER: http://localhost:8001
+      WECHAT_REDIRECT_URI: http://localhost:${OIDC_PORT:-8000}/wechat/callback
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_key_here_at_least_32_characters}
+      ISSUER: http://localhost:${OIDC_PORT:-8000}
+      EDITION: ${EDITION:-community}
+      SSO_ENABLED: ${SSO_ENABLED:-false}
+      AUDIT_LOGS_ENABLED: ${AUDIT_LOGS_ENABLED:-false}
     volumes:
-      - ./phoenixcoder-oidc-server:/app
+      - ./apps/${EDITION:-community}/oidc-server:/app
+      - ./packages:/packages
+      - ./apps/${EDITION:-community}/config:/app/config
     networks:
       - phoenixcoder-network
     depends_on:
@@ -31,50 +36,69 @@ services:
         condition: service_healthy
     command: uvicorn main:app --host 0.0.0.0 --port 8000
     restart: unless-stopped
+    profiles:
+      - ${EDITION:-community}
 
   # 主服务端
   server:
-    build: ./phoenixcoder-server
-    container_name: phoenixcoder-server
+    build: ./apps/${EDITION:-community}/server
+    image: localhost:32000/${EDITION:-community}-server:latest
+    container_name: ${EDITION:-community}-server
     ports:
-      - "8000:8000"
+      - "${SERVER_PORT:-8001}:8000"
     environment:
-      - OIDC_ISSUER=http://oidc-server:8001
+      - OIDC_ISSUER=http://oidc-server:8000
       - OIDC_CLIENT_ID=phoenixcoder-client
-      - OIDC_CLIENT_SECRET=dev-client-secret
-      - OIDC_REDIRECT_URI=http://localhost:3000/auth/callback
-      - JWT_SECRET=dev-jwt-secret-key-change-in-production
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET:-your_oidc_client_secret_here_at_least_32_characters}
+      - OIDC_REDIRECT_URI=http://localhost:${ADMIN_PORT:-3000}/auth/callback
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key_here_at_least_32_characters}
+      - EDITION=${EDITION:-community}
+      - API_RATE_LIMIT=${API_RATE_LIMIT:-100}
+      - STORAGE_LIMIT_GB=${STORAGE_LIMIT_GB:-1}
+      - ANALYTICS_ENABLED=${ANALYTICS_ENABLED:-false}
+      - TEAM_MANAGEMENT_ENABLED=${TEAM_MANAGEMENT_ENABLED:-false}
+      - ENTERPRISE_FEATURES_CONFIG=/app/config/enterprise-features.json
     volumes:
-      - ./phoenixcoder-server:/app
+      - ./apps/${EDITION:-community}/server:/app
+      - ./packages:/packages
+      - ./apps/${EDITION:-community}/config:/app/config
     depends_on:
       - oidc-server
     networks:
       - phoenixcoder-network
     restart: unless-stopped
+    profiles:
+      - ${EDITION:-community}
 
   # 管理端
   admin:
-    build: ./phoenixcoder-admin
-    container_name: phoenixcoder-admin
+    build: ./apps/${EDITION:-community}/admin
+    image: localhost:32000/${EDITION:-community}-admin:latest
+    container_name: ${EDITION:-community}-admin
     ports:
-      - "3000:80"
+      - "${ADMIN_PORT:-3000}:80"
     environment:
-      - REACT_APP_API_URL=http://localhost:8000
-      - REACT_APP_OIDC_ISSUER=http://localhost:8001
-      - REACT_APP_CLIENT_ID=phoenixcoder-admin
+      - REACT_APP_API_URL=http://localhost:${SERVER_PORT:-8001}
+      - REACT_APP_OIDC_ISSUER=http://localhost:${OIDC_PORT:-8000}
+      - REACT_APP_CLIENT_ID=${EDITION:-community}-admin
+      - REACT_APP_EDITION=${EDITION:-community}
+      - REACT_APP_ANALYTICS_ENABLED=${ANALYTICS_ENABLED:-false}
+      - REACT_APP_TEAM_MANAGEMENT_ENABLED=${TEAM_MANAGEMENT_ENABLED:-false}
     depends_on:
       - server
       - oidc-server
     networks:
       - phoenixcoder-network
     restart: unless-stopped
+    profiles:
+      - ${EDITION:-community}
 
   # Redis 缓存
   redis:
     image: redis:7-alpine
-    container_name: phoenixcoder-redis
+    container_name: phoenixcoder-redis-${EDITION:-community}
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis-data:/data
     networks:
@@ -85,72 +109,68 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    profiles:
+      - ${EDITION:-community}
 
   # PostgreSQL 数据库
   postgres:
     image: postgres:14-alpine
-    container_name: phoenixcoder-postgres
+    container_name: phoenixcoder-postgres-${EDITION:-community}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     environment:
-      POSTGRES_DB: phoenixcoder
+      POSTGRES_DB: phoenixcoder_${EDITION:-community}
       POSTGRES_USER: phoenixcoder
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-your_strong_postgres_password_here}
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./phoenixcoder-oidc-server/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
     networks:
       - phoenixcoder-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d phoenixcoder"]
+      test: ["CMD-SHELL", "pg_isready -U phoenixcoder -d phoenixcoder_${EDITION:-community}"]
       interval: 5s
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    profiles:
+      - ${EDITION:-community}
 
-  # RabbitMQ 消息队列
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: phoenixcoder-rabbitmq
+  # 监控服务 - 企业版专有
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: phoenixcoder-prometheus-${EDITION:-community}
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - phoenixcoder-network
+    restart: unless-stopped
+    profiles:
+      - enterprise
+
+  # 日志收集 - 企业版专有
+  grafana:
+    image: grafana/grafana:latest
+    container_name: phoenixcoder-grafana-${EDITION:-community}
+    ports:
+      - "3001:3000"
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+      - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-    networks:
-      - phoenixcoder-network
-    healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    restart: unless-stopped
-
-  # Nginx 反向代理
-  nginx:
-    image: nginx:alpine
-    container_name: phoenixcoder-nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/ssl:/etc/nginx/ssl
-    depends_on:
-      - server
-      - oidc-server
-      - admin
+      - grafana-data:/var/lib/grafana
     networks:
       - phoenixcoder-network
     restart: unless-stopped
+    profiles:
+      - enterprise
 
 volumes:
   redis-data:
   postgres-data:
-  rabbitmq-data:
+  prometheus-data:
+  grafana-data:
 
 networks:
   phoenixcoder-network:

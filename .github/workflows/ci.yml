@@ -1,0 +1,569 @@
+name: PhoenixCoder CI/CD Pipeline
+
+# 触发条件
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # 每天凌晨2点运行完整测试
+    - cron: '0 2 * * *'
+
+# 环境变量
+env:
+  NODE_VERSION: '24'
+  PYTHON_VERSION: '3.11'
+  PNPM_VERSION: '8'
+
+# 并发控制
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 代码质量检查
+  code-quality:
+    name: 代码质量检查
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 设置Python环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: 安装pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      
+      - name: 安装Python依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install pre-commit black isort flake8 bandit mypy
+      
+      - name: 运行pre-commit检查
+        run: |
+          pre-commit install
+          pre-commit run --all-files
+      
+      - name: 代码复杂度检查
+        run: |
+          pip install radon
+          radon cc --min=C apps/community/server apps/community/oidc-server
+      
+      - name: 安全漏洞扫描
+        run: |
+          pip install safety
+          safety check --json --output safety-report.json || true
+      
+      - name: 上传安全报告
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-report
+          path: safety-report.json
+
+  # 后端测试
+  backend-tests:
+    name: 后端测试
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [server, oidc-server]
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Python环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: 安装依赖
+        working-directory: apps/community/${{ matrix.service }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+      
+      - name: 运行单元测试
+        working-directory: apps/community/${{ matrix.service }}
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          TESTING: true
+        run: |
+          python -m pytest tests/ \
+            --cov=. \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term \
+            --junitxml=test-results.xml \
+            --tb=short \
+            -v
+      
+      - name: 运行性能测试
+        working-directory: apps/community/${{ matrix.service }}
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          TESTING: true
+        run: |
+          python -m pytest tests/performance/ \
+            --benchmark-json=benchmark-results.json \
+            --benchmark-only
+      
+      - name: 上传覆盖率报告
+        uses: codecov/codecov-action@v3
+        with:
+          file: apps/community/${{ matrix.service }}/coverage.xml
+          flags: ${{ matrix.service }}
+          name: ${{ matrix.service }}-coverage
+      
+      - name: 上传测试结果
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: ${{ matrix.service }}-test-results
+          path: |
+            apps/community/${{ matrix.service }}/test-results.xml
+            apps/community/${{ matrix.service }}/htmlcov/
+            apps/community/${{ matrix.service }}/benchmark-results.json
+
+  # 前端测试
+  frontend-tests:
+    name: 前端测试
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [admin, miniapp]
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: 安装pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      
+      - name: 安装依赖
+        working-directory: apps/community/${{ matrix.app }}
+        run: pnpm install --frozen-lockfile
+      
+      - name: 类型检查
+        working-directory: apps/community/${{ matrix.app }}
+        run: pnpm run type-check
+      
+      - name: 代码检查
+        working-directory: apps/community/${{ matrix.app }}
+        run: pnpm run lint
+      
+      - name: 运行单元测试
+        working-directory: apps/community/${{ matrix.app }}
+        run: |
+          pnpm run test:unit \
+            --coverage \
+            --reporter=verbose \
+            --reporter=junit \
+            --outputFile=test-results.xml
+      
+      - name: 运行组件测试
+        working-directory: apps/community/${{ matrix.app }}
+        run: pnpm run test:component --coverage
+      
+      - name: 运行性能测试
+        working-directory: apps/community/${{ matrix.app }}
+        run: pnpm run test:performance
+      
+      - name: 构建检查
+        working-directory: apps/community/${{ matrix.app }}
+        run: pnpm run build
+      
+      - name: Bundle分析
+        working-directory: apps/community/${{ matrix.app }}
+        run: |
+          pnpm run build:analyze
+          ls -la dist/
+      
+      - name: 上传覆盖率报告
+        uses: codecov/codecov-action@v3
+        with:
+          file: apps/community/${{ matrix.app }}/coverage/lcov.info
+          flags: ${{ matrix.app }}
+          name: ${{ matrix.app }}-coverage
+      
+      - name: 上传测试结果
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: ${{ matrix.app }}-test-results
+          path: |
+            apps/community/${{ matrix.app }}/test-results.xml
+            apps/community/${{ matrix.app }}/coverage/
+            apps/community/${{ matrix.app }}/dist/
+
+  # 端到端测试
+  e2e-tests:
+    name: 端到端测试
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Python环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: 安装pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      
+      - name: 安装后端依赖
+        working-directory: apps/community/server
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: 安装前端依赖
+        working-directory: apps/community/admin
+        run: pnpm install --frozen-lockfile
+      
+      - name: 启动后端服务
+        working-directory: apps/community/server
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          TESTING: true
+        run: |
+          python main.py &
+          sleep 10
+      
+      - name: 构建前端
+        working-directory: apps/community/admin
+        run: pnpm run build
+      
+      - name: 安装Playwright
+        working-directory: apps/community/admin
+        run: pnpm exec playwright install --with-deps
+      
+      - name: 运行E2E测试
+        working-directory: apps/community/admin
+        run: pnpm run test:e2e
+      
+      - name: 上传E2E测试结果
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: e2e-test-results
+          path: |
+            apps/community/admin/test-results/
+            apps/community/admin/playwright-report/
+
+  # 集成测试
+  integration-tests:
+    name: 集成测试
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Python环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tests/requirements.txt
+      
+      - name: 运行集成测试
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          TESTING: true
+        run: |
+          python -m pytest tests/ \
+            --cov=apps \
+            --cov-report=xml \
+            --cov-report=html \
+            --junitxml=integration-test-results.xml \
+            --tb=short \
+            -v
+      
+      - name: 上传集成测试结果
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: integration-test-results
+          path: |
+            integration-test-results.xml
+            htmlcov/
+            coverage.xml
+
+  # 覆盖率汇总
+  coverage-report:
+    name: 覆盖率汇总
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests, integration-tests]
+    if: always()
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: 下载所有测试结果
+        uses: actions/download-artifact@v3
+      
+      - name: 生成覆盖率报告
+        run: |
+          node coverage-monitor.js --generate-report
+          node coverage-badge-generator.js --generate-all
+      
+      - name: 上传覆盖率报告
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: |
+            coverage-reports/
+            badges/
+      
+      - name: 评论PR覆盖率
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'coverage-reports/summary.json';
+            
+            if (fs.existsSync(path)) {
+              const coverage = JSON.parse(fs.readFileSync(path, 'utf8'));
+              
+              const comment = `## 📊 测试覆盖率报告
+              
+              | 项目 | 行覆盖率 | 分支覆盖率 | 函数覆盖率 |
+              |------|----------|------------|------------|
+              | 后端服务 | ${coverage.server?.lines || 'N/A'}% | ${coverage.server?.branches || 'N/A'}% | ${coverage.server?.functions || 'N/A'}% |
+              | OIDC服务 | ${coverage.oidc?.lines || 'N/A'}% | ${coverage.oidc?.branches || 'N/A'}% | ${coverage.oidc?.functions || 'N/A'}% |
+              | 管理前端 | ${coverage.admin?.lines || 'N/A'}% | ${coverage.admin?.branches || 'N/A'}% | ${coverage.admin?.functions || 'N/A'}% |
+              | 小程序 | ${coverage.miniapp?.lines || 'N/A'}% | ${coverage.miniapp?.branches || 'N/A'}% | ${coverage.miniapp?.functions || 'N/A'}% |
+              
+              📈 [查看详细报告](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+
+  # 性能回归检测
+  performance-regression:
+    name: 性能回归检测
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: 下载性能测试结果
+        uses: actions/download-artifact@v3
+        with:
+          pattern: '*-test-results'
+      
+      - name: 运行性能回归检测
+        run: |
+          node performance-regression-detector.js \
+            --compare-with=main \
+            --threshold=10 \
+            --output=performance-report.json
+      
+      - name: 评论PR性能报告
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'performance-report.json';
+            
+            if (fs.existsSync(path)) {
+              const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+              
+              if (report.regressions && report.regressions.length > 0) {
+                const comment = `## ⚠️ 性能回归检测
+                
+                发现 ${report.regressions.length} 个性能回归问题：
+                
+                ${report.regressions.map(r => 
+                  `- **${r.metric}**: ${r.change}% 变化 (阈值: ${r.threshold}%)`
+                ).join('\n')}
+                
+                请检查代码变更对性能的影响。`;
+                
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              }
+            }
+
+  # 部署检查
+  deployment-check:
+    name: 部署检查
+    runs-on: ubuntu-latest
+    needs: [code-quality, backend-tests, frontend-tests, e2e-tests, integration-tests]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 检查部署配置
+        run: |
+          echo "检查Docker配置..."
+          if [ -f "docker-compose.yml" ]; then
+            docker-compose config
+          fi
+          
+          echo "检查Kubernetes配置..."
+          if [ -d "k8s" ]; then
+            kubectl --dry-run=client apply -f k8s/ || true
+          fi
+      
+      - name: 安全扫描
+        run: |
+          echo "运行安全扫描..."
+          # 这里可以集成更多安全扫描工具
+      
+      - name: 部署就绪检查
+        run: |
+          echo "✅ 所有检查通过，可以部署"
+          echo "deployment_ready=true" >> $GITHUB_OUTPUT
+        id: deployment
+      
+      - name: 通知部署状态
+        if: steps.deployment.outputs.deployment_ready == 'true'
+        run: |
+          echo "🚀 项目已准备好部署到生产环境"

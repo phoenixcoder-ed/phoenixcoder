@@ -1,0 +1,11 @@
+# pnpm workspace configuration
+packages:
+  # Shared packages
+  - 'packages/*'
+  # Community edition apps
+  - 'apps/community/*'
+  # Enterprise edition apps
+  - 'apps/enterprise/*'
+  # Infrastructure and tools
+  - 'infrastructure/*'
+  - 'tools/*'

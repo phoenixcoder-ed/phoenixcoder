@@ -1,0 +1,526 @@
+/* 登录页面样式 - 与设计原型保持一致 */
+
+/* 粒子背景动画 */
+.login-particle-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.login-particle-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, rgba(106, 0, 255, 0.8), transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(0, 228, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(0, 255, 179, 0.8), transparent),
+    radial-gradient(
+      1px 1px at 130px 80px,
+      rgba(255, 169, 64, 0.6),
+      transparent
+    ),
+    radial-gradient(
+      2px 2px at 160px 30px,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+  background-repeat: repeat;
+  background-size: 200px 100px;
+  animation: particle-float 20s linear infinite;
+}
+
+@keyframes particle-float {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(-200px, -100px);
+  }
+}
+
+/* 登录页面背景 */
+.login-background {
+  background: #0d0d17;
+  background-image:
+    radial-gradient(
+      circle at 25% 25%,
+      rgba(106, 0, 255, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 75% 75%,
+      rgba(0, 228, 255, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(0, 255, 179, 0.05) 0%,
+      transparent 50%
+    );
+  min-height: 100vh;
+  position: relative;
+}
+
+/* 智能玻璃导航栏 */
+.login-navbar {
+  background: rgba(26, 26, 46, 0.3);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(106, 0, 255, 0.2);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 10;
+}
+
+/* 登录卡片 */
+.login-card {
+  background: rgba(26, 26, 46, 0.4);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(106, 0, 255, 0.3);
+  border-radius: 20px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 40px rgba(106, 0, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(106, 0, 255, 0.1),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.login-card:hover::before {
+  left: 100%;
+}
+
+/* 登录卡片内容 */
+.login-card-content {
+  padding: 2rem;
+}
+
+/* 登录标题容器 */
+.login-title-container {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* 登录表单标题 */
+.login-title {
+  font-family: 'Orbitron', 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  color: #ffffff;
+  text-shadow:
+    0 0 10px rgba(106, 0, 255, 0.8),
+    0 0 20px rgba(106, 0, 255, 0.6),
+    0 0 30px rgba(106, 0, 255, 0.4);
+  margin: 0 0 0.5rem 0;
+}
+
+/* 登录副标题 */
+.login-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  color: #e0e0e0;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* 登录方式选择器 */
+.login-type-selector {
+  display: flex;
+  background: rgba(26, 26, 46, 0.4);
+  border: 1px solid rgba(106, 0, 255, 0.2);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 1.5rem;
+  gap: 4px;
+}
+
+.login-type-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #b0b0c0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-type-btn:hover {
+  color: #ffffff;
+  background: rgba(106, 0, 255, 0.1);
+}
+
+.login-type-btn.active {
+  background: rgba(106, 0, 255, 0.3);
+  color: #ffffff;
+  box-shadow:
+    0 0 15px rgba(106, 0, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.login-type-btn.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(106, 0, 255, 0.2),
+    rgba(0, 228, 255, 0.1)
+  );
+  z-index: -1;
+}
+
+.type-icon {
+  font-size: 1.1rem;
+}
+
+/* 输入框组 */
+.input-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+/* 输入框图标 */
+.input-icon {
+  position: absolute;
+  left: 12px;
+  color: #b0b0c0;
+  z-index: 2;
+  font-size: 1.2rem;
+}
+
+/* 密码切换按钮 */
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  color: #b0b0c0 !important;
+  z-index: 2;
+}
+
+.password-toggle:hover {
+  color: #ffffff !important;
+}
+
+/* 输入框样式 */
+.login-input {
+  background: rgba(26, 26, 46, 0.6);
+  border: 1px solid rgba(106, 0, 255, 0.3);
+  border-radius: 12px;
+  color: #ffffff;
+  padding: 14px 16px 14px 45px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: rgba(0, 228, 255, 0.6);
+  box-shadow:
+    0 0 20px rgba(0, 228, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: rgba(26, 26, 46, 0.8);
+}
+
+.login-input::placeholder {
+  color: #b0b0c0;
+  font-size: 0.95rem;
+}
+
+/* 登录选项 */
+.login-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+/* 复选框容器 */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  color: #e0e0e0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.login-checkbox {
+  margin-right: 8px;
+  accent-color: #6a00ff;
+}
+
+/* 忘记密码链接 */
+.forgot-password-link {
+  color: #00e4ff;
+  text-decoration: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.forgot-password-link:hover {
+  color: #00ffb3;
+  text-shadow: 0 0 10px rgba(0, 255, 179, 0.5);
+}
+
+/* 错误信息 */
+.error-message {
+  background: rgba(255, 69, 58, 0.1);
+  border: 1px solid rgba(255, 69, 58, 0.3);
+  border-radius: 8px;
+  color: #ff6b6b;
+  padding: 12px;
+  margin-bottom: 1rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* 登录按钮 */
+.login-btn {
+  background: linear-gradient(135deg, #6a00ff, #00e4ff);
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  padding: 16px 28px;
+  font-weight: 600;
+  font-family: 'Orbitron', 'Inter', sans-serif;
+  font-size: 1rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  box-shadow:
+    0 4px 15px rgba(106, 0, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.login-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.login-btn:hover::before {
+  left: 100%;
+}
+
+.login-btn:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 15px 35px rgba(106, 0, 255, 0.4),
+    0 0 30px rgba(0, 228, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.login-btn:active {
+  transform: translateY(-1px);
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 分割线 */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(106, 0, 255, 0.3),
+    transparent
+  );
+}
+
+.divider-text {
+  padding: 0 1rem;
+  color: #b0b0c0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+}
+
+/* 第三方登录 */
+.third-party-login {
+  margin-bottom: 1.5rem;
+}
+
+/* 第三方登录按钮 */
+.third-party-btn {
+  background: rgba(26, 26, 46, 0.6);
+  border: 1px solid rgba(106, 0, 255, 0.3);
+  border-radius: 12px;
+  color: #ffffff;
+  padding: 12px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 0.75rem;
+  width: 100%;
+}
+
+.third-party-btn:hover {
+  border-color: rgba(0, 228, 255, 0.6);
+  background: rgba(26, 26, 46, 0.8);
+  box-shadow: 0 0 20px rgba(0, 228, 255, 0.2);
+}
+
+.third-party-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* GitHub 按钮 */
+.github-btn:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+/* 微信按钮 */
+.wechat-btn {
+  color: #07c160;
+}
+
+.wechat-btn:hover:not(:disabled) {
+  border-color: rgba(7, 193, 96, 0.6);
+  box-shadow: 0 0 20px rgba(7, 193, 96, 0.2);
+  background: rgba(7, 193, 96, 0.1);
+}
+
+/* 微信扫码登录特殊样式 */
+.wechat-qr-container {
+  text-align: center;
+  padding: 20px;
+  background: rgba(26, 26, 46, 0.6);
+  border: 1px solid rgba(7, 193, 96, 0.3);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.wechat-qr-code {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 15px;
+  border: 2px solid rgba(7, 193, 96, 0.3);
+  border-radius: 8px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wechat-qr-tip {
+  color: #07c160;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.wechat-qr-status {
+  color: #b0b0c0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+}
+
+/* Google 按钮 */
+.google-btn:hover:not(:disabled) {
+  border-color: rgba(66, 133, 244, 0.6);
+  box-shadow: 0 0 20px rgba(66, 133, 244, 0.2);
+}
+
+/* 注册链接容器 */
+.register-link-container {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.register-text {
+  color: #b0b0c0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.register-link {
+  color: #00e4ff;
+  text-decoration: none;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+  margin-left: 4px;
+}
+
+.register-link:hover {
+  color: #00ffb3;
+  text-shadow: 0 0 10px rgba(0, 255, 179, 0.5);
+}

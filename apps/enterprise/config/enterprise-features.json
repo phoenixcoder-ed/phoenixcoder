@@ -1,0 +1,50 @@
+{
+  "version": "enterprise",
+  "features": {
+    "analytics": {
+      "enabled": true,
+      "advanced_reporting": true,
+      "custom_dashboards": true,
+      "data_export": true,
+      "real_time_metrics": true
+    },
+    "team_management": {
+      "enabled": true,
+      "role_based_access": true,
+      "team_workspaces": true,
+      "collaboration_tools": true,
+      "approval_workflows": true
+    },
+    "api_limits": {
+      "daily_calls": 10000,
+      "concurrent_requests": 100,
+      "rate_limit_per_minute": 1000
+    },
+    "storage": {
+      "limit_gb": 100,
+      "backup_retention_days": 90,
+      "version_history": true
+    },
+    "security": {
+      "sso_integration": true,
+      "audit_logs": true,
+      "ip_whitelisting": true,
+      "advanced_encryption": true
+    },
+    "support": {
+      "priority_support": true,
+      "dedicated_account_manager": true,
+      "sla_guarantee": "99.9%"
+    },
+    "integrations": {
+      "third_party_apis": true,
+      "webhook_support": true,
+      "custom_integrations": true
+    }
+  },
+  "limits": {
+    "max_team_members": 100,
+    "max_projects": 50,
+    "max_tasks_per_project": 1000
+  }
+}
