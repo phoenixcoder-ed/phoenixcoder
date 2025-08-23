@@ -315,5 +315,22 @@ jobs:
                 badge_content=$(sed -n '/<!-- BADGES_START -->/,/<!-- BADGES_END -->/p' badges/README-badges.md)
                 
                 # 使用 sed 替换
-                sed -i '/<!-- BADGES_START -->/,/<!-- BADGES_END -->/c\
-'
+                sed -i '/<!-- BADGES_START -->/,/<!-- BADGES_END -->/c\\n'"$badge_content"'' README.md
+              fi
+            fi
+          fi
+      
+      - name: Commit and push changes
+        if: success()
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # 检查是否有变更
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add badges/ README.md
+            git commit -m "🏷️ Update status badges [skip ci]"
+            git push
+          fi
