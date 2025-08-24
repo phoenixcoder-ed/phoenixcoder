@@ -9,7 +9,7 @@ export interface ValidationRule {
   pattern?: RegExp;
   email?: boolean;
   url?: boolean;
-  custom?: (value: any) => string | undefined;
+  custom?: (value: unknown) => string | undefined;
   message?: string;
 }
 
@@ -24,17 +24,17 @@ export interface ValidationErrors {
 export interface UseValidationReturn {
   errors: ValidationErrors;
   isValid: boolean;
-  validate: (name: string, value: any) => string | undefined;
-  validateAll: (values: Record<string, any>) => boolean;
+  validate: (name: string, value: unknown) => string | undefined;
+  validateAll: (values: Record<string, unknown>) => boolean;
   setError: (name: string, error: string) => void;
   clearError: (name: string) => void;
   clearAllErrors: () => void;
 }
 
 const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
+const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/;
 
-function validateSingleRule(value: any, rule: ValidationRule): string | undefined {
+function validateSingleRule(value: unknown, rule: ValidationRule): string | undefined {
   if (rule.required && (value === undefined || value === null || value === '')) {
     return rule.message || '此字段为必填项';
   }
@@ -82,7 +82,7 @@ function validateSingleRule(value: any, rule: ValidationRule): string | undefine
 export function useValidation(rules: ValidationRules = {}): UseValidationReturn {
   const [errors, setErrors] = useState<ValidationErrors>({});
 
-  const validate = useCallback((name: string, value: any): string | undefined => {
+  const validate = useCallback((name: string, value: unknown): string | undefined => {
     const fieldRules = rules[name];
     if (!fieldRules) return undefined;
 
@@ -106,7 +106,7 @@ export function useValidation(rules: ValidationRules = {}): UseValidationReturn 
     return undefined;
   }, [rules]);
 
-  const validateAll = useCallback((values: Record<string, any>): boolean => {
+  const validateAll = useCallback((values: Record<string, unknown>): boolean => {
     const newErrors: ValidationErrors = {};
     let isValid = true;
 

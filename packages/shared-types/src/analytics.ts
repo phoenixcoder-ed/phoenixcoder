@@ -73,7 +73,7 @@ export interface ActivityEvent {
   id: string;
   type: ActivityType;
   description: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   timestamp: Date;
   impact: ActivityImpact;
 }
@@ -296,7 +296,7 @@ export enum ReportType {
 export interface ReportConfig {
   period: AnalyticsPeriod;
   metrics: string[];
-  filters: Record<string, any>;
+  filters: Record<string, unknown>;
   format: ReportFormat;
   includeCharts: boolean;
   includeRawData: boolean;

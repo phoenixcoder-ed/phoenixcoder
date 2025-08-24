@@ -1,73 +1,74 @@
 import { useState, useCallback } from 'react';
 
-export interface FormField {
-  value: any;
+export interface FormField<T = unknown> {
+  value: T;
   error?: string;
   touched?: boolean;
 }
 
-export interface FormState {
-  [key: string]: FormField;
+export type FormState<T = Record<string, unknown>> = {
+  [K in keyof T]: FormField<T[K]>;
 }
 
-export interface FormValidationRule {
+export interface FormValidationRule<T = unknown> {
   required?: boolean;
   minLength?: number;
   maxLength?: number;
   pattern?: RegExp;
-  custom?: (value: any) => string | undefined;
+  custom?: (value: T) => string | undefined;
 }
 
-export interface FormValidationRules {
-  [key: string]: FormValidationRule;
+export type FormValidationRules<T = Record<string, unknown>> = {
+  [K in keyof T]?: FormValidationRule<T[K]>;
 }
 
-export interface UseFormOptions {
-  initialValues?: Record<string, any>;
-  validationRules?: FormValidationRules;
-  onSubmit?: (values: Record<string, any>) => void | Promise<void>;
+export interface UseFormOptions<T = Record<string, unknown>> {
+  initialValues?: Partial<T>;
+  validationRules?: FormValidationRules<T>;
+  onSubmit?: (values: T) => void | Promise<void>;
 }
 
-export interface UseFormReturn {
-  values: Record<string, any>;
-  errors: Record<string, string>;
-  touched: Record<string, boolean>;
+export interface UseFormReturn<T = Record<string, unknown>> {
+  values: Partial<T>;
+  errors: Partial<Record<keyof T, string>>;
+  touched: Partial<Record<keyof T, boolean>>;
   isValid: boolean;
   isSubmitting: boolean;
-  setValue: (name: string, value: any) => void;
-  setError: (name: string, error: string) => void;
-  setTouched: (name: string, touched?: boolean) => void;
-  validateField: (name: string) => string | undefined;
+  setValue: <K extends keyof T>(name: K, value: T[K]) => void;
+  setError: (name: keyof T, error: string) => void;
+  setTouched: (name: keyof T, touched?: boolean) => void;
+  validateField: (name: keyof T) => string | undefined;
   validateForm: () => boolean;
   handleSubmit: (e?: React.FormEvent) => Promise<void>;
   reset: () => void;
-  getFieldProps: (name: string) => {
-    value: any;
-    onChange: (value: any) => void;
+  getFieldProps: <K extends keyof T>(name: K) => {
+    value: T[K] | undefined;
+    onChange: (value: T[K]) => void;
     onBlur: () => void;
     error?: string;
     touched?: boolean;
   };
 }
 
-export function useForm(options: UseFormOptions = {}): UseFormReturn {
+export function useForm<T = Record<string, unknown>>(options: UseFormOptions<T> = {}): UseFormReturn<T> {
   const { initialValues = {}, validationRules = {}, onSubmit } = options;
 
-  const [formState, setFormState] = useState<FormState>(() => {
-    const state: FormState = {};
-    Object.keys(initialValues).forEach(key => {
-      state[key] = {
-        value: initialValues[key],
+  const [formState, setFormState] = useState<FormState<T>>(() => {
+    const state = {} as FormState<T>;
+    Object.keys(initialValues || {}).forEach(key => {
+      const typedKey = key as keyof T;
+      state[typedKey] = {
+        value: (initialValues as T)[typedKey],
         error: undefined,
         touched: false,
-      };
+      } as FormField<T[keyof T]>;
     });
     return state;
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const setValue = useCallback((name: string, value: any) => {
+  const setValue = useCallback(<K extends keyof T>(name: K, value: T[K]) => {
     setFormState(prev => ({
       ...prev,
       [name]: {
@@ -78,7 +79,7 @@ export function useForm(options: UseFormOptions = {}): UseFormReturn {
     }));
   }, []);
 
-  const setError = useCallback((name: string, error: string) => {
+  const setError = useCallback((name: keyof T, error: string) => {
     setFormState(prev => ({
       ...prev,
       [name]: {
@@ -88,7 +89,7 @@ export function useForm(options: UseFormOptions = {}): UseFormReturn {
     }));
   }, []);
 
-  const setTouched = useCallback((name: string, touched = true) => {
+  const setTouched = useCallback((name: keyof T, touched = true) => {
     setFormState(prev => ({
       ...prev,
       [name]: {
@@ -98,9 +99,9 @@ export function useForm(options: UseFormOptions = {}): UseFormReturn {
     }));
   }, []);
 
-  const validateField = useCallback((name: string): string | undefined => {
+  const validateField = useCallback((name: keyof T): string | undefined => {
     const field = formState[name];
-    const rules = validationRules[name];
+    const rules = validationRules && (validationRules as FormValidationRules<T>)[name];
 
     if (!field || !rules) return undefined;
 
@@ -110,15 +111,15 @@ export function useForm(options: UseFormOptions = {}): UseFormReturn {
       return '此字段为必填项';
     }
 
-    if (rules.minLength && value && value.length < rules.minLength) {
+    if (rules.minLength && value && typeof value === 'string' && value.length < rules.minLength) {
       return `最少需要 ${rules.minLength} 个字符`;
     }
 
-    if (rules.maxLength && value && value.length > rules.maxLength) {
+    if (rules.maxLength && value && typeof value === 'string' && value.length > rules.maxLength) {
       return `最多允许 ${rules.maxLength} 个字符`;
     }
 
-    if (rules.pattern && value && !rules.pattern.test(value)) {
+    if (rules.pattern && value && typeof value === 'string' && !rules.pattern.test(value)) {
       return '格式不正确';
     }
 
@@ -133,7 +134,8 @@ export function useForm(options: UseFormOptions = {}): UseFormReturn {
     let isValid = true;
     const newFormState = { ...formState };
 
-    Object.keys(formState).forEach(name => {
+    Object.keys(formState).forEach(key => {
+      const name = key as keyof T;
       const error = validateField(name);
       if (error) {
         isValid = false;
@@ -164,9 +166,10 @@ export function useForm(options: UseFormOptions = {}): UseFormReturn {
 
     setIsSubmitting(true);
     try {
-      const values: Record<string, any> = {};
+      const values = {} as T;
       Object.keys(formState).forEach(key => {
-        values[key] = formState[key].value;
+        const typedKey = key as keyof T;
+        values[typedKey] = formState[typedKey].value;
       });
       await onSubmit(values);
     } finally {
@@ -175,24 +178,25 @@ export function useForm(options: UseFormOptions = {}): UseFormReturn {
   }, [formState, validateForm, onSubmit]);
 
   const reset = useCallback(() => {
-    const state: FormState = {};
-    Object.keys(initialValues).forEach(key => {
-      state[key] = {
-        value: initialValues[key],
+    const state = {} as FormState<T>;
+    Object.keys(initialValues || {}).forEach(key => {
+      const typedKey = key as keyof T;
+      state[typedKey] = {
+        value: (initialValues as T)[typedKey],
         error: undefined,
         touched: false,
-      };
+      } as FormField<T[keyof T]>;
     });
     setFormState(state);
     setIsSubmitting(false);
   }, [initialValues]);
 
-  const getFieldProps = useCallback((name: string) => {
-    const field = formState[name] || { value: '', error: undefined, touched: false };
+  const getFieldProps = useCallback(<K extends keyof T>(name: K) => {
+    const field = formState[name] || { value: undefined as T[K], error: undefined, touched: false };
     
     return {
       value: field.value,
-      onChange: (value: any) => setValue(name, value),
+      onChange: (value: T[K]) => setValue(name, value),
       onBlur: () => {
         setTouched(name, true);
         const error = validateField(name);
@@ -206,23 +210,29 @@ export function useForm(options: UseFormOptions = {}): UseFormReturn {
   }, [formState, setValue, setTouched, setError, validateField]);
 
   const values = Object.keys(formState).reduce((acc, key) => {
-    acc[key] = formState[key].value;
+    const typedKey = key as keyof T;
+    acc[typedKey] = formState[typedKey].value;
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Partial<T>);
 
   const errors = Object.keys(formState).reduce((acc, key) => {
-    if (formState[key].error) {
-      acc[key] = formState[key].error!;
+    const typedKey = key as keyof T;
+    if (formState[typedKey].error) {
+      acc[typedKey] = formState[typedKey].error!;
     }
     return acc;
-  }, {} as Record<string, string>);
+  }, {} as Partial<Record<keyof T, string>>);
 
   const touched = Object.keys(formState).reduce((acc, key) => {
-    acc[key] = formState[key].touched || false;
+    const typedKey = key as keyof T;
+    acc[typedKey] = formState[typedKey].touched || false;
     return acc;
-  }, {} as Record<string, boolean>);
+  }, {} as Partial<Record<keyof T, boolean>>);
 
-  const isValid = Object.keys(formState).every(key => !formState[key].error);
+  const isValid = Object.keys(formState).every(key => {
+    const typedKey = key as keyof T;
+    return !formState[typedKey].error;
+  });
 
   return {
     values,

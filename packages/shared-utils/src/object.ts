@@ -1,20 +1,20 @@
 // 对象基础操作
-export const isEmpty = (obj: any): boolean => {
+export const isEmpty = (obj: unknown): boolean => {
   if (obj == null) return true;
   if (Array.isArray(obj)) return obj.length === 0;
   if (typeof obj === 'object') return Object.keys(obj).length === 0;
   return false;
 };
 
-export const isNotEmpty = (obj: any): boolean => {
+export const isNotEmpty = (obj: unknown): boolean => {
   return !isEmpty(obj);
 };
 
-export const isObject = (obj: any): obj is object => {
+export const isObject = (obj: unknown): obj is object => {
   return obj !== null && typeof obj === 'object' && !Array.isArray(obj);
 };
 
-export const isPlainObject = (obj: any): obj is Record<string, any> => {
+export const isPlainObject = (obj: unknown): obj is Record<string, unknown> => {
   if (!isObject(obj)) return false;
   
   // 检查是否是普通对象（不是类实例）
@@ -22,19 +22,19 @@ export const isPlainObject = (obj: any): obj is Record<string, any> => {
   return proto === null || proto === Object.prototype;
 };
 
-export const keys = <T extends Record<string, any>>(obj: T): (keyof T)[] => {
+export const keys = <T extends Record<string, unknown>>(obj: T): (keyof T)[] => {
   return Object.keys(obj) as (keyof T)[];
 };
 
 export const values = <T extends Record<string, any>>(obj: T): T[keyof T][] => {
-  return Object.values(obj);
+  return Object.values(obj) as T[keyof T][];
 };
 
-export const entries = <T extends Record<string, any>>(obj: T): [keyof T, T[keyof T]][] => {
+export const entries = <T extends Record<string, unknown>>(obj: T): [keyof T, T[keyof T]][] => {
   return Object.entries(obj) as [keyof T, T[keyof T]][];
 };
 
-export const size = (obj: any): number => {
+export const size = (obj: unknown): number => {
   if (obj == null) return 0;
   if (Array.isArray(obj)) return obj.length;
   if (typeof obj === 'object') return Object.keys(obj).length;
@@ -43,25 +43,25 @@ export const size = (obj: any): number => {
 };
 
 // 对象属性操作
-export const has = <T extends Record<string, any>>(obj: T, key: string | number | symbol): boolean => {
+export const has = <T extends Record<string, unknown>>(obj: T, key: string | number | symbol): boolean => {
   return Object.prototype.hasOwnProperty.call(obj, key);
 };
 
-export const hasPath = (obj: any, path: string | string[]): boolean => {
+export const hasPath = (obj: unknown, path: string | string[]): boolean => {
   const keys = Array.isArray(path) ? path : path.split('.');
   let current = obj;
   
   for (const key of keys) {
-    if (current == null || !has(current, key)) {
+    if (current == null || !has(current as Record<string, unknown>, key)) {
       return false;
     }
-    current = current[key];
+    current = (current as any)[key];
   }
   
   return true;
 };
 
-export const get = <T = any>(obj: any, path: string | string[], defaultValue?: T): T => {
+export const get = <T = any>(obj: Record<string, any>, path: string, defaultValue?: T): T => {
   const keys = Array.isArray(path) ? path : path.split('.');
   let current = obj;
   
@@ -75,9 +75,9 @@ export const get = <T = any>(obj: any, path: string | string[], defaultValue?: T
   return current as T;
 };
 
-export const set = <T extends Record<string, any>>(obj: T, path: string | string[], value: any): T => {
+export const set = <T extends Record<string, any>>(obj: T, path: string, value: any): T => {
   const keys = Array.isArray(path) ? path : path.split('.');
-  const result = { ...obj } as any;
+  const result = { ...obj } as Record<string, any>;
   let current = result;
   
   for (let i = 0; i < keys.length - 1; i++) {
@@ -91,30 +91,30 @@ export const set = <T extends Record<string, any>>(obj: T, path: string | string
   }
   
   current[keys[keys.length - 1]] = value;
-  return result;
+  return result as T;
 };
 
-export const unset = <T extends Record<string, any>>(obj: T, path: string | string[]): T => {
+export const unset = <T extends Record<string, any>>(obj: T, path: string): T => {
   const keys = Array.isArray(path) ? path : path.split('.');
-  const result = { ...obj } as any;
+  const result = { ...obj } as Record<string, any>;
   
   if (keys.length === 1) {
     delete result[keys[0]];
-    return result;
+    return result as T;
   }
   
   let current = result;
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
     if (!has(current, key) || !isObject(current[key])) {
-      return result;
+      return result as T;
     }
     current[key] = { ...current[key] };
     current = current[key];
   }
   
   delete current[keys[keys.length - 1]];
-  return result;
+  return result as T;
 };
 
 // 对象合并和克隆
@@ -135,7 +135,7 @@ export const clone = <T>(obj: T): T => {
     const cloned = {} as T;
     for (const key in obj) {
       if (has(obj, key)) {
-        (cloned as any)[key] = clone((obj as any)[key]);
+        (cloned as Record<string, unknown>)[key] = clone((obj as Record<string, unknown>)[key]);
       }
     }
     return cloned;
@@ -160,7 +160,7 @@ export const shallowClone = <T>(obj: T): T => {
   return obj;
 };
 
-export const merge = <T extends Record<string, any>>(...objects: Partial<T>[]): T => {
+export const merge = <T extends Record<string, unknown>>(...objects: Partial<T>[]): T => {
   const result = {} as T;
   
   for (const obj of objects) {
@@ -172,8 +172,8 @@ export const merge = <T extends Record<string, any>>(...objects: Partial<T>[]): 
   return result;
 };
 
-export const deepMerge = <T extends Record<string, any>>(...objects: Partial<T>[]): T => {
-  const result = {} as any;
+export const deepMerge = <T extends Record<string, unknown>>(...objects: Partial<T>[]): T => {
+  const result = {} as Record<string, unknown>;
   
   for (const obj of objects) {
     if (isPlainObject(obj)) {
@@ -194,12 +194,12 @@ export const deepMerge = <T extends Record<string, any>>(...objects: Partial<T>[
   return result as T;
 };
 
-export const assign = <T extends Record<string, any>>(target: T, ...sources: Partial<T>[]): T => {
+export const assign = <T extends Record<string, unknown>>(target: T, ...sources: Partial<T>[]): T => {
   return Object.assign(target, ...sources);
 };
 
 // 对象过滤和转换
-export const pick = <T extends Record<string, any>, K extends keyof T>(
+export const pick = <T extends Record<string, unknown>, K extends keyof T>(
   obj: T,
   keys: K[]
 ): Pick<T, K> => {
@@ -214,7 +214,7 @@ export const pick = <T extends Record<string, any>, K extends keyof T>(
   return result;
 };
 
-export const omit = <T extends Record<string, any>, K extends keyof T>(
+export const omit = <T extends Record<string, unknown>, K extends keyof T>(
   obj: T,
   keys: K[]
 ): Omit<T, K> => {
@@ -227,7 +227,7 @@ export const omit = <T extends Record<string, any>, K extends keyof T>(
   return result;
 };
 
-export const pickBy = <T extends Record<string, any>>(
+export const pickBy = <T extends Record<string, unknown>>(
   obj: T,
   predicate: (value: T[keyof T], key: keyof T) => boolean
 ): Partial<T> => {
@@ -242,7 +242,7 @@ export const pickBy = <T extends Record<string, any>>(
   return result;
 };
 
-export const omitBy = <T extends Record<string, any>>(
+export const omitBy = <T extends Record<string, unknown>>(
   obj: T,
   predicate: (value: T[keyof T], key: keyof T) => boolean
 ): Partial<T> => {
@@ -257,7 +257,7 @@ export const omitBy = <T extends Record<string, any>>(
   return result;
 };
 
-export const mapValues = <T extends Record<string, any>, U>(
+export const mapValues = <T extends Record<string, unknown>, U>(
   obj: T,
   mapper: (value: T[keyof T], key: keyof T) => U
 ): Record<keyof T, U> => {
@@ -272,7 +272,7 @@ export const mapValues = <T extends Record<string, any>, U>(
   return result;
 };
 
-export const mapKeys = <T extends Record<string, any>, K extends string | number | symbol>(
+export const mapKeys = <T extends Record<string, unknown>, K extends string | number | symbol>(
   obj: T,
   mapper: (value: T[keyof T], key: keyof T) => K
 ): Record<K, T[keyof T]> => {
@@ -289,7 +289,7 @@ export const mapKeys = <T extends Record<string, any>, K extends string | number
 };
 
 // 对象比较
-export const equals = (obj1: any, obj2: any): boolean => {
+export const equals = (obj1: unknown, obj2: unknown): boolean => {
   if (obj1 === obj2) return true;
   
   if (obj1 == null || obj2 == null) return obj1 === obj2;
@@ -313,7 +313,7 @@ export const equals = (obj1: any, obj2: any): boolean => {
   return false;
 };
 
-export const shallowEquals = (obj1: any, obj2: any): boolean => {
+export const shallowEquals = (obj1: unknown, obj2: unknown): boolean => {
   if (obj1 === obj2) return true;
   
   if (obj1 == null || obj2 == null) return obj1 === obj2;
@@ -341,7 +341,7 @@ export const shallowEquals = (obj1: any, obj2: any): boolean => {
 export const isEqual = equals;
 export const isShallowEqual = shallowEquals;
 
-export const hasValue = (obj: any, value: any): boolean => {
+export const hasValue = (obj: unknown, value: unknown): boolean => {
   if (Array.isArray(obj)) {
     return obj.includes(value);
   }
@@ -353,7 +353,7 @@ export const hasValue = (obj: any, value: any): boolean => {
   return false;
 };
 
-export const hasDeepValue = (obj: any, value: any): boolean => {
+export const hasDeepValue = (obj: unknown, value: unknown): boolean => {
   if (equals(obj, value)) return true;
   
   if (Array.isArray(obj)) {
@@ -368,11 +368,11 @@ export const hasDeepValue = (obj: any, value: any): boolean => {
 };
 
 // 对象转换
-export const toArray = <T extends Record<string, any>>(
+export const toArray = <T extends Record<string, unknown>>(
   obj: T,
-  mapper?: (value: T[keyof T], key: keyof T) => any
-): any[] => {
-  const result: any[] = [];
+  mapper?: (value: T[keyof T], key: keyof T) => unknown
+): unknown[] => {
+  const result: unknown[] = [];
   
   for (const key in obj) {
     if (has(obj, key)) {
@@ -384,7 +384,7 @@ export const toArray = <T extends Record<string, any>>(
   return result;
 };
 
-export const toPairs = <T extends Record<string, any>>(obj: T): [keyof T, T[keyof T]][] => {
+export const toPairs = <T extends Record<string, unknown>>(obj: T): [keyof T, T[keyof T]][] => {
   return entries(obj);
 };
 
@@ -435,7 +435,7 @@ export const invertBy = <T extends Record<string, any>, K extends string | numbe
 };
 
 // 对象路径操作
-export const paths = (obj: any, currentPath: string[] = []): string[][] => {
+export const paths = (obj: unknown, currentPath: string[] = []): string[][] => {
   const result: string[][] = [];
   
   if (isPlainObject(obj)) {
@@ -457,10 +457,10 @@ export const paths = (obj: any, currentPath: string[] = []): string[][] => {
   return result;
 };
 
-export const pathValues = (obj: any): Array<{ path: string[]; value: any }> => {
-  const result: Array<{ path: string[]; value: any }> = [];
+export const pathValues = (obj: unknown): Array<{ path: string[]; value: unknown }> => {
+  const result: Array<{ path: string[]; value: unknown }> = [];
   
-  const traverse = (current: any, currentPath: string[] = []) => {
+  const traverse = (current: unknown, currentPath: string[] = []) => {
     if (isPlainObject(current)) {
       for (const key in current) {
         if (has(current, key)) {
@@ -483,10 +483,10 @@ export const pathValues = (obj: any): Array<{ path: string[]; value: any }> => {
 };
 
 // 对象扁平化
-export const flatten = (obj: any, separator: string = '.'): Record<string, any> => {
-  const result: Record<string, any> = {};
+export const flatten = (obj: unknown, separator: string = '.'): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
   
-  const traverse = (current: any, prefix: string = '') => {
+  const traverse = (current: unknown, prefix: string = '') => {
     if (isPlainObject(current)) {
       for (const key in current) {
         if (has(current, key)) {
@@ -508,8 +508,8 @@ export const flatten = (obj: any, separator: string = '.'): Record<string, any> 
   return result;
 };
 
-export const unflatten = (obj: Record<string, any>, separator: string = '.'): any => {
-  const result: any = {};
+export const unflatten = (obj: Record<string, unknown>, separator: string = '.'): unknown => {
+  const result: Record<string, unknown> = {};
   
   for (const key in obj) {
     if (has(obj, key)) {
@@ -523,7 +523,7 @@ export const unflatten = (obj: Record<string, any>, separator: string = '.'): an
           const nextKey = keys[i + 1];
           current[k] = /^\d+$/.test(nextKey) ? [] : {};
         }
-        current = current[k];
+        current = (current as any)[k];
       }
       
       current[keys[keys.length - 1]] = obj[key];
@@ -542,24 +542,24 @@ export const seal = <T>(obj: T): T => {
   return Object.seal(obj);
 };
 
-export const isFrozen = (obj: any): boolean => {
+export const isFrozen = (obj: unknown): boolean => {
   return Object.isFrozen(obj);
 };
 
-export const isSealed = (obj: any): boolean => {
+export const isSealed = (obj: unknown): boolean => {
   return Object.isSealed(obj);
 };
 
-export const isExtensible = (obj: any): boolean => {
+export const isExtensible = (obj: unknown): boolean => {
   return Object.isExtensible(obj);
 };
 
 // 对象序列化
-export const stringify = (obj: any, space?: number): string => {
+export const stringify = (obj: unknown, space?: number): string => {
   return JSON.stringify(obj, null, space);
 };
 
-export const parse = <T = any>(str: string): T | null => {
+export const parse = <T = unknown>(str: string): T | null => {
   try {
     return JSON.parse(str) as T;
   } catch {
@@ -579,7 +579,7 @@ export const memoize = <T extends (...args: any[]) => any>(fn: T): T => {
     }
     
     const result = fn(...args);
-    cache.set(key, result);
+    cache.set(key, result as ReturnType<T>);
     return result;
   }) as T;
 };
@@ -598,8 +598,8 @@ export const memoizeWith = <T extends (...args: any[]) => any>(
     }
     
     const result = fn(...args);
-    cache.set(key, result);
-    return result;
+    cache.set(key, result as ReturnType<T>);
+    return result as ReturnType<T>;
   }) as T;
 };
 

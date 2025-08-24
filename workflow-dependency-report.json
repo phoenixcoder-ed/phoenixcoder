@@ -1,0 +1,850 @@
+{
+  "summary": {
+    "total_workflows": 9,
+    "total_issues": 0,
+    "timestamp": "2025-08-23T09:30:55.215Z"
+  },
+  "workflows": {
+    "ci.yml": {
+      "name": "CI/CD 流程",
+      "dependencies": {
+        "workflow_run": [],
+        "needs": [
+          {
+            "job": "build",
+            "needs": "test"
+          },
+          {
+            "job": "security-scan",
+            "needs": "build"
+          }
+        ],
+        "uses": [],
+        "secrets": [],
+        "env_vars": [],
+        "actions": [
+          {
+            "job": "test",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "test",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "test",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "build",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "build",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "build",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "security-scan",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "security-scan",
+            "action": "actions/setup-python@v5"
+          },
+          {
+            "job": "security-scan",
+            "action": "actions/upload-artifact@v4"
+          }
+        ]
+      },
+      "issues": []
+    },
+    "code-quality.yml": {
+      "name": "Code Quality Analysis",
+      "dependencies": {
+        "workflow_run": [],
+        "needs": [
+          {
+            "job": "sonarqube-analysis",
+            "needs": "lint-and-format"
+          },
+          {
+            "job": "codeclimate-analysis",
+            "needs": "lint-and-format"
+          },
+          {
+            "job": "quality-gate",
+            "needs": "lint-and-format"
+          },
+          {
+            "job": "quality-gate",
+            "needs": "sonarqube-analysis"
+          },
+          {
+            "job": "quality-gate",
+            "needs": "codeclimate-analysis"
+          },
+          {
+            "job": "quality-gate",
+            "needs": "dependency-analysis"
+          }
+        ],
+        "uses": [],
+        "secrets": [
+          "SONAR_TOKEN",
+          "SONAR_HOST_URL",
+          "CC_TEST_REPORTER_ID"
+        ],
+        "env_vars": [
+          "NODE_VERSION",
+          "PYTHON_VERSION",
+          "JAVA_VERSION"
+        ],
+        "actions": [
+          {
+            "job": "lint-and-format",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "lint-and-format",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "lint-and-format",
+            "action": "actions/setup-python@v5"
+          },
+          {
+            "job": "lint-and-format",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "sonarqube-analysis",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "sonarqube-analysis",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "sonarqube-analysis",
+            "action": "actions/setup-python@v5"
+          },
+          {
+            "job": "sonarqube-analysis",
+            "action": "actions/setup-java@v4"
+          },
+          {
+            "job": "sonarqube-analysis",
+            "action": "actions/download-artifact@v4"
+          },
+          {
+            "job": "sonarqube-analysis",
+            "action": "sonarqube-quality-gate-action@master"
+          },
+          {
+            "job": "codeclimate-analysis",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "codeclimate-analysis",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "dependency-analysis",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "dependency-analysis",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "dependency-analysis",
+            "action": "actions/setup-python@v5"
+          },
+          {
+            "job": "dependency-analysis",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "quality-gate",
+            "action": "actions/github-script@v7"
+          }
+        ]
+      },
+      "issues": []
+    },
+    "deploy.yml": {
+      "name": "Deploy to Environment",
+      "dependencies": {
+        "workflow_run": [
+          "CI/CD 流程"
+        ],
+        "needs": [
+          {
+            "job": "pre-deployment-checks",
+            "needs": "determine-environment"
+          },
+          {
+            "job": "deploy-staging",
+            "needs": "determine-environment"
+          },
+          {
+            "job": "deploy-staging",
+            "needs": "pre-deployment-checks"
+          },
+          {
+            "job": "deploy-production",
+            "needs": "determine-environment"
+          },
+          {
+            "job": "deploy-production",
+            "needs": "pre-deployment-checks"
+          },
+          {
+            "job": "post-deployment",
+            "needs": "determine-environment"
+          },
+          {
+            "job": "post-deployment",
+            "needs": "deploy-staging"
+          },
+          {
+            "job": "post-deployment",
+            "needs": "deploy-production"
+          }
+        ],
+        "uses": [],
+        "secrets": [
+          "DEPLOY_HOST",
+          "DEPLOY_USER",
+          "DATABASE_URL",
+          "REDIS_URL",
+          "JWT_SECRET",
+          "STRIPE_SECRET_KEY",
+          "SENDGRID_API_KEY",
+          "SENTRY_DSN",
+          "KUBE_CONFIG_STAGING",
+          "KUBE_CONFIG_PRODUCTION",
+          "SLACK_WEBHOOK_URL"
+        ],
+        "env_vars": [
+          "REGISTRY",
+          "IMAGE_PREFIX"
+        ],
+        "actions": [
+          {
+            "job": "pre-deployment-checks",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "deploy-staging",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "deploy-staging",
+            "action": "azure/setup-kubectl@v3"
+          },
+          {
+            "job": "deploy-production",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "deploy-production",
+            "action": "azure/setup-kubectl@v3"
+          },
+          {
+            "job": "rollback",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "rollback",
+            "action": "azure/setup-kubectl@v3"
+          },
+          {
+            "job": "post-deployment",
+            "action": "actions/upload-artifact@v4"
+          }
+        ]
+      },
+      "issues": []
+    },
+    "docker-build.yml": {
+      "name": "Docker Build and Push",
+      "dependencies": {
+        "workflow_run": [],
+        "needs": [
+          {
+            "job": "build-and-push",
+            "needs": "detect-changes"
+          },
+          {
+            "job": "update-deployment-manifests",
+            "needs": "detect-changes"
+          },
+          {
+            "job": "update-deployment-manifests",
+            "needs": "build-and-push"
+          },
+          {
+            "job": "notify-deployment",
+            "needs": "build-and-push"
+          },
+          {
+            "job": "notify-deployment",
+            "needs": "update-deployment-manifests"
+          }
+        ],
+        "uses": [],
+        "secrets": [
+          "GITHUB_TOKEN",
+          "SLACK_WEBHOOK_URL"
+        ],
+        "env_vars": [
+          "REGISTRY",
+          "IMAGE_PREFIX"
+        ],
+        "actions": [
+          {
+            "job": "detect-changes",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "detect-changes",
+            "action": "dorny/paths-filter@v3"
+          },
+          {
+            "job": "build-and-push",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "build-and-push",
+            "action": "docker/setup-buildx-action@v3"
+          },
+          {
+            "job": "build-and-push",
+            "action": "docker/login-action@v3"
+          },
+          {
+            "job": "build-and-push",
+            "action": "docker/metadata-action@v5"
+          },
+          {
+            "job": "build-and-push",
+            "action": "docker/build-push-action@v5"
+          },
+          {
+            "job": "build-and-push",
+            "action": "aquasecurity/trivy-action@master"
+          },
+          {
+            "job": "build-and-push",
+            "action": "github/codeql-action/upload-sarif@v3"
+          },
+          {
+            "job": "build-and-push",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "update-deployment-manifests",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "update-deployment-manifests",
+            "action": "actions/download-artifact@v4"
+          }
+        ]
+      },
+      "issues": []
+    },
+    "notifications.yml": {
+      "name": "Notifications and Reporting",
+      "dependencies": {
+        "workflow_run": [
+          "CI/CD 流程",
+          "Deploy to Environment",
+          "Performance Monitoring",
+          "Code Quality Analysis",
+          "Docker Build and Push"
+        ],
+        "needs": [
+          {
+            "job": "collect-workflow-data",
+            "needs": "determine-notification-context"
+          },
+          {
+            "job": "send-slack-notification",
+            "needs": "determine-notification-context"
+          },
+          {
+            "job": "send-slack-notification",
+            "needs": "collect-workflow-data"
+          },
+          {
+            "job": "send-email-notification",
+            "needs": "determine-notification-context"
+          },
+          {
+            "job": "send-email-notification",
+            "needs": "collect-workflow-data"
+          },
+          {
+            "job": "update-pr-status",
+            "needs": "determine-notification-context"
+          },
+          {
+            "job": "generate-status-badges",
+            "needs": "determine-notification-context"
+          },
+          {
+            "job": "generate-status-badges",
+            "needs": "collect-workflow-data"
+          },
+          {
+            "job": "notification-summary",
+            "needs": "send-slack-notification"
+          },
+          {
+            "job": "notification-summary",
+            "needs": "send-email-notification"
+          },
+          {
+            "job": "notification-summary",
+            "needs": "update-pr-status"
+          },
+          {
+            "job": "notification-summary",
+            "needs": "generate-status-badges"
+          }
+        ],
+        "uses": [],
+        "secrets": [
+          "SLACK_WEBHOOK_URL",
+          "TEAMS_WEBHOOK_URL",
+          "EMAIL_SMTP_HOST",
+          "EMAIL_SMTP_PORT",
+          "EMAIL_USERNAME",
+          "EMAIL_PASSWORD",
+          "EMAIL_FROM",
+          "EMAIL_TO",
+          "GITHUB_TOKEN"
+        ],
+        "env_vars": [],
+        "actions": [
+          {
+            "job": "collect-workflow-data",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "generate-status-badges",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "generate-status-badges",
+            "action": "actions/upload-artifact@v4"
+          }
+        ]
+      },
+      "issues": []
+    },
+    "performance-monitoring.yml": {
+      "name": "Performance Monitoring",
+      "dependencies": {
+        "workflow_run": [],
+        "needs": [
+          {
+            "job": "backend-performance-tests",
+            "needs": "setup-performance-environment"
+          },
+          {
+            "job": "frontend-performance-tests",
+            "needs": "setup-performance-environment"
+          },
+          {
+            "job": "e2e-performance-tests",
+            "needs": "setup-performance-environment"
+          },
+          {
+            "job": "analyze-performance-results",
+            "needs": "setup-performance-environment"
+          },
+          {
+            "job": "analyze-performance-results",
+            "needs": "backend-performance-tests"
+          },
+          {
+            "job": "analyze-performance-results",
+            "needs": "frontend-performance-tests"
+          },
+          {
+            "job": "analyze-performance-results",
+            "needs": "e2e-performance-tests"
+          },
+          {
+            "job": "update-performance-baselines",
+            "needs": "setup-performance-environment"
+          },
+          {
+            "job": "update-performance-baselines",
+            "needs": "analyze-performance-results"
+          }
+        ],
+        "uses": [],
+        "secrets": [
+          "GITHUB_TOKEN"
+        ],
+        "env_vars": [
+          "NODE_VERSION",
+          "PYTHON_VERSION"
+        ],
+        "actions": [
+          {
+            "job": "backend-performance-tests",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "backend-performance-tests",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "backend-performance-tests",
+            "action": "actions/setup-python@v5"
+          },
+          {
+            "job": "backend-performance-tests",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "frontend-performance-tests",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "frontend-performance-tests",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "frontend-performance-tests",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "frontend-performance-tests",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "e2e-performance-tests",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "e2e-performance-tests",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "e2e-performance-tests",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "analyze-performance-results",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "analyze-performance-results",
+            "action": "actions/setup-python@v5"
+          },
+          {
+            "job": "analyze-performance-results",
+            "action": "actions/download-artifact@v4"
+          },
+          {
+            "job": "analyze-performance-results",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "analyze-performance-results",
+            "action": "actions/github-script@v7"
+          },
+          {
+            "job": "update-performance-baselines",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "update-performance-baselines",
+            "action": "actions/download-artifact@v4"
+          }
+        ]
+      },
+      "issues": []
+    },
+    "test-report.yml": {
+      "name": "Test Report Generator",
+      "dependencies": {
+        "workflow_run": [
+          "CI/CD 流程"
+        ],
+        "needs": [],
+        "uses": [],
+        "secrets": [
+          "GITHUB_TOKEN"
+        ],
+        "env_vars": [],
+        "actions": [
+          {
+            "job": "generate-test-report",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "generate-test-report",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "generate-test-report",
+            "action": "actions/github-script@v6"
+          },
+          {
+            "job": "generate-test-report",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "generate-test-report",
+            "action": "peaceiris/actions-gh-pages@v3"
+          },
+          {
+            "job": "generate-test-report",
+            "action": "actions/github-script@v6"
+          }
+        ]
+      },
+      "issues": []
+    },
+    "test.yml": {
+      "name": "🧪 智能分层测试",
+      "dependencies": {
+        "workflow_run": [],
+        "needs": [
+          {
+            "job": "backend-unit-tests",
+            "needs": "code-quality"
+          },
+          {
+            "job": "frontend-unit-tests",
+            "needs": "code-quality"
+          },
+          {
+            "job": "integration-tests",
+            "needs": "backend-unit-tests"
+          },
+          {
+            "job": "integration-tests",
+            "needs": "frontend-unit-tests"
+          },
+          {
+            "job": "e2e-tests",
+            "needs": "integration-tests"
+          },
+          {
+            "job": "performance-tests",
+            "needs": "integration-tests"
+          }
+        ],
+        "uses": [],
+        "secrets": [
+          "POSTGRES_PASSWORD"
+        ],
+        "env_vars": [
+          "NODE_VERSION",
+          "PNPM_VERSION",
+          "PYTHON_VERSION",
+          "DATABASE_URL",
+          "COVERAGE_THRESHOLD",
+          "REDIS_URL"
+        ],
+        "actions": [
+          {
+            "job": "code-quality",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "code-quality",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "code-quality",
+            "action": "pnpm/action-setup@v4"
+          },
+          {
+            "job": "code-quality",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "backend-unit-tests",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "backend-unit-tests",
+            "action": "actions/setup-python@v5"
+          },
+          {
+            "job": "backend-unit-tests",
+            "action": "codecov/codecov-action@v4"
+          },
+          {
+            "job": "backend-unit-tests",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "frontend-unit-tests",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "frontend-unit-tests",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "frontend-unit-tests",
+            "action": "pnpm/action-setup@v4"
+          },
+          {
+            "job": "frontend-unit-tests",
+            "action": "codecov/codecov-action@v4"
+          },
+          {
+            "job": "frontend-unit-tests",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "integration-tests",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "integration-tests",
+            "action": "actions/setup-python@v5"
+          },
+          {
+            "job": "integration-tests",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "integration-tests",
+            "action": "pnpm/action-setup@v4"
+          },
+          {
+            "job": "integration-tests",
+            "action": "codecov/codecov-action@v4"
+          },
+          {
+            "job": "integration-tests",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "e2e-tests",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "e2e-tests",
+            "action": "actions/setup-python@v5"
+          },
+          {
+            "job": "e2e-tests",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "e2e-tests",
+            "action": "pnpm/action-setup@v4"
+          },
+          {
+            "job": "e2e-tests",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "e2e-tests",
+            "action": "actions/upload-artifact@v4"
+          },
+          {
+            "job": "performance-tests",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "performance-tests",
+            "action": "actions/setup-python@v5"
+          },
+          {
+            "job": "performance-tests",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "performance-tests",
+            "action": "pnpm/action-setup@v4"
+          }
+        ]
+      },
+      "issues": []
+    },
+    "update-badges.yml": {
+      "name": "Update Status Badges",
+      "dependencies": {
+        "workflow_run": [
+          "CI/CD 流程",
+          "Code Quality Analysis",
+          "Performance Monitoring",
+          "Deploy to Environment"
+        ],
+        "needs": [
+          {
+            "job": "collect-badge-data",
+            "needs": "prepare-badge-update"
+          },
+          {
+            "job": "generate-badges",
+            "needs": "prepare-badge-update"
+          },
+          {
+            "job": "generate-badges",
+            "needs": "collect-badge-data"
+          }
+        ],
+        "uses": [],
+        "secrets": [
+          "GITHUB_TOKEN",
+          "SONARQUBE_TOKEN",
+          "SONARQUBE_URL",
+          "CODECOV_TOKEN",
+          "UPTIME_ROBOT_API_KEY"
+        ],
+        "env_vars": [],
+        "actions": [
+          {
+            "job": "prepare-badge-update",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "collect-badge-data",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "collect-badge-data",
+            "action": "actions/setup-node@v4"
+          },
+          {
+            "job": "collect-badge-data",
+            "action": "actions/setup-python@v5"
+          },
+          {
+            "job": "generate-badges",
+            "action": "actions/checkout@v4"
+          },
+          {
+            "job": "generate-badges",
+            "action": "actions/setup-python@v5"
+          }
+        ]
+      },
+      "issues": []
+    }
+  },
+  "issues": [],
+  "recommendations": [
+    "所有工作流依赖关系检查通过，配置正确！"
+  ]
+}

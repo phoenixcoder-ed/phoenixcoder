@@ -5,7 +5,11 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "composite": true,
-    "incremental": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "noEmit": false
   },
   "include": [
@@ -14,8 +18,6 @@
   "exclude": [
     "dist",
     "node_modules",
-    "**/*.test.ts",
-    "**/*.spec.ts",
     "coverage"
   ],
   "references": [

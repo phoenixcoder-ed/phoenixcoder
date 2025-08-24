@@ -1,7 +1,7 @@
 import React from 'react';
 
 // 基础组件属性类型
-export type ComponentProps<T = {}> = T & {
+export type ComponentProps<T = Record<string, unknown>> = T & {
   className?: string;
   children?: React.ReactNode;
 };

@@ -1,6 +1,6 @@
 import { BaseService } from '../base/BaseService';
 import { IService } from '../interfaces/IService';
-import { ServiceError, ValidationError, NotFoundError, AuthorizationError, ServiceErrorType, handleUnknownError } from '../types/ServiceError';
+import { ServiceError, ValidationError, NotFoundError, AuthorizationError, ServiceErrorType } from '../types/ServiceError';
 import { ApiConfig } from '../types/ServiceConfig';
 
 import {
@@ -8,8 +8,7 @@ import {
   TaskCategory,
   TaskDifficulty,
   TaskStatus,
-  PaginatedResponse,
-  User
+  PaginatedResponse
 } from '@phoenixcoder/shared-types';
 import { ApiClient, buildURL } from '@phoenixcoder/shared-utils';
 import { EventEmitter } from 'eventemitter3';
@@ -34,6 +33,7 @@ export interface TaskQueryParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   includeExpired?: boolean;
+  [key: string]: unknown;
 }
 
 /**
@@ -187,12 +187,12 @@ export class TaskService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       const response = await this.apiClient.get('/tasks/health');
-      return response.success;
+      return { success: response.success, status: 'healthy' };
     } catch (error: unknown) {
-      return false;
+      return { success: false, status: 'unhealthy', error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -247,7 +247,7 @@ export class TaskService extends BaseService implements IService {
       this.eventEmitter.emit('task:created', task);
       return task;
     } catch (error: unknown) {
-      const err = error as any;
+      const err = error as { response?: { status?: number } };
       if (err.response?.status === 404) {
         throw new NotFoundError(`任务 ${taskId} 不存在`, 'task', 'TaskService');
       }
@@ -278,7 +278,7 @@ export class TaskService extends BaseService implements IService {
       
       return task;
     } catch (error: unknown) {
-      const err = error as any;
+      const err = error as { response?: { status?: number } };
       if (err.response?.status === 400) {
         throw new ValidationError('任务数据验证失败', [{
           field: 'taskData',
@@ -313,7 +313,7 @@ export class TaskService extends BaseService implements IService {
       
       return task;
     } catch (error: unknown) {
-      const err = error as any;
+      const err = error as { response?: { status?: number } };
       if (err.response?.status === 404) {
         throw new NotFoundError(`任务 ${taskId} 不存在`, 'task', 'TaskService');
       }
@@ -351,7 +351,7 @@ export class TaskService extends BaseService implements IService {
       
       this.eventEmitter.emit('task:deleted', taskId);
     } catch (error: unknown) {
-      const err = error as any;
+      const err = error as { response?: { status?: number } };
       if (err.response?.status === 404) {
         throw new NotFoundError(`任务 ${taskId} 不存在`, 'task', 'TaskService');
       }
@@ -385,7 +385,7 @@ export class TaskService extends BaseService implements IService {
       
       return task;
     } catch (error: unknown) {
-      const err = error as any;
+      const err = error as { response?: { status?: number } };
       if (err.response?.status === 404) {
         throw new NotFoundError(`任务 ${taskId} 不存在`, 'task', 'TaskService');
       }
@@ -422,13 +422,12 @@ export class TaskService extends BaseService implements IService {
       // 更新缓存
       this.setTaskCache(taskId, task);
       
-      // 创建被取消分配者的用户对象（简化版）
-      const assignee = { id: assigneeId } as User;
+      // 发射取消分配事件
       this.eventEmitter.emit('task:unassigned', task, assigneeId);
       
       return task;
     } catch (error: unknown) {
-      const err = error as any;
+      const err = error as { response?: { status?: number } };
       if (err.response?.status === 404) {
         throw new NotFoundError(`任务 ${taskId} 或分配关系不存在`, 'taskOrAssignment', 'TaskService');
       }
@@ -462,7 +461,7 @@ export class TaskService extends BaseService implements IService {
       
       return task;
     } catch (error: unknown) {
-      const err = error as any;
+      const err = error as { response?: { status?: number } };
       if (err.response?.status === 404) {
         throw new NotFoundError(`任务 ${taskId} 不存在`, 'task', 'TaskService');
       }
@@ -503,7 +502,7 @@ export class TaskService extends BaseService implements IService {
       
       return task;
     } catch (error: unknown) {
-      const err = error as any;
+      const err = error as { response?: { status?: number } };
       if (err.response?.status === 404) {
         throw new NotFoundError(`任务 ${taskId} 不存在`, 'task', 'TaskService');
       }
@@ -547,7 +546,7 @@ export class TaskService extends BaseService implements IService {
       
       return task;
     } catch (error: unknown) {
-      const err = error as any;
+      const err = error as { response?: { status?: number } };
       if (err.response?.status === 404) {
         throw new NotFoundError(`任务 ${taskId} 不存在`, 'task', 'TaskService');
       }
@@ -734,7 +733,7 @@ export class TaskService extends BaseService implements IService {
   /**
    * 监听任务事件
    */
-  override on<T extends string | symbol>(event: T, fn?: ((...args: any[]) => void) | undefined, context?: any): this {
+  override on<T extends string | symbol>(event: T, fn?: ((...args: unknown[]) => void) | undefined, context?: unknown): this {
     if (fn) {
       super.on(event, fn, context);
     }
@@ -744,7 +743,7 @@ export class TaskService extends BaseService implements IService {
   /**
    * 移除任务事件监听
    */
-  override off<T extends string | symbol>(event: T, fn?: ((...args: any[]) => void) | undefined, context?: any): this {
+  override off<T extends string | symbol>(event: T, fn?: ((...args: unknown[]) => void) | undefined, context?: unknown): this {
     if (fn) {
       super.off(event, fn, context);
     }
@@ -755,14 +754,14 @@ export class TaskService extends BaseService implements IService {
    * 监听任务事件（类型安全版本）
    */
   onTaskEvent<K extends keyof TaskEvents>(event: K, listener: TaskEvents[K]): void {
-    this.eventEmitter.on(event, listener as any);
+    this.eventEmitter.on(event, listener as (...args: unknown[]) => void);
   }
 
   /**
    * 移除任务事件监听（类型安全版本）
    */
   offTaskEvent<K extends keyof TaskEvents>(event: K, listener: TaskEvents[K]): void {
-    super.off(event, listener as any);
+    super.off(event, listener as (...args: unknown[]) => void);
   }
 
   /**
@@ -811,7 +810,7 @@ export class TaskService extends BaseService implements IService {
       try {
         // 检查即将到期的任务
         const response = await this.apiClient.get('/tasks/deadline-check');
-        const { approaching, overdue } = response.data;
+        const { approaching, overdue } = response.data as { approaching: Array<{ task: Task; hoursLeft: number }>; overdue: Task[] };
         
         // 发出即将到期事件
         approaching.forEach((item: { task: Task; hoursLeft: number }) => {
@@ -824,6 +823,7 @@ export class TaskService extends BaseService implements IService {
         });
       } catch (error: unknown) {
         // 静默处理错误，避免影响主要功能
+        // eslint-disable-next-line no-console
         console.warn('Deadline check failed:', error);
       }
     }, 3600000); // 每小时检查一次

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, Star, Crown, Award, Target, Zap, Shield, Lock, Calendar, Users, TrendingUp, CheckCircle } from 'lucide-react';
+import { Star, Crown, Target, Zap, Shield, Lock, Calendar, Users, TrendingUp, Trophy } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Badge } from '../ui/Badge';
 import { Progress } from '../ui/Progress';
@@ -1289,16 +1289,18 @@ export const AchievementList: React.FC<AchievementListProps> = ({
         aValue = a.title;
         bValue = b.title;
         break;
-      case 'status':
+      case 'status': {
         const statusOrder = { completed: 4, claimed: 3, in_progress: 2, available: 1, locked: 0 };
         aValue = statusOrder[a.status];
         bValue = statusOrder[b.status];
         break;
-      case 'rarity':
+      }
+      case 'rarity': {
         const rarityOrder = { legendary: 4, epic: 3, rare: 2, uncommon: 1, common: 0 };
         aValue = rarityOrder[a.rarity];
         bValue = rarityOrder[b.rarity];
         break;
+      }
       case 'completedAt':
         aValue = a.completedAt?.getTime() || 0;
         bValue = b.completedAt?.getTime() || 0;

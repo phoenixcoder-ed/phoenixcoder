@@ -1,6 +1,7 @@
+import * as os from 'os';
 import { BaseService } from '../base/BaseService';
 import { IService } from '../interfaces/IService';
-import { ServiceError, ServiceErrorType, ValidationError } from '../types/ServiceError';
+import { ServiceError, ServiceErrorType } from '../types/ServiceError';
 import { ServiceConfig } from '../types/ServiceConfig';
 import { SERVICE_EVENTS } from '../types/ServiceConstants';
 import { EventEmitter } from 'eventemitter3';
@@ -80,7 +81,7 @@ export interface HealthCheckResult {
   message?: string;
   duration: number;
   timestamp: Date;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 /**
@@ -174,7 +175,7 @@ export interface AlertRule {
  */
 export interface AlertAction {
   type: 'email' | 'webhook' | 'log' | 'notification';
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 /**
@@ -550,13 +551,13 @@ export class MonitoringService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       // 检查基本功能
       this.recordMetric('health_check', 1);
-      return true;
+      return { success: true, status: 'healthy', metricsCount: this.metrics.size };
     } catch (error) {
-      return false;
+      return { success: false, status: 'unhealthy', error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -905,9 +906,9 @@ export class MonitoringService extends BaseService implements IService {
           usage: memoryUsage.heapUsed / (memoryUsage.heapTotal + memoryUsage.external)
         },
         cpu: {
-          cores: require('os').cpus().length,
+          cores: os.cpus().length,
           usage: (cpuUsage.user + cpuUsage.system) / 1000000, // 转换为秒
-          loadAverage: require('os').loadavg()
+          loadAverage: os.loadavg()
         },
         uptime: process.uptime(),
         pid: process.pid,
@@ -986,7 +987,7 @@ export class MonitoringService extends BaseService implements IService {
   /**
    * 监听监控事件
    */
-  override on<T extends string | symbol>(event: T, fn: (...args: any[]) => void, context?: any): this {
+  override on<T extends string | symbol>(event: T, fn: (...args: unknown[]) => void, context?: unknown): this {
     return super.on(event, fn, context);
   }
 
@@ -994,13 +995,13 @@ export class MonitoringService extends BaseService implements IService {
    * 监听监控事件（类型安全版本）
    */
   onMonitoringEvent<K extends keyof MonitoringEvents>(event: K, listener: MonitoringEvents[K]): void {
-    this.eventEmitter.on(event, listener as any);
+    this.eventEmitter.on(event, listener as (...args: unknown[]) => void);
   }
 
   /**
    * 移除监控事件监听
    */
-  override off<T extends string | symbol>(event: T, fn?: ((...args: any[]) => void) | undefined, context?: any, once?: boolean | undefined): this {
+  override off<T extends string | symbol>(event: T, fn?: ((...args: unknown[]) => void) | undefined, context?: unknown, once?: boolean | undefined): this {
     return super.off(event, fn, context, once);
   }
 
@@ -1008,7 +1009,7 @@ export class MonitoringService extends BaseService implements IService {
    * 移除监控事件监听（类型安全版本）
    */
   offMonitoringEvent<K extends keyof MonitoringEvents>(event: K, listener: MonitoringEvents[K]): void {
-    this.eventEmitter.off(event, listener as any);
+    this.eventEmitter.off(event, listener as (...args: unknown[]) => void);
   }
 
   /**
@@ -1086,6 +1087,7 @@ export class MonitoringService extends BaseService implements IService {
       } catch (error: unknown) {
         const err = this.handleUnknownError(error);
         // 记录收集错误但不抛出
+        // eslint-disable-next-line no-console
         console.warn('Data collection error:', err.message);
       }
     }, 30000); // 每30秒收集一次
@@ -1101,6 +1103,7 @@ export class MonitoringService extends BaseService implements IService {
       } catch (error: unknown) {
         const err = this.handleUnknownError(error);
         // 记录健康检查错误但不抛出
+        // eslint-disable-next-line no-console
         console.warn('Health check error:', err.message);
       }
     }, 60000); // 每分钟检查一次
@@ -1220,10 +1223,11 @@ export class MonitoringService extends BaseService implements IService {
       try {
         switch (action.type) {
           case 'log':
+            // eslint-disable-next-line no-console
             console.error(`[ALERT] ${alert.message}`);
             break;
           case 'webhook':
-            if (action.config.url) {
+            if (action.config.url && typeof action.config.url === 'string') {
               await fetch(action.config.url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1241,6 +1245,7 @@ export class MonitoringService extends BaseService implements IService {
       } catch (error: unknown) {
         const err = this.handleUnknownError(error);
         // 记录动作执行错误但不抛出
+        // eslint-disable-next-line no-console
         console.warn('Alert action execution error:', err.message);
       }
     }
@@ -1263,8 +1268,6 @@ export class MonitoringService extends BaseService implements IService {
       p99: this.getPercentile(sortedTimes, 0.99)
     };
     
-    const now = Date.now();
-    const oneMinuteAgo = now - 60000;
     const recentRequests = this.requestTimes.length; // 简化计算
     
     this.performanceMetrics.throughput = {

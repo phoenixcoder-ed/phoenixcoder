@@ -1,0 +1,373 @@
+{
+  "summary": {
+    "total_workflows": 9,
+    "valid_workflows": 9,
+    "success_rate": 100.0,
+    "errors": 0,
+    "warnings": 1,
+    "status": "excellent",
+    "ci_workflows": [
+      "ci",
+      "test",
+      "code-quality"
+    ],
+    "cd_workflows": [
+      "deploy",
+      "docker-build"
+    ]
+  },
+  "workflows": {
+    "test-report": {
+      "file": ".github/workflows/test-report.yml",
+      "valid": true,
+      "errors": [],
+      "warnings": [
+        "建议添加 workflow_dispatch 以支持手动触发"
+      ],
+      "analysis": {
+        "name": "Test Report Generator",
+        "has_on": true,
+        "has_jobs": true,
+        "has_workflow_dispatch": false,
+        "jobs": [
+          "generate-test-report"
+        ],
+        "triggers": [
+          "workflow_run"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "name": "Test Report Generator",
+      "triggers": [
+        "workflow_run"
+      ],
+      "jobs": [
+        "generate-test-report"
+      ]
+    },
+    "update-badges": {
+      "file": ".github/workflows/update-badges.yml",
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "analysis": {
+        "name": "Update Status Badges",
+        "has_on": true,
+        "has_jobs": true,
+        "has_workflow_dispatch": true,
+        "jobs": [
+          "prepare-badge-update",
+          "collect-badge-data",
+          "generate-badges"
+        ],
+        "triggers": [
+          "schedule",
+          "workflow_dispatch",
+          "workflow_run"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "name": "Update Status Badges",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch",
+        "workflow_run"
+      ],
+      "jobs": [
+        "prepare-badge-update",
+        "collect-badge-data",
+        "generate-badges"
+      ]
+    },
+    "docker-build": {
+      "file": ".github/workflows/docker-build.yml",
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "analysis": {
+        "name": "Docker Build and Push",
+        "has_on": true,
+        "has_jobs": true,
+        "has_workflow_dispatch": true,
+        "jobs": [
+          "detect-changes",
+          "build-and-push",
+          "update-deployment-manifests",
+          "notify-deployment"
+        ],
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "name": "Docker Build and Push",
+      "triggers": [
+        "push",
+        "pull_request",
+        "workflow_dispatch"
+      ],
+      "jobs": [
+        "detect-changes",
+        "build-and-push",
+        "update-deployment-manifests",
+        "notify-deployment"
+      ]
+    },
+    "test": {
+      "file": ".github/workflows/test.yml",
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "analysis": {
+        "name": "🧪 智能分层测试",
+        "has_on": true,
+        "has_jobs": true,
+        "has_workflow_dispatch": true,
+        "jobs": [
+          "code-quality",
+          "backend-unit-tests",
+          "frontend-unit-tests",
+          "integration-tests",
+          "e2e-tests",
+          "performance-tests"
+        ],
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule",
+          "workflow_dispatch"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "name": "🧪 智能分层测试",
+      "triggers": [
+        "push",
+        "pull_request",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "jobs": [
+        "code-quality",
+        "backend-unit-tests",
+        "frontend-unit-tests",
+        "integration-tests",
+        "e2e-tests",
+        "performance-tests"
+      ]
+    },
+    "performance-monitoring": {
+      "file": ".github/workflows/performance-monitoring.yml",
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "analysis": {
+        "name": "Performance Monitoring",
+        "has_on": true,
+        "has_jobs": true,
+        "has_workflow_dispatch": true,
+        "jobs": [
+          "setup-performance-environment",
+          "backend-performance-tests",
+          "frontend-performance-tests",
+          "e2e-performance-tests",
+          "analyze-performance-results",
+          "update-performance-baselines"
+        ],
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "name": "Performance Monitoring",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "jobs": [
+        "setup-performance-environment",
+        "backend-performance-tests",
+        "frontend-performance-tests",
+        "e2e-performance-tests",
+        "analyze-performance-results",
+        "update-performance-baselines"
+      ]
+    },
+    "notifications": {
+      "file": ".github/workflows/notifications.yml",
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "analysis": {
+        "name": "Notifications and Reporting",
+        "has_on": true,
+        "has_jobs": true,
+        "has_workflow_dispatch": true,
+        "jobs": [
+          "determine-notification-context",
+          "collect-workflow-data",
+          "send-slack-notification",
+          "send-email-notification",
+          "update-pr-status",
+          "generate-status-badges",
+          "notification-summary"
+        ],
+        "triggers": [
+          "pull_request",
+          "schedule",
+          "workflow_dispatch",
+          "workflow_run"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "name": "Notifications and Reporting",
+      "triggers": [
+        "pull_request",
+        "schedule",
+        "workflow_dispatch",
+        "workflow_run"
+      ],
+      "jobs": [
+        "determine-notification-context",
+        "collect-workflow-data",
+        "send-slack-notification",
+        "send-email-notification",
+        "update-pr-status",
+        "generate-status-badges",
+        "notification-summary"
+      ]
+    },
+    "code-quality": {
+      "file": ".github/workflows/code-quality.yml",
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "analysis": {
+        "name": "Code Quality Analysis",
+        "has_on": true,
+        "has_jobs": true,
+        "has_workflow_dispatch": true,
+        "jobs": [
+          "lint-and-format",
+          "sonarqube-analysis",
+          "codeclimate-analysis",
+          "dependency-analysis",
+          "quality-gate"
+        ],
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule",
+          "workflow_dispatch"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "name": "Code Quality Analysis",
+      "triggers": [
+        "push",
+        "pull_request",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "jobs": [
+        "lint-and-format",
+        "sonarqube-analysis",
+        "codeclimate-analysis",
+        "dependency-analysis",
+        "quality-gate"
+      ]
+    },
+    "deploy": {
+      "file": ".github/workflows/deploy.yml",
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "analysis": {
+        "name": "Deploy to Environment",
+        "has_on": true,
+        "has_jobs": true,
+        "has_workflow_dispatch": true,
+        "jobs": [
+          "determine-environment",
+          "pre-deployment-checks",
+          "deploy-staging",
+          "deploy-production",
+          "rollback",
+          "post-deployment"
+        ],
+        "triggers": [
+          "workflow_dispatch",
+          "workflow_run"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "name": "Deploy to Environment",
+      "triggers": [
+        "workflow_dispatch",
+        "workflow_run"
+      ],
+      "jobs": [
+        "determine-environment",
+        "pre-deployment-checks",
+        "deploy-staging",
+        "deploy-production",
+        "rollback",
+        "post-deployment"
+      ]
+    },
+    "ci": {
+      "file": ".github/workflows/ci.yml",
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "analysis": {
+        "name": "CI/CD 流程",
+        "has_on": true,
+        "has_jobs": true,
+        "has_workflow_dispatch": true,
+        "jobs": [
+          "test",
+          "build",
+          "security-scan"
+        ],
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "name": "CI/CD 流程",
+      "triggers": [
+        "push",
+        "pull_request",
+        "workflow_dispatch"
+      ],
+      "jobs": [
+        "test",
+        "build",
+        "security-scan"
+      ]
+    }
+  },
+  "recommendations": [
+    "✅ CI工作流配置正确",
+    "✅ 部署工作流配置正确",
+    "✅ 测试工作流配置正确",
+    "建议定期更新GitHub Actions版本",
+    "建议添加工作流运行时间监控",
+    "建议配置失败通知机制"
+  ],
+  "timestamp": "2025-08-23T17:57:36.860158"
+}

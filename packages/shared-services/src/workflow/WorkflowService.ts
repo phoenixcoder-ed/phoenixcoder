@@ -420,8 +420,13 @@ export class WorkflowService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
-    return this.isProcessing;
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
+    return {
+      isProcessing: this.isProcessing,
+      workflowCount: this.workflows.size,
+      executionCount: this.executions.size,
+      status: 'healthy'
+    };
   }
 
   /**
@@ -1416,7 +1421,7 @@ export class WorkflowService extends BaseService implements IService {
   private async executeStartNode(
     execution: WorkflowExecution, 
     node: WorkflowNode, 
-    nodeExecution: WorkflowNodeExecution
+    _nodeExecution: WorkflowNodeExecution
   ): Promise<void> {
     // 开始节点只是标记工作流开始，直接执行下一个节点
     const workflow = this.workflows.get(execution.workflowId)!;
@@ -1431,9 +1436,9 @@ export class WorkflowService extends BaseService implements IService {
    * 执行结束节点
    */
   private async executeEndNode(
-    execution: WorkflowExecution, 
-    node: WorkflowNode, 
-    nodeExecution: WorkflowNodeExecution
+    _execution: WorkflowExecution, 
+    _node: WorkflowNode, 
+    _nodeExecution: WorkflowNodeExecution
   ): Promise<void> {
     // 结束节点标记工作流结束
     // 这里可以添加结束时的清理逻辑
@@ -1445,7 +1450,7 @@ export class WorkflowService extends BaseService implements IService {
   private async executeTaskNode(
     execution: WorkflowExecution, 
     node: WorkflowNode, 
-    nodeExecution: WorkflowNodeExecution
+    _nodeExecution: WorkflowNodeExecution
   ): Promise<void> {
     // 这里应该实现具体的任务执行逻辑
     // 例如调用外部API、执行数据库操作等
@@ -1468,7 +1473,7 @@ export class WorkflowService extends BaseService implements IService {
   private async executeDecisionNode(
     execution: WorkflowExecution, 
     node: WorkflowNode, 
-    nodeExecution: WorkflowNodeExecution
+    _nodeExecution: WorkflowNodeExecution
   ): Promise<void> {
     // 根据条件决定执行哪个分支
     const condition = node.config.condition;
@@ -1497,7 +1502,7 @@ export class WorkflowService extends BaseService implements IService {
   private async executeDelayNode(
     execution: WorkflowExecution, 
     node: WorkflowNode, 
-    nodeExecution: WorkflowNodeExecution
+    _nodeExecution: WorkflowNodeExecution
   ): Promise<void> {
     const delayDuration = node.config.delayDuration || 1000;
     
@@ -1519,7 +1524,7 @@ export class WorkflowService extends BaseService implements IService {
   private async executeScriptNode(
     execution: WorkflowExecution, 
     node: WorkflowNode, 
-    nodeExecution: WorkflowNodeExecution
+    _nodeExecution: WorkflowNodeExecution
   ): Promise<void> {
     const script = node.config.script;
     if (!script) {

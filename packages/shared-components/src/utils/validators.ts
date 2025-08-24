@@ -18,8 +18,8 @@ export const validators = {
 
   // 电话号码验证
   phone: (value: string): boolean => {
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    return phoneRegex.test(value.replace(/[\s\-\(\)]/g, ''));
+    const phoneRegex = /^[+]?[1-9][\d]{0,15}$/;
+    return phoneRegex.test(value.replace(/[\s\-()]/g, ''));
   },
 
   // 密码强度验证
@@ -80,7 +80,7 @@ export const validators = {
   },
 
   // 必填验证
-  required: (value: any): boolean => {
+  required: (value: unknown): boolean => {
     if (value === null || value === undefined) return false;
     if (typeof value === 'string') return value.trim().length > 0;
     if (Array.isArray(value)) return value.length > 0;

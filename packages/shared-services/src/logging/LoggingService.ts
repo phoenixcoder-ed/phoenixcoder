@@ -2,7 +2,7 @@ import { BaseService } from '../base/BaseService';
 import { IService } from '../interfaces/IService';
 import { ServiceError, ServiceErrorType } from '../types/ServiceError';
 import { LoggerConfig } from '../types/ServiceConfig';
-import { SERVICE_EVENTS, LOG_LEVELS } from '../types/ServiceConstants';
+import { SERVICE_EVENTS } from '../types/ServiceConstants';
 import { EventEmitter } from 'eventemitter3';
 
 /**
@@ -27,7 +27,7 @@ export interface LogEntry {
   message: string;
   category?: string;
   tags?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   error?: Error;
   stack?: string;
   userId?: string;
@@ -147,16 +147,20 @@ export class ConsoleAppender implements LogAppender {
     switch (entry.level) {
       case LogLevel.TRACE:
       case LogLevel.DEBUG:
+        // eslint-disable-next-line no-console
         console.debug(formatted);
         break;
       case LogLevel.INFO:
+        // eslint-disable-next-line no-console
         console.info(formatted);
         break;
       case LogLevel.WARN:
+        // eslint-disable-next-line no-console
         console.warn(formatted);
         break;
       case LogLevel.ERROR:
       case LogLevel.FATAL:
+        // eslint-disable-next-line no-console
         console.error(formatted);
         break;
     }
@@ -174,7 +178,7 @@ export class FileAppender implements LogAppender {
   private maxSize: number;
   private maxFiles: number;
   private currentSize: number = 0;
-  private writeStream: any = null;
+  private writeStream: { close(): void } | null = null;
 
   constructor(
     filePath: string,
@@ -309,6 +313,7 @@ export class RemoteAppender implements LogAppender {
       } catch (error: unknown) {
         // 忽略定时刷新错误
         const errorObj = error instanceof Error ? error : new Error(String(error));
+        // eslint-disable-next-line no-console
         console.error('定时刷新错误:', errorObj.message);
       }
     }, this.flushInterval);
@@ -433,13 +438,13 @@ export class LoggingService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       // 测试日志记录
       await this.info('健康检查测试日志', { timestamp: Date.now() });
-      return true;
+      return { success: true, status: 'healthy', appendersCount: this.appenders.size, entriesCount: this.entries.length };
     } catch (error) {
-      return false;
+      return { success: false, status: 'unhealthy', error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -496,35 +501,35 @@ export class LoggingService extends BaseService implements IService {
   /**
    * 记录TRACE级别日志
    */
-  async trace(message: string, metadata?: Record<string, any>, category?: string): Promise<void> {
+  async trace(message: string, metadata?: Record<string, unknown>, category?: string): Promise<void> {
     await this.log(LogLevel.TRACE, message, metadata, category);
   }
 
   /**
    * 记录DEBUG级别日志
    */
-  async debug(message: string, metadata?: Record<string, any>, category?: string): Promise<void> {
+  async debug(message: string, metadata?: Record<string, unknown>, category?: string): Promise<void> {
     await this.log(LogLevel.DEBUG, message, metadata, category);
   }
 
   /**
    * 记录INFO级别日志
    */
-  async info(message: string, metadata?: Record<string, any>, category?: string): Promise<void> {
+  async info(message: string, metadata?: Record<string, unknown>, category?: string): Promise<void> {
     await this.log(LogLevel.INFO, message, metadata, category);
   }
 
   /**
    * 记录WARN级别日志
    */
-  async warn(message: string, metadata?: Record<string, any>, category?: string): Promise<void> {
+  async warn(message: string, metadata?: Record<string, unknown>, category?: string): Promise<void> {
     await this.log(LogLevel.WARN, message, metadata, category);
   }
 
   /**
    * 记录ERROR级别日志
    */
-  async error(message: string, error?: Error, metadata?: Record<string, any>, category?: string): Promise<void> {
+  async error(message: string, error?: Error, metadata?: Record<string, unknown>, category?: string): Promise<void> {
     const logMetadata = { ...metadata };
     if (error) {
       logMetadata.error = {
@@ -540,7 +545,7 @@ export class LoggingService extends BaseService implements IService {
   /**
    * 记录FATAL级别日志
    */
-  async fatal(message: string, error?: Error, metadata?: Record<string, any>, category?: string): Promise<void> {
+  async fatal(message: string, error?: Error, metadata?: Record<string, unknown>, category?: string): Promise<void> {
     const logMetadata = { ...metadata };
     if (error) {
       logMetadata.error = {
@@ -559,7 +564,7 @@ export class LoggingService extends BaseService implements IService {
   async log(
     level: LogLevel,
     message: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
     category?: string,
     error?: Error
   ): Promise<void> {
@@ -580,11 +585,11 @@ export class LoggingService extends BaseService implements IService {
         metadata,
         error,
         stack: error?.stack,
-        userId: metadata?.userId,
-        sessionId: metadata?.sessionId,
-        requestId: metadata?.requestId,
+        userId: metadata?.userId as string | undefined,
+        sessionId: metadata?.sessionId as string | undefined,
+        requestId: metadata?.requestId as string | undefined,
         source: this.getSourceInfo(),
-        performance: metadata?.performance
+        performance: metadata?.performance as { duration?: number; memory?: number; cpu?: number } | undefined
       };
 
       // 添加到内存存储
@@ -683,7 +688,7 @@ export class LoggingService extends BaseService implements IService {
       // 排序
       if (params.sortBy) {
         results.sort((a, b) => {
-          let valueA: any, valueB: any;
+          let valueA: string | number, valueB: string | number;
           
           switch (params.sortBy) {
             case 'timestamp':
@@ -777,7 +782,7 @@ export class LoggingService extends BaseService implements IService {
   /**
    * 监听日志事件
    */
-  override on<T extends string | symbol>(event: T, fn: (...args: any[]) => void, context?: any): this {
+  override on<T extends string | symbol>(event: T, fn: (...args: unknown[]) => void, context?: unknown): this {
     return super.on(event, fn, context);
   }
 
@@ -785,20 +790,20 @@ export class LoggingService extends BaseService implements IService {
    * 监听日志事件（类型安全版本）
    */
   onLoggingEvent<K extends keyof LoggingEvents>(event: K, listener: LoggingEvents[K]): void {
-    this.eventEmitter.on(event, listener as any);
+    this.eventEmitter.on(event, listener as (...args: unknown[]) => void);
   }
 
   /**
    * 移除日志事件监听
    */
-  override off<T extends string | symbol>(event: T, fn?: ((...args: any[]) => void) | undefined, context?: any, once?: boolean | undefined): this {
+  override off<T extends string | symbol>(event: T, fn?: ((...args: unknown[]) => void) | undefined, context?: unknown, once?: boolean | undefined): this {
     return super.off(event, fn, context, once);
   }
 
   /**
    * 移除日志事件监听（类型安全版本）
    */
-  offLoggingEvent<K extends keyof LoggingEvents>(event: K, listener: (...args: any[]) => void): void {
+  offLoggingEvent<K extends keyof LoggingEvents>(event: K, listener: (...args: unknown[]) => void): void {
     this.eventEmitter.off(event, listener);
   }
 

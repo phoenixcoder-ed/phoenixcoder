@@ -23,7 +23,7 @@ export interface ServiceConfig {
   /** 是否启用监控 */
   enableMonitoring?: boolean;
   /** 自定义配置 */
-  custom?: Record<string, any>;
+  custom?: Record<string, unknown>;
 }
 
 /**
@@ -306,7 +306,7 @@ export interface LoggerConfig extends ServiceConfig {
   /** 是否启用颜色 */
   enableColors?: boolean;
   /** 自定义字段 */
-  customFields?: Record<string, any>;
+  customFields?: Record<string, unknown>;
 }
 
 /**
@@ -398,7 +398,7 @@ export interface SecurityConfig extends ServiceConfig {
   /** 是否启用双因素认证 */
   enableTwoFactor?: boolean;
   /** 安全配置（用于兼容性） */
-  securityConfig?: any;
+  securityConfig?: Record<string, unknown>;
 }
 
 /**
@@ -555,7 +555,7 @@ export class ServiceConfigFactory {
   static createDefault(): ServiceConfig {
     return {
       debug: process.env.NODE_ENV === 'development',
-      environment: (process.env.NODE_ENV as any) || 'development',
+      environment: (process.env.NODE_ENV as 'development' | 'staging' | 'production') || 'development',
       timeout: 30000,
       retries: 3,
       retryDelay: 1000,
@@ -605,7 +605,7 @@ export class ServiceConfigFactory {
   static fromEnvironment(): ServiceConfig {
     return {
       debug: process.env.DEBUG === 'true',
-      environment: (process.env.NODE_ENV as any) || 'development',
+      environment: (process.env.NODE_ENV as 'development' | 'staging' | 'production') || 'development',
       timeout: parseInt(process.env.SERVICE_TIMEOUT || '30000'),
       retries: parseInt(process.env.SERVICE_RETRIES || '3'),
       retryDelay: parseInt(process.env.SERVICE_RETRY_DELAY || '1000'),

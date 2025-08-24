@@ -5,7 +5,7 @@ export interface Notification {
   type: NotificationType;
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   isRead: boolean;
   priority: NotificationPriority;
   channels: NotificationChannel[];
@@ -94,7 +94,7 @@ export interface PushNotificationPayload {
   icon?: string;
   badge?: string;
   image?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   actions?: NotificationAction[];
   tag?: string;
   requireInteraction?: boolean;
@@ -113,7 +113,7 @@ export interface EmailNotification {
   bcc?: string[];
   subject: string;
   template: string;
-  templateData: Record<string, any>;
+  templateData: Record<string, unknown>;
   priority: NotificationPriority;
   scheduledAt?: Date;
 }

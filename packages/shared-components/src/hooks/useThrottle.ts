@@ -23,7 +23,7 @@ export function useThrottle<T>(value: T, delay: number): T {
 }
 
 // 节流回调 Hook
-export function useThrottleCallback<T extends (...args: any[]) => any>(
+export function useThrottleCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number
 ): T {
@@ -95,6 +95,12 @@ export function useThrottleEffect(
   const cleanupRef = useRef<(() => void) | void>(undefined);
   const lastExecuted = useRef<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const effectRef = useRef(effect);
+
+  // 更新 effect 引用
+  useEffect(() => {
+    effectRef.current = effect;
+  }, [effect]);
 
   useEffect(() => {
     const now = Date.now();
@@ -104,7 +110,7 @@ export function useThrottleEffect(
       if (cleanupRef.current) {
         cleanupRef.current();
       }
-      cleanupRef.current = effect();
+      cleanupRef.current = effectRef.current();
       lastExecuted.current = now;
     } else {
       // 延迟执行
@@ -116,7 +122,7 @@ export function useThrottleEffect(
         if (cleanupRef.current) {
           cleanupRef.current();
         }
-        cleanupRef.current = effect();
+        cleanupRef.current = effectRef.current();
         lastExecuted.current = Date.now();
       }, delay - (now - lastExecuted.current));
     }
@@ -129,5 +135,6 @@ export function useThrottleEffect(
         cleanupRef.current();
       }
     };
-  }, [...deps, delay]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [delay, ...deps]);
 }

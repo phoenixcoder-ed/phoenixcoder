@@ -5,8 +5,8 @@ import { EmailServiceConfig } from '../types/ServiceConfig';
 import { SERVICE_EVENTS } from '../types/ServiceConstants';
 import { EventEmitter } from 'eventemitter3';
 import { createTransport, Transporter, SendMailOptions } from 'nodemailer';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+// import { readFile } from 'fs/promises';
+// import { join } from 'path';
 
 /**
  * 邮件地址接口
@@ -52,12 +52,12 @@ export interface EmailSendOptions {
   bcc?: EmailAddress[];
   content: EmailContent;
   templateId?: string;
-  templateData?: Record<string, any>;
+  templateData?: Record<string, unknown>;
   sendAt?: Date; // 定时发送
   retryCount?: number;
   priority?: number;
   tags?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -76,7 +76,7 @@ export interface EmailTemplate {
   createdAt: Date;
   updatedAt: Date;
   createdBy?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -90,7 +90,7 @@ export interface EmailTemplateCreateData {
   category?: string;
   description?: string;
   createdBy?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -104,7 +104,7 @@ export interface EmailTemplateUpdateData {
   category?: string;
   description?: string;
   isActive?: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -347,12 +347,12 @@ export class EmailService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       await this.verifyConnection();
-      return true;
+      return { success: true, status: 'healthy', queueSize: this.queue.size, templatesCount: this.templates.size };
     } catch (error) {
-      return false;
+      return { success: false, status: 'unhealthy', error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -529,7 +529,7 @@ export class EmailService extends BaseService implements IService {
       // 排序
       if (params.sortBy) {
         items.sort((a, b) => {
-          let aValue: any, bValue: any;
+          let aValue: number | string, bValue: number | string;
           
           switch (params.sortBy) {
             case 'createdAt':
@@ -784,7 +784,7 @@ export class EmailService extends BaseService implements IService {
       // 排序
       if (params.sortBy) {
         templates.sort((a, b) => {
-          let aValue: any, bValue: any;
+          let aValue: number | string, bValue: number | string;
           
           switch (params.sortBy) {
             case 'name':
@@ -826,7 +826,7 @@ export class EmailService extends BaseService implements IService {
   /**
    * 渲染邮件模板
    */
-  async renderTemplate(templateId: string, data: Record<string, any>): Promise<EmailContent> {
+  async renderTemplate(templateId: string, data: Record<string, unknown>): Promise<EmailContent> {
     try {
       const template = this.templates.get(templateId);
       if (!template) {
@@ -877,7 +877,7 @@ export class EmailService extends BaseService implements IService {
   /**
    * 监听邮件事件
    */
-  override on<T extends string | symbol>(event: T, fn: (...args: any[]) => void, context?: any): this {
+  override on<T extends string | symbol>(event: T, fn: (...args: unknown[]) => void, context?: unknown): this {
     return super.on(event, fn, context);
   }
 
@@ -885,13 +885,13 @@ export class EmailService extends BaseService implements IService {
    * 监听邮件事件（类型安全版本）
    */
   onEmailEvent<K extends keyof EmailEvents>(event: K, listener: EmailEvents[K]): void {
-    this.eventEmitter.on(event, listener as any);
+    this.eventEmitter.on(event, listener as (...args: unknown[]) => void);
   }
 
   /**
    * 移除邮件事件监听
    */
-  override off<T extends string | symbol>(event: T, fn?: ((...args: any[]) => void) | undefined, context?: any, once?: boolean | undefined): this {
+  override off<T extends string | symbol>(event: T, fn?: ((...args: unknown[]) => void) | undefined, context?: unknown, once?: boolean | undefined): this {
     return super.off(event, fn, context, once);
   }
 
@@ -899,7 +899,7 @@ export class EmailService extends BaseService implements IService {
    * 移除邮件事件监听（类型安全版本）
    */
   offEmailEvent<K extends keyof EmailEvents>(event: K, listener: EmailEvents[K]): void {
-    this.eventEmitter.off(event, listener as any);
+    this.eventEmitter.off(event, listener as (...args: unknown[]) => void);
   }
 
   /**
@@ -997,7 +997,7 @@ export class EmailService extends BaseService implements IService {
       html: content.html,
       attachments: content.attachments?.map(att => ({
          filename: att.filename,
-         content: att.content as any,
+         content: att.content as Buffer | string,
          path: att.path,
          contentType: att.contentType,
          cid: att.cid
@@ -1038,7 +1038,7 @@ export class EmailService extends BaseService implements IService {
   /**
    * 添加跟踪像素
    */
-  private addTrackingPixel(html: string, options: EmailSendOptions): string {
+  private addTrackingPixel(html: string, _options: EmailSendOptions): string {
     if (!this.options.trackingDomain) {
       return html;
     }
@@ -1071,7 +1071,7 @@ export class EmailService extends BaseService implements IService {
   /**
    * 渲染模板字符串
    */
-  private renderTemplateString(template: string, data: Record<string, any>): string {
+  private renderTemplateString(template: string, data: Record<string, unknown>): string {
     return template.replace(/\{\{\s*([a-zA-Z_][a-zA-Z0-9_.]*)\s*\}\}/g, (match, variable) => {
       const value = this.getNestedValue(data, variable);
       return value !== undefined ? String(value) : match;
@@ -1081,9 +1081,9 @@ export class EmailService extends BaseService implements IService {
   /**
    * 获取嵌套值
    */
-  private getNestedValue(obj: any, path: string): any {
+  private getNestedValue(obj: unknown, path: string): unknown {
     return path.split('.').reduce((current, key) => {
-      return current && current[key] !== undefined ? current[key] : undefined;
+      return current && (current as any)[key] !== undefined ? (current as any)[key] : undefined;
     }, obj);
   }
 
@@ -1199,7 +1199,8 @@ export class EmailService extends BaseService implements IService {
       }
     } catch (error: unknown) {
       // 加载失败不影响服务启动
-      console.warn('Failed to load email templates:', error instanceof Error ? error.message : String(error));
+      const serviceError = handleUnknownError(error, 'EmailService', 'loadTemplates', ServiceErrorType.INTERNAL_SERVICE);
+      this.eventEmitter.emit('email:error', serviceError);
     }
   }
 
@@ -1214,7 +1215,8 @@ export class EmailService extends BaseService implements IService {
       }
     } catch (error: unknown) {
       // 保存失败不影响主流程
-      console.warn('Failed to save email templates:', error instanceof Error ? error.message : String(error));
+      const serviceError = handleUnknownError(error, 'EmailService', 'saveTemplates', ServiceErrorType.INTERNAL_SERVICE);
+      this.eventEmitter.emit('email:error', serviceError);
     }
   }
 

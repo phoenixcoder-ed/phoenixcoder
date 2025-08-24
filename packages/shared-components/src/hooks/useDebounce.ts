@@ -18,7 +18,7 @@ export function useDebounce<T>(value: T, delay: number): T {
 }
 
 // 防抖回调 Hook
-export function useDebounceCallback<T extends (...args: any[]) => any>(
+export function useDebounceCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number
 ): T {

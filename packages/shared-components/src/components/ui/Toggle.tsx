@@ -99,7 +99,7 @@ const ToggleGroup = React.forwardRef<HTMLDivElement, ToggleGroupProps>(
         {React.Children.map(children, (child) => {
           if (React.isValidElement(child) && child.type === ToggleGroupItem) {
             const childProps = child.props as ToggleGroupItemProps;
-            return React.cloneElement(child as React.ReactElement<any>, {
+            return React.cloneElement(child as React.ReactElement<ToggleProps>, {
               ...childProps,
               pressed: isPressed(childProps.value),
               onPressedChange: () => handleToggle(childProps.value),
@@ -121,7 +121,7 @@ export interface ToggleGroupItemProps extends Omit<ToggleProps, 'pressed' | 'onP
 }
 
 const ToggleGroupItem = React.forwardRef<HTMLButtonElement, ToggleGroupItemProps>(
-  ({ className, value, ...props }, ref) => {
+  ({ className, value: _value, ...props }, ref) => {
     return (
       <Toggle
         ref={ref}

@@ -4,16 +4,12 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
-    include: ['**/*.test.tsx'],
-    coverage: {
-      provider: 'istanbul',
-      reporter: ['text', 'json', 'html'],
-    },
+    include: ['**/*.test.{ts,tsx}'],
     globals: true,
   },
   resolve: {
     alias: {
-      '@': '/Users/zhuwencan/work/phoenixcoder/phoenixcoder-admin/src',
+      '@': './src',
     },
   },
 });

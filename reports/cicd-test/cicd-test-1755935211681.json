@@ -1,0 +1,179 @@
+{
+  "timestamp": "2025-08-23T07:45:58.935Z",
+  "tests": [
+    {
+      "name": "Git 仓库检查",
+      "status": "passed",
+      "message": "Git 仓库状态正常",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.089Z"
+    },
+    {
+      "name": "远程仓库检查",
+      "status": "passed",
+      "message": "远程仓库已配置",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.135Z"
+    },
+    {
+      "name": "分支检查",
+      "status": "passed",
+      "message": "当前分支: fix-cicd-workflow",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.175Z"
+    },
+    {
+      "name": "工作流目录检查",
+      "status": "passed",
+      "message": "工作流目录存在",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.175Z"
+    },
+    {
+      "name": "工作流文件检查",
+      "status": "passed",
+      "message": "发现 9 个工作流文件",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.175Z"
+    },
+    {
+      "name": "工作流文件 ci.yml",
+      "status": "failed",
+      "message": "解析失败: can not read a block mapping entry; a multiline key may not be an implicit key (2516:52)\n\n 2513 |  ... ----BEGIN [A-Z ]+-----', 'private_key')\n 2514 |  ... \n 2515 |  ... \n 2516 |  ... , dirs, files in os.walk('.'):\n------------------------------------------^\n 2517 |  ... 不需要扫描的目录\n 2518 |  ... [:] = [d for d in dirs if not d.startswith('.') and d not i ...",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.191Z"
+    },
+    {
+      "name": "工作流文件 code-quality.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.194Z"
+    },
+    {
+      "name": "工作流文件 deploy.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.198Z"
+    },
+    {
+      "name": "工作流文件 docker-build.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.201Z"
+    },
+    {
+      "name": "工作流文件 notifications.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.203Z"
+    },
+    {
+      "name": "工作流文件 performance-monitoring.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.207Z"
+    },
+    {
+      "name": "工作流文件 test-report.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.208Z"
+    },
+    {
+      "name": "工作流文件 test.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.213Z"
+    },
+    {
+      "name": "工作流文件 update-badges.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.216Z"
+    },
+    {
+      "name": "package.json 检查",
+      "status": "passed",
+      "message": "package.json 存在",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.216Z"
+    },
+    {
+      "name": "依赖安装检查",
+      "status": "passed",
+      "message": "依赖已安装",
+      "details": {},
+      "timestamp": "2025-08-23T07:45:59.216Z"
+    },
+    {
+      "name": "代码检查 (lint)",
+      "status": "failed",
+      "message": "代码检查失败: Command failed: npm run lint",
+      "details": {},
+      "timestamp": "2025-08-23T07:46:16.003Z"
+    },
+    {
+      "name": "类型检查",
+      "status": "skipped",
+      "message": "未配置类型检查脚本",
+      "details": {},
+      "timestamp": "2025-08-23T07:46:16.005Z"
+    },
+    {
+      "name": "项目构建",
+      "status": "passed",
+      "message": "项目构建成功",
+      "details": {},
+      "timestamp": "2025-08-23T07:46:49.069Z"
+    },
+    {
+      "name": "单元测试",
+      "status": "failed",
+      "message": "单元测试失败: Command failed: npm test",
+      "details": {},
+      "timestamp": "2025-08-23T07:46:51.582Z"
+    },
+    {
+      "name": "环境文件 .env",
+      "status": "passed",
+      "message": "环境配置文件存在",
+      "details": {},
+      "timestamp": "2025-08-23T07:46:51.583Z"
+    },
+    {
+      "name": "GitHub 环境配置",
+      "status": "passed",
+      "message": "发现 2 个环境配置",
+      "details": {},
+      "timestamp": "2025-08-23T07:46:51.583Z"
+    },
+    {
+      "name": ".gitignore 安全检查",
+      "status": "passed",
+      "message": "包含必要的安全模式",
+      "details": {},
+      "timestamp": "2025-08-23T07:46:51.583Z"
+    },
+    {
+      "name": "敏感文件检查",
+      "status": "failed",
+      "message": "发现被提交的敏感文件: .env",
+      "details": {},
+      "timestamp": "2025-08-23T07:46:51.680Z"
+    }
+  ],
+  "summary": {
+    "total": 24,
+    "passed": 19,
+    "failed": 4,
+    "skipped": 1
+  }
+}

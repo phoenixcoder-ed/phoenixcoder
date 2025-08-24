@@ -8,9 +8,10 @@ import {
   within,
 } from '@testing-library/react';
 import '@testing-library/jest-dom/matchers';
-import axios from 'axios';
 import { vi, describe, beforeEach, test, expect } from 'vitest';
 
+// 导入服务
+import { UserService } from './services/userService';
 // 导入共享类型
 import type { User } from './types/index';
 
@@ -24,8 +25,26 @@ interface CreateUserRequest {
   isActive: boolean;
 }
 
-// 模拟axios
-vi.mock('axios');
+// 模拟UserService
+vi.mock('./services/userService', () => ({
+  UserService: {
+    getUsers: vi.fn(),
+    createUser: vi.fn(),
+    updateUser: vi.fn(),
+    deleteUser: vi.fn(),
+    activateUser: vi.fn(),
+    deactivateUser: vi.fn(),
+    resetPassword: vi.fn(),
+    getUserStats: vi.fn(),
+  },
+}));
+
+// 模拟全局store
+vi.mock('../../shared/store/globalStore', () => ({
+  useGlobalStore: () => ({
+    addNotification: vi.fn(),
+  }),
+}));
 
 // 模拟react-admin的useTheme hook
 vi.mock('react-admin', () => ({
@@ -40,16 +59,6 @@ vi.mock('react-admin', () => ({
     },
   ],
 }));
-
-const mockAxiosInstance = {
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  delete: vi.fn(),
-};
-
-// 设置axios.create返回mock实例
-(axios.create as ReturnType<typeof vi.fn>).mockReturnValue(mockAxiosInstance);
 
 // 模拟用户数据
 const mockUsers: User[] = [
@@ -78,16 +87,17 @@ const mockUsers: User[] = [
 describe('UserManagement Component', () => {
   beforeEach(() => {
     // 重置模拟
-    mockAxiosInstance.get.mockReset();
-    mockAxiosInstance.post.mockReset();
-    mockAxiosInstance.put.mockReset();
-    mockAxiosInstance.delete.mockReset();
+    vi.clearAllMocks();
   });
 
   test('renders user management page and fetches users', async () => {
     // 模拟API响应
-    mockAxiosInstance.get.mockResolvedValueOnce({
-      data: mockUsers,
+    (UserService.getUsers as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      users: mockUsers,
+      total: mockUsers.length,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
     });
 
     // 渲染组件
@@ -111,8 +121,12 @@ describe('UserManagement Component', () => {
 
   test('opens add user dialog when add button is clicked', async () => {
     // 模拟API响应
-    mockAxiosInstance.get.mockResolvedValueOnce({
-      data: mockUsers,
+    (UserService.getUsers as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      users: mockUsers,
+      total: mockUsers.length,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
     });
 
     // 渲染组件
@@ -133,10 +147,6 @@ describe('UserManagement Component', () => {
   });
 
   test('adds a new user successfully', async () => {
-    // 模拟API响应
-    mockAxiosInstance.get.mockResolvedValueOnce({
-      data: mockUsers,
-    });
     const newUser: CreateUserRequest = {
       username: 'newuser',
       email: 'newuser@example.com',
@@ -144,20 +154,41 @@ describe('UserManagement Component', () => {
       userType: 'programmer',
       isActive: true,
     };
-    mockAxiosInstance.post.mockResolvedValueOnce({
-      data: { ...newUser, id: '3', name: newUser.username },
+
+    // 模拟初始用户列表获取
+    (UserService.getUsers as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      users: mockUsers,
+      total: mockUsers.length,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
     });
-    mockAxiosInstance.get.mockResolvedValueOnce({
-      data: [
+
+    // 模拟创建用户
+    (UserService.createUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ...newUser,
+      id: '3',
+      fullName: newUser.username,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    // 模拟刷新后的用户列表
+    (UserService.getUsers as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      users: [
         ...mockUsers,
         {
           ...newUser,
           id: '3',
-          name: newUser.username,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          fullName: newUser.username,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         },
       ],
+      total: mockUsers.length + 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
     });
 
     // 渲染组件

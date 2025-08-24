@@ -20,6 +20,7 @@ export interface AchievementQueryParams {
   isActive?: boolean;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  [key: string]: unknown;
 }
 
 /**
@@ -48,8 +49,8 @@ export interface AchievementCreateData {
   points: number;
   icon?: string;
   badge?: string;
-  requirements: Record<string, any>;
-  rewards?: Record<string, any>;
+  requirements: Record<string, unknown>;
+  rewards?: Record<string, unknown>;
   isActive?: boolean;
   isSecret?: boolean;
   prerequisites?: string[];
@@ -67,8 +68,8 @@ export interface AchievementUpdateData {
   points?: number;
   icon?: string;
   badge?: string;
-  requirements?: Record<string, any>;
-  rewards?: Record<string, any>;
+  requirements?: Record<string, unknown>;
+  rewards?: Record<string, unknown>;
   isActive?: boolean;
   isSecret?: boolean;
   prerequisites?: string[];
@@ -83,7 +84,7 @@ export interface AchievementProgressData {
   progress: number; // 0-100
   currentValue?: number;
   targetValue?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -94,7 +95,7 @@ export interface AchievementUnlockData {
   achievementId: string;
   unlockedAt?: Date;
   evidence?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -203,12 +204,12 @@ export class AchievementService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       const response = await this.apiClient.get('/achievements/health');
-      return response.success;
+      return { success: response.success, status: 'healthy' };
     } catch (error) {
-      return false;
+      return { success: false, status: 'unhealthy', error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -259,7 +260,8 @@ export class AchievementService extends BaseService implements IService {
       return achievement;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'AchievementService', 'getAchievementById', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`成就 ${achievementId} 不存在`, 'achievement', 'AchievementService');
       }
       serviceError.message = '获取成就失败';
@@ -285,7 +287,8 @@ export class AchievementService extends BaseService implements IService {
       return achievement;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'AchievementService', 'createAchievement', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 400) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('成就数据验证失败', [{ field: 'achievementData', message: '成就数据验证失败', code: 'VALIDATION_FAILED' }], 'AchievementService');
       }
       serviceError.message = '创建成就失败';
@@ -311,10 +314,11 @@ export class AchievementService extends BaseService implements IService {
       return achievement;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'AchievementService', 'updateAchievement', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`成就 ${achievementId} 不存在`, 'achievement', 'AchievementService');
       }
-      if (serviceError.details?.response?.status === 400) {
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('成就数据验证失败', [{ field: 'updateData', message: '成就数据验证失败', code: 'VALIDATION_FAILED' }], 'AchievementService');
       }
       serviceError.message = '更新成就失败';
@@ -337,7 +341,8 @@ export class AchievementService extends BaseService implements IService {
       this.emit(SERVICE_EVENTS.ACHIEVEMENT_DELETED, { achievementId });
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'AchievementService', 'deleteAchievement', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`成就 ${achievementId} 不存在`, 'achievement', 'AchievementService');
       }
       serviceError.message = '删除成就失败';
@@ -369,7 +374,8 @@ export class AchievementService extends BaseService implements IService {
       return userAchievements;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'AchievementService', 'getUserAchievements', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'AchievementService');
       }
       serviceError.message = '获取用户成就失败';
@@ -401,10 +407,11 @@ export class AchievementService extends BaseService implements IService {
       return userAchievement;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'AchievementService', 'updateAchievementProgress', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户或成就不存在`, 'userOrAchievement', 'AchievementService');
       }
-      if (serviceError.details?.response?.status === 400) {
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('成就进度数据验证失败', [{ field: 'progressData', message: '成就进度数据验证失败', code: 'VALIDATION_FAILED' }], 'AchievementService');
       }
       serviceError.message = '更新成就进度失败';
@@ -430,10 +437,11 @@ export class AchievementService extends BaseService implements IService {
       return userAchievement;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'AchievementService', 'unlockAchievement', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户或成就不存在`, 'userOrAchievement', 'AchievementService');
       }
-      if (serviceError.details?.response?.status === 400) {
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('成就解锁数据验证失败', [{ field: 'unlockData', message: '成就解锁数据验证失败', code: 'VALIDATION_FAILED' }], 'AchievementService');
       }
       serviceError.message = '解锁成就失败';
@@ -499,7 +507,8 @@ export class AchievementService extends BaseService implements IService {
       return stats;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'AchievementService', 'getUserAchievementStats', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'AchievementService');
       }
       serviceError.message = '获取用户成就统计失败';
@@ -545,7 +554,8 @@ export class AchievementService extends BaseService implements IService {
       return achievements;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'AchievementService', 'getRecommendedAchievements', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'AchievementService');
       }
       serviceError.message = '获取推荐成就失败';
@@ -567,7 +577,8 @@ export class AchievementService extends BaseService implements IService {
       return achievements;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'AchievementService', 'getUpcomingAchievements', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'AchievementService');
       }
       serviceError.message = '获取即将解锁的成就失败';
@@ -622,7 +633,8 @@ export class AchievementService extends BaseService implements IService {
       return updatedAchievements;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'AchievementService', 'checkAchievementConditions', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'AchievementService');
       }
       serviceError.message = '检查成就条件失败';
@@ -666,14 +678,14 @@ export class AchievementService extends BaseService implements IService {
   /**
    * 监听成就事件
    */
-  onAchievementEvent<K extends keyof AchievementEvents>(event: K, listener: (...args: any[]) => void): void {
+  onAchievementEvent<K extends keyof AchievementEvents>(event: K, listener: (...args: unknown[]) => void): void {
     this.eventEmitter.on(event, listener);
   }
 
   /**
    * 移除成就事件监听
    */
-  offAchievementEvent<K extends keyof AchievementEvents>(event: K, listener: (...args: any[]) => void): void {
+  offAchievementEvent<K extends keyof AchievementEvents>(event: K, listener: (...args: unknown[]) => void): void {
     this.eventEmitter.off(event, listener);
   }
 

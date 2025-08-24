@@ -6,47 +6,9 @@ declare module 'axios' {
     }
 }
 
-declare module '@/utils/httpUtil' {
-    export namespace HttpUtil {
-        export function fetchGrowthPath(): Promise<AxiosResponse<any>>;
-        export function updateGrowthProgress(_progress: number): Promise<AxiosResponse<any>>;
-        export function fetchChallenges(): Promise<AxiosResponse<any>>;
-        export function updateChallengeProgress(_challengeId: string, _progress: number): Promise<AxiosResponse<any>>;
-        export function completeChallenge(_challengeId: string): Promise<AxiosResponse<any>>;
-        export function fetchSkills(): Promise<AxiosResponse<any>>;
-        export function updateSkillLevel(_skillId: string, _level: number): Promise<AxiosResponse<any>>;
-    }
-}
-
-declare module '@/redux/actions' {
-    export const growthActions: {
-        fetchGrowthPath: any;
-        fetchGrowthPathSuccess: (_data: any) => any;
-        fetchGrowthPathFailed: (_error: string) => any;
-        updateGrowthProgress: any;
-        updateGrowthProgressSuccess: (_progress: number) => any;
-        updateGrowthProgressFailed: (_error: string) => any;
-        fetchChallenges: any;
-        fetchChallengesSuccess: (_data: any) => any;
-        fetchChallengesFailed: (_error: string) => any;
-        updateChallengeProgress: any;
-        updateChallengeProgressSuccess: (_data: any) => any;
-        updateChallengeProgressFailed: (_error: string) => any;
-        completeChallenge: any;
-        completeChallengeSuccess: (_challengeId: string) => any;
-        completeChallengeFailed: (_error: string) => any;
-        fetchSkills: any;
-        fetchSkillsSuccess: (_data: any) => any;
-        fetchSkillsFailed: (_error: string) => any;
-        updateSkillLevel: any;
-        updateSkillLevelSuccess: (_data: any) => any;
-        updateSkillLevelFailed: (_error: string) => any;
-    };
-}
-
 declare module '../../typed/types' {
     export interface ActionWithDeferred {
-        payload: any;
+        payload?: any;
         deferred: {
             resolve: () => void;
             reject: () => void;
@@ -77,7 +39,7 @@ import { ActionWithDeferred, IAction } from '../../typed/types';
 export function* fetchGrowthPathSaga() {
     return yield takeLatest(
         growthActions.fetchGrowthPath,
-        function* fetchGrowthPath({ deferred }: ActionWithDeferred): IterableIterator<IAction> {
+        function* fetchGrowthPathHandler({ deferred }: ActionWithDeferred): IterableIterator<IAction> {
             try {
                 const { data }: AxiosResponse<GrowthPath> = yield call(HttpUtil.fetchGrowthPath);
                 yield put(growthActions.fetchGrowthPathSuccess(data));
@@ -97,7 +59,7 @@ export function* fetchGrowthPathSaga() {
 export function* updateGrowthProgressSaga() {
     return yield takeLatest(
         growthActions.updateGrowthProgress,
-        function* updateProgress({ payload, deferred }: ActionWithDeferred): IterableIterator<IAction> {
+        function* updateProgressHandler({ payload, deferred }: ActionWithDeferred): IterableIterator<IAction> {
             try {
                 const { progress: _progress } = payload;
                 yield call(HttpUtil.updateGrowthProgress, _progress);
@@ -118,7 +80,7 @@ export function* updateGrowthProgressSaga() {
 export function* fetchChallengesSaga() {
     return yield takeLatest(
         growthActions.fetchChallenges,
-        function* fetchChallenges({ deferred }: ActionWithDeferred): IterableIterator<IAction> {
+        function* fetchChallengesHandler({ deferred }: ActionWithDeferred): IterableIterator<IAction> {
             try {
                 const { data }: AxiosResponse<Challenge[]> = yield call(HttpUtil.fetchChallenges);
                 yield put(growthActions.fetchChallengesSuccess(data));
@@ -182,7 +144,7 @@ export function* completeChallengeSaga() {
 export function* fetchSkillsSaga() {
     return yield takeLatest(
         growthActions.fetchSkills,
-        function* ({ deferred }: ActionWithDeferred): IterableIterator<IAction> {
+        function* fetchSkillsHandler({ deferred }: ActionWithDeferred): IterableIterator<IAction> {
             try {
                 const { data }: AxiosResponse<Skill[]> = yield call(HttpUtil.fetchSkills);
                 yield put(growthActions.fetchSkillsSuccess(data));
@@ -202,7 +164,7 @@ export function* fetchSkillsSaga() {
 export function* updateSkillLevelSaga() {
     return yield takeLatest(
         growthActions.updateSkillLevel,
-        function* updateSkill({ payload, deferred }: ActionWithDeferred): IterableIterator<IAction> {
+        function* updateSkillHandler({ payload, deferred }: ActionWithDeferred): IterableIterator<IAction> {
             try {
                 const { skillId: _skillId, level: _level } = payload;
                 yield call(HttpUtil.updateSkillLevel, _skillId, _level);

@@ -86,18 +86,18 @@ export const isValidFileSize = (size: number, maxSizeMB: number = 10): boolean =
 };
 
 // 数据结构验证
-export const isValidArray = <T>(arr: any, validator?: (item: T) => boolean): arr is T[] => {
+export const isValidArray = <T>(arr: unknown, validator?: (item: T) => boolean): arr is T[] => {
   if (!Array.isArray(arr)) return false;
   if (!validator) return true;
   return arr.every(validator);
 };
 
-export const isValidObject = (obj: any): obj is Record<string, any> => {
+export const isValidObject = (obj: unknown): obj is Record<string, unknown> => {
   return obj !== null && typeof obj === 'object' && !Array.isArray(obj);
 };
 
-export const hasRequiredFields = <T extends Record<string, any>>(
-  obj: any,
+export const hasRequiredFields = <T extends Record<string, unknown>>(
+  obj: unknown,
   requiredFields: (keyof T)[]
 ): obj is T => {
   if (!isValidObject(obj)) return false;

@@ -2,7 +2,7 @@ import { BaseService } from '../base/BaseService';
 import { IService } from '../interfaces/IService';
 import { ServiceError, ValidationError, NotFoundError, handleUnknownError, ServiceErrorType } from '../types/ServiceError';
 import { ApiConfig } from '../types/ServiceConfig';
-import { SERVICE_EVENTS } from '../types/ServiceConstants';
+
 import { Skill, SkillLevel, SkillCategory, UserSkill, SkillAssessment, PaginatedResponse } from '@phoenixcoder/shared-types';
 import { ApiClient, buildURL } from '@phoenixcoder/shared-utils';
 import { EventEmitter } from 'eventemitter3';
@@ -188,12 +188,12 @@ export class SkillService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       const response = await this.apiClient.get('/skills/health');
-      return response.status === 200;
+      return { success: response.status === 200, status: 'healthy' };
     } catch (error) {
-      return false;
+      return { success: false, status: 'unhealthy', error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -265,7 +265,8 @@ export class SkillService extends BaseService implements IService {
       return skill;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'SkillService', 'getSkillById', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`技能 ${skillId} 不存在`, 'skill', 'SkillService');
       }
       serviceError.message = '获取技能失败';
@@ -290,7 +291,8 @@ export class SkillService extends BaseService implements IService {
       return skill;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'SkillService', 'createSkill', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 400) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('技能数据验证失败', [{ field: 'skillData', message: '技能数据验证失败', code: 'VALIDATION_FAILED' }], 'SkillService');
       }
       serviceError.message = '创建技能失败';
@@ -315,10 +317,11 @@ export class SkillService extends BaseService implements IService {
       return skill;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'SkillService', 'updateSkill', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`技能 ${skillId} 不存在`, 'skill', 'SkillService');
       }
-      if (serviceError.details?.response?.status === 400) {
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('技能数据验证失败', [{ field: 'updateData', message: '技能数据验证失败', code: 'VALIDATION_FAILED' }], 'SkillService');
       }
       serviceError.message = '更新技能失败';
@@ -340,7 +343,8 @@ export class SkillService extends BaseService implements IService {
       this.eventEmitter.emit('skill:deleted', skillId);
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'SkillService', 'deleteSkill', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`技能 ${skillId} 不存在`, 'skill', 'SkillService');
       }
       serviceError.message = '删除技能失败';
@@ -372,7 +376,8 @@ export class SkillService extends BaseService implements IService {
       return userSkills;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'SkillService', 'getUserSkills', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'SkillService');
       }
       serviceError.message = '获取用户技能失败';
@@ -397,10 +402,11 @@ export class SkillService extends BaseService implements IService {
       return userSkill;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'SkillService', 'addUserSkill', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 或技能不存在`, 'userOrSkill', 'SkillService');
       }
-      if (serviceError.details?.response?.status === 400) {
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('用户技能数据验证失败', [{ field: 'skillData', message: '用户技能数据验证失败', code: 'VALIDATION_FAILED' }], 'SkillService');
       }
       serviceError.message = '添加用户技能失败';
@@ -425,10 +431,11 @@ export class SkillService extends BaseService implements IService {
       return userSkill;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'SkillService', 'updateUserSkill', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户技能不存在`, 'userSkill', 'SkillService');
       }
-      if (serviceError.details?.response?.status === 400) {
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('用户技能数据验证失败', [{ field: 'updateData', message: '用户技能数据验证失败', code: 'VALIDATION_FAILED' }], 'SkillService');
       }
       serviceError.message = '更新用户技能失败';
@@ -450,7 +457,8 @@ export class SkillService extends BaseService implements IService {
       this.eventEmitter.emit('user-skill:removed', userId, skillId);
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'SkillService', 'removeUserSkill', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户技能不存在`, 'userSkill', 'SkillService');
       }
       serviceError.message = '移除用户技能失败';
@@ -475,7 +483,8 @@ export class SkillService extends BaseService implements IService {
       return assessment;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'SkillService', 'assessSkill', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 400) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('技能评估数据验证失败', [{ field: 'assessmentData', message: '技能评估数据验证失败', code: 'VALIDATION_FAILED' }], 'SkillService');
       }
       serviceError.message = '技能评估失败';
@@ -503,7 +512,8 @@ export class SkillService extends BaseService implements IService {
       return userSkill;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'SkillService', 'verifyUserSkill', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户技能不存在`, 'userSkill', 'SkillService');
       }
       serviceError.message = '验证用户技能失败';
@@ -550,7 +560,8 @@ export class SkillService extends BaseService implements IService {
       return recommendations;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'SkillService', 'getSkillRecommendations', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'SkillService');
       }
       serviceError.message = '获取技能推荐失败';
@@ -660,7 +671,7 @@ export class SkillService extends BaseService implements IService {
   /**
    * 监听技能事件
    */
-  override on<T extends string | symbol>(event: T, fn: (...args: any[]) => void, context?: any): this {
+  override on<T extends string | symbol>(event: T, fn: (...args: unknown[]) => void, context?: unknown): this {
     return super.on(event, fn, context);
   }
 
@@ -668,13 +679,13 @@ export class SkillService extends BaseService implements IService {
    * 监听技能事件（类型安全版本）
    */
   onSkillEvent<K extends keyof SkillEvents>(event: K, listener: SkillEvents[K]): void {
-    super.on(event as string, listener as any);
+    super.on(event as string, listener as (...args: unknown[]) => void);
   }
 
   /**
    * 移除技能事件监听
    */
-  override off<T extends string | symbol>(event: T, fn?: ((...args: any[]) => void) | undefined, context?: any, once?: boolean | undefined): this {
+  override off<T extends string | symbol>(event: T, fn?: ((...args: unknown[]) => void) | undefined, context?: unknown, once?: boolean | undefined): this {
     return super.off(event, fn, context, once);
   }
 
@@ -682,7 +693,7 @@ export class SkillService extends BaseService implements IService {
    * 移除技能事件监听（类型安全版本）
    */
   offSkillEvent<K extends keyof SkillEvents>(event: K, listener: SkillEvents[K]): void {
-    super.off(event as string, listener as any);
+    super.off(event as string, listener as (...args: unknown[]) => void);
   }
 
   /**

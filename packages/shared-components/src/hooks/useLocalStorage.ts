@@ -14,8 +14,8 @@ export function useLocalStorage<T>(
     try {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.warn(`Error reading localStorage key "${key}":`, error);
+    } catch {
+      // 静默处理 localStorage 读取错误，返回默认值
       return initialValue;
     }
   });
@@ -29,8 +29,8 @@ export function useLocalStorage<T>(
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
       }
-    } catch (error) {
-      console.warn(`Error setting localStorage key "${key}":`, error);
+    } catch {
+      // 静默处理 localStorage 设置错误
     }
   }, [key, storedValue]);
 
@@ -41,8 +41,8 @@ export function useLocalStorage<T>(
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(key);
       }
-    } catch (error) {
-      console.warn(`Error removing localStorage key "${key}":`, error);
+    } catch {
+      // 静默处理 localStorage 移除错误
     }
   }, [key, initialValue]);
 
@@ -56,8 +56,8 @@ export function useLocalStorage<T>(
       if (e.key === key && e.newValue !== null) {
         try {
           setStoredValue(JSON.parse(e.newValue));
-        } catch (error) {
-          console.warn(`Error parsing localStorage value for key "${key}":`, error);
+        } catch {
+          // 静默处理 localStorage 解析错误
         }
       }
     };

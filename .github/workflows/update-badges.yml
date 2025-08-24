@@ -5,11 +5,10 @@ on:
   # 工作流完成时触发
   workflow_run:
     workflows:
-      - "CI/CD Pipeline"
-      - "Security Scan"
-      - "Performance Test"
-      - "Deploy to Production"
-      - "Deploy to Staging"
+      - "CI/CD 流程"
+      - "Code Quality Analysis"
+      - "Performance Monitoring"
+      - "Deploy to Environment"
     types:
       - completed
   
@@ -43,10 +42,7 @@ env:
 permissions:
   contents: write
   actions: read
-  pull-requests: write
-  issues: write
   checks: read
-  deployments: read
 
 jobs:
   # 检测变更和准备数据
@@ -125,16 +121,16 @@ jobs:
             case "${{ steps.context.outputs.trigger_type }}" in
               "workflow_completion")
                 case "${{ steps.context.outputs.workflow_name }}" in
-                  "CI/CD Pipeline")
+                  "CI/CD 流程")
                     badge_types="build_badges,project_badges"
                     ;;
-                  "Security Scan")
+                  "Code Quality Analysis")
                     badge_types="build_badges"
                     ;;
-                  "Performance Test")
+                  "Performance Monitoring")
                     badge_types="performance_badges"
                     ;;
-                  "Deploy to Production"|"Deploy to Staging")
+                  "Deploy to Environment")
                     badge_types="deployment_badges"
                     ;;
                   *)

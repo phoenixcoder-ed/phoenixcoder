@@ -6,16 +6,6 @@ declare module 'axios' {
     }
 }
 
-declare module '@/utils/httpUtil' {
-    export namespace HttpUtil {
-        export function fetchProblems(_category?: string, _difficulty?: number): Promise<AxiosResponse<any>>;
-        export function fetchProblemDetail(_problemId: string): Promise<AxiosResponse<any>>;
-        export function submitAnswer(_problemId: string, _code: string, _language: string): Promise<AxiosResponse<any>>;
-        export function fetchAnswerRecords(): Promise<AxiosResponse<any>>;
-        export function fetchWrongProblems(): Promise<AxiosResponse<any>>;
-    }
-}
-
 declare module '@/redux/actions' {
     export const problemActions: {
         fetchProblemsRequest: any;

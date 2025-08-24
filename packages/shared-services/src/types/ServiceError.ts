@@ -1,4 +1,16 @@
 /**
+ * HTTP 响应错误详情
+ */
+export interface HttpErrorDetails {
+  response?: {
+    status?: number;
+    statusText?: string;
+    data?: unknown;
+  };
+  [key: string]: unknown;
+}
+
+/**
  * 服务错误基类
  */
 export class ServiceError extends Error {
@@ -9,7 +21,7 @@ export class ServiceError extends Error {
   /** HTTP状态码 */
   public httpStatus?: number;
   /** 错误详情 */
-  public readonly details?: any;
+  public readonly details?: unknown;
   /** 错误时间戳 */
   public readonly timestamp: Date;
   /** 服务名称 */
@@ -23,7 +35,7 @@ export class ServiceError extends Error {
   /** 内部错误 */
   public readonly innerError?: Error;
   /** 错误上下文 */
-  public readonly context?: Record<string, any>;
+  public readonly context?: Record<string, unknown>;
 
   override get name(): string {
     return this.constructor.name;
@@ -126,7 +138,7 @@ export interface ServiceErrorOptions {
   /** HTTP状态码 */
   httpStatus?: number;
   /** 错误详情 */
-  details?: any;
+  details?: unknown;
   /** 服务名称 */
   serviceName?: string;
   /** 操作名称 */
@@ -136,7 +148,7 @@ export interface ServiceErrorOptions {
   /** 内部错误 */
   innerError?: Error;
   /** 错误上下文 */
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 /**
@@ -148,7 +160,7 @@ export interface ServiceErrorJSON {
   code: string;
   type: ServiceErrorType;
   httpStatus?: number;
-  details?: any;
+  details?: unknown;
   timestamp: string;
   serviceName?: string;
   operation?: string;
@@ -159,7 +171,7 @@ export interface ServiceErrorJSON {
     message: string;
     stack?: string;
   };
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 /**
@@ -318,7 +330,8 @@ export class ValidationError extends ServiceError {
    * 获取验证错误详情
    */
   getValidationErrors(): ValidationErrorDetail[] {
-    return this.details?.errors || [];
+    const validationDetails = this.details as { errors?: ValidationErrorDetail[] } | undefined;
+    return validationDetails?.errors || [];
   }
 }
 
@@ -333,9 +346,9 @@ export interface ValidationErrorDetail {
   /** 错误代码 */
   code: string;
   /** 当前值 */
-  value?: any;
+  value?: unknown;
   /** 约束条件 */
-  constraints?: Record<string, any>;
+  constraints?: Record<string, unknown>;
 }
 
 /**
@@ -358,7 +371,7 @@ export class NotFoundError extends ServiceError {
  * 业务逻辑错误
  */
 export class BusinessLogicError extends ServiceError {
-  constructor(message: string, code: string, details?: any, serviceName?: string) {
+  constructor(message: string, code: string, details?: unknown, serviceName?: string) {
     super({
       message,
       code,
@@ -374,7 +387,7 @@ export class BusinessLogicError extends ServiceError {
  * 数据错误
  */
 export class DataError extends ServiceError {
-  constructor(message: string, details?: any, serviceName?: string, retryable: boolean = false) {
+  constructor(message: string, details?: unknown, serviceName?: string, retryable: boolean = false) {
     super({
       message,
       code: 'DATA_ERROR',
@@ -390,7 +403,7 @@ export class DataError extends ServiceError {
  * 存储错误
  */
 export class StorageError extends ServiceError {
-  constructor(message: string, details?: any, serviceName?: string, retryable: boolean = true) {
+  constructor(message: string, details?: unknown, serviceName?: string, retryable: boolean = true) {
     super({
       message,
       code: 'STORAGE_ERROR',
@@ -406,7 +419,7 @@ export class StorageError extends ServiceError {
  * 缓存错误
  */
 export class CacheError extends ServiceError {
-  constructor(message: string, details?: any, serviceName?: string, retryable: boolean = true) {
+  constructor(message: string, details?: unknown, serviceName?: string, retryable: boolean = true) {
     super({
       message,
       code: 'CACHE_ERROR',
@@ -453,14 +466,16 @@ export class RateLimitError extends ServiceError {
    * 获取重置时间
    */
   getResetTime(): Date | undefined {
-    return this.details?.resetTime ? new Date(this.details.resetTime) : undefined;
+    const rateLimitDetails = this.details as { resetTime?: Date | string | number } | undefined;
+    return rateLimitDetails?.resetTime ? new Date(rateLimitDetails.resetTime) : undefined;
   }
 
   /**
    * 获取限制数量
    */
   getLimit(): number {
-    return this.details?.limit || 0;
+    const rateLimitDetails = this.details as { limit?: number } | undefined;
+    return rateLimitDetails?.limit || 0;
   }
 }
 
@@ -468,12 +483,12 @@ export class RateLimitError extends ServiceError {
  * 资源不足错误
  */
 export class ResourceExhaustedError extends ServiceError {
-  constructor(message: string, resource: string, details?: any, serviceName?: string) {
+  constructor(message: string, resource: string, details?: unknown, serviceName?: string) {
     super({
       message,
       code: 'RESOURCE_EXHAUSTED_ERROR',
       type: ServiceErrorType.RESOURCE_EXHAUSTED,
-      details: { resource, ...details },
+      details: { resource, ...(details && typeof details === 'object' ? details as Record<string, unknown> : {}) },
       serviceName,
       retryable: true
     });
@@ -660,7 +675,7 @@ export class DefaultErrorHandler implements ErrorHandler {
     }
   }
 
-  canHandle(error: ServiceError): boolean {
+  canHandle(_error: ServiceError): boolean {
     return true;
   }
 }
@@ -720,21 +735,21 @@ globalErrorHandler.addHandler(new DefaultErrorHandler());
  * 将 unknown 类型的错误转换为 ServiceError
  */
 export function handleUnknownError(
-  error: unknown,
+  _error: unknown,
   serviceName?: string,
   operation?: string,
   defaultType: ServiceErrorType = ServiceErrorType.UNKNOWN
 ): ServiceError {
   // 如果已经是 ServiceError，直接返回
-  if (error instanceof ServiceError) {
-    return error;
+  if (_error instanceof ServiceError) {
+    return _error;
   }
 
   // 如果是 Error 对象，检查是否为 HTTP 错误
-  if (error instanceof Error) {
+  if (_error instanceof Error) {
     // 检查是否为 axios 错误或包含 HTTP 状态信息
-    if ('response' in error && error.response && typeof error.response === 'object') {
-      const response = error.response as any;
+    if ('response' in _error && _error.response && typeof _error.response === 'object') {
+      const response = _error.response as any;
       if (response.status && response.statusText) {
         return ServiceErrorFactory.fromHttpResponse(
           response.status,
@@ -744,13 +759,13 @@ export function handleUnknownError(
         );
       }
     }
-    return ServiceErrorFactory.fromError(error, serviceName, operation, defaultType);
+    return ServiceErrorFactory.fromError(_error, serviceName, operation, defaultType);
   }
 
   // 如果是字符串，创建新的 ServiceError
-  if (typeof error === 'string') {
+  if (typeof _error === 'string') {
     return new ServiceError({
-      message: error,
+      message: _error,
       code: 'UNKNOWN_ERROR',
       type: defaultType,
       serviceName,
@@ -760,15 +775,15 @@ export function handleUnknownError(
   }
 
   // 如果是对象且有 message 属性
-  if (error && typeof error === 'object' && 'message' in error) {
-    const message = typeof error.message === 'string' ? error.message : 'Unknown error occurred';
+  if (_error && typeof _error === 'object' && 'message' in _error) {
+    const message = typeof _error.message === 'string' ? _error.message : 'Unknown error occurred';
     return new ServiceError({
       message,
       code: 'UNKNOWN_ERROR',
       type: defaultType,
       serviceName,
       operation,
-      details: error,
+      details: _error,
       retryable: false
     });
   }
@@ -780,7 +795,7 @@ export function handleUnknownError(
     type: defaultType,
     serviceName,
     operation,
-    details: { originalError: error },
+    details: { originalError: _error },
     retryable: false
   });
 }

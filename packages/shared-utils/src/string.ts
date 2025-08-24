@@ -348,13 +348,13 @@ export const similarity = (str1: string, str2: string): number => {
 };
 
 // 字符串模板
-export const template = (str: string, variables: Record<string, any>): string => {
+export const template = (str: string, variables: Record<string, unknown>): string => {
   return str.replace(/\{\{(\w+)\}\}/g, (match, key) => {
     return Object.prototype.hasOwnProperty.call(variables, key) ? String(variables[key]) : match;
   });
 };
 
-export const interpolate = (str: string, variables: Record<string, any>): string => {
+export const interpolate = (str: string, variables: Record<string, unknown>): string => {
   return str.replace(/\$\{(\w+)\}/g, (match, key) => {
     return Object.prototype.hasOwnProperty.call(variables, key) ? String(variables[key]) : match;
   });

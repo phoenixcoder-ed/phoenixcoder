@@ -7,7 +7,7 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 
 export interface RequestConfig {
   method?: HttpMethod;
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   timeout?: number;
   retries?: number;
   retryDelay?: number;
@@ -126,7 +126,7 @@ export class ApiClient {
   }
 
   // 核心请求方法
-  async request<T = any>(url: string, config: RequestConfig = {}): Promise<ApiResponse<T>> {
+  async request<T = unknown>(url: string, config: RequestConfig = {}): Promise<ApiResponse<T>> {
     try {
       // 应用请求拦截器
       const processedConfig = await this.applyRequestInterceptors(config);
@@ -154,7 +154,7 @@ export class ApiClient {
         if (typeof processedConfig.body === 'object' && !(processedConfig.body instanceof FormData)) {
           requestConfig.body = JSON.stringify(processedConfig.body);
         } else {
-          requestConfig.body = processedConfig.body;
+          requestConfig.body = processedConfig.body as BodyInit;
         }
       }
 
@@ -182,7 +182,7 @@ export class ApiClient {
           const error: ApiError = {
             code: response.status.toString(),
             message: response.statusText,
-            details: data as Record<string, any>,
+            details: data as Record<string, unknown>,
           };
           
           return {
@@ -205,7 +205,7 @@ export class ApiClient {
       const apiError: ApiError = {
         code: 'NETWORK_ERROR',
         message: processedError.message,
-        details: processedError as Record<string, any>,
+        details: processedError as any,
       };
 
       return {
@@ -235,23 +235,23 @@ export class ApiClient {
   }
 
   // HTTP 方法快捷方式
-  async get<T = any>(url: string, config: Omit<RequestConfig, 'method' | 'body'> = {}): Promise<ApiResponse<T>> {
+  async get<T = unknown>(url: string, config: Omit<RequestConfig, 'method' | 'body'> = {}): Promise<ApiResponse<T>> {
     return this.request<T>(url, { ...config, method: 'GET' });
   }
 
-  async post<T = any>(url: string, body?: any, config: Omit<RequestConfig, 'method' | 'body'> = {}): Promise<ApiResponse<T>> {
+  async post<T = unknown>(url: string, body?: unknown, config: Omit<RequestConfig, 'method' | 'body'> = {}): Promise<ApiResponse<T>> {
     return this.request<T>(url, { ...config, method: 'POST', body });
   }
 
-  async put<T = any>(url: string, body?: any, config: Omit<RequestConfig, 'method' | 'body'> = {}): Promise<ApiResponse<T>> {
+  async put<T = unknown>(url: string, body?: unknown, config: Omit<RequestConfig, 'method' | 'body'> = {}): Promise<ApiResponse<T>> {
     return this.request<T>(url, { ...config, method: 'PUT', body });
   }
 
-  async patch<T = any>(url: string, body?: any, config: Omit<RequestConfig, 'method' | 'body'> = {}): Promise<ApiResponse<T>> {
+  async patch<T = unknown>(url: string, body?: unknown, config: Omit<RequestConfig, 'method' | 'body'> = {}): Promise<ApiResponse<T>> {
     return this.request<T>(url, { ...config, method: 'PATCH', body });
   }
 
-  async delete<T = any>(url: string, config: Omit<RequestConfig, 'method' | 'body'> = {}): Promise<ApiResponse<T>> {
+  async delete<T = unknown>(url: string, config: Omit<RequestConfig, 'method' | 'body'> = {}): Promise<ApiResponse<T>> {
     return this.request<T>(url, { ...config, method: 'DELETE' });
   }
 
@@ -297,7 +297,7 @@ export const withRetry = async <T>(
       lastError = {
         code: 'RETRY_ERROR',
         message: (error as Error).message,
-        details: error as Record<string, any>,
+        details: error as Record<string, unknown>,
       };
       
       if (attempt < maxRetries) {
@@ -335,9 +335,9 @@ export const sequential = async <T>(
 
 // 请求缓存
 class ApiRequestCache {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+  private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>();
 
-  set(key: string, data: any, ttl: number = 300000): void { // 默认5分钟
+  set(key: string, data: unknown, ttl: number = 300000): void { // 默认5分钟
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -345,7 +345,7 @@ class ApiRequestCache {
     });
   }
 
-  get(key: string): any | null {
+  get(key: string): unknown | null {
     const item = this.cache.get(key);
     
     if (!item) {
@@ -390,7 +390,7 @@ export const withCache = async <T>(
   if (cached) {
     return {
       success: true,
-      data: cached,
+      data: cached as T,
     };
   }
   
@@ -404,7 +404,7 @@ export const withCache = async <T>(
 };
 
 // URL 构建工具
-export const buildURL = (base: string, path: string, params?: Record<string, any>): string => {
+export const buildURL = (base: string, path: string, params?: Record<string, unknown>): string => {
   const baseURL = base.endsWith('/') ? base.slice(0, -1) : base;
   const pathname = path.startsWith('/') ? path : `/${path}`;
   let url = `${baseURL}${pathname}`;
@@ -451,7 +451,7 @@ export const parseQueryString = (queryString: string): Record<string, string | s
   return params;
 };
 
-export const stringifyQueryParams = (params: Record<string, any>): string => {
+export const stringifyQueryParams = (params: Record<string, unknown>): string => {
   const searchParams = new URLSearchParams();
   
   Object.entries(params).forEach(([key, value]) => {
@@ -477,7 +477,7 @@ export const uploadFile = async (
     onProgress?: (progress: number) => void;
     signal?: AbortSignal;
   } = {}
-): Promise<ApiResponse<any>> => {
+): Promise<ApiResponse<unknown>> => {
   const {
     fieldName = 'file',
     additionalFields = {},
@@ -519,7 +519,7 @@ export const uploadFile = async (
               error: {
                 code: xhr.status.toString(),
                 message: xhr.statusText,
-                details: data as Record<string, any>,
+                details: data as Record<string, unknown>,
               },
             });
           }
@@ -529,7 +529,7 @@ export const uploadFile = async (
             error: {
               code: 'PARSE_ERROR',
               message: 'Failed to parse response',
-              details: error as Record<string, any>,
+              details: error as Record<string, unknown>,
             },
           });
         }

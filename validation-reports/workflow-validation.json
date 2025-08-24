@@ -1,0 +1,222 @@
+{
+  "timestamp": "2025-08-23T07:56:13.886Z",
+  "workflows": {
+    "ci.yml": {
+      "filename": "ci.yml",
+      "path": ".github/workflows/ci.yml",
+      "valid": true,
+      "issues": [
+        {
+          "type": "warning",
+          "category": "actions",
+          "message": "使用了过时的Action: actions/setup-python@v4，建议升级到 actions/setup-python@v5",
+          "line": null,
+          "job": "security-scan",
+          "step": 2
+        },
+        {
+          "type": "warning",
+          "category": "actions",
+          "message": "使用了过时的Action: actions/upload-artifact@v3，建议升级到 actions/upload-artifact@v4",
+          "line": null,
+          "job": "security-scan",
+          "step": 6
+        }
+      ],
+      "categories": {
+        "structure": 0,
+        "triggers": 0,
+        "actions": 2,
+        "security": 0,
+        "performance": 0
+      },
+      "severity": {
+        "error": 0,
+        "warning": 2,
+        "info": 0
+      }
+    },
+    "code-quality.yml": {
+      "filename": "code-quality.yml",
+      "path": ".github/workflows/code-quality.yml",
+      "valid": true,
+      "issues": [
+        {
+          "type": "warning",
+          "category": "security",
+          "message": "第三方Action未固定版本: sonarqube-quality-gate-action@master，建议固定到特定版本",
+          "line": null,
+          "job": "sonarqube-analysis",
+          "step": 10
+        }
+      ],
+      "categories": {
+        "structure": 0,
+        "triggers": 0,
+        "actions": 0,
+        "security": 1,
+        "performance": 0
+      },
+      "severity": {
+        "error": 0,
+        "warning": 1,
+        "info": 0
+      }
+    },
+    "deploy.yml": {
+      "filename": "deploy.yml",
+      "path": ".github/workflows/deploy.yml",
+      "valid": true,
+      "issues": [],
+      "categories": {
+        "structure": 0,
+        "triggers": 0,
+        "actions": 0,
+        "security": 0,
+        "performance": 0
+      },
+      "severity": {
+        "error": 0,
+        "warning": 0,
+        "info": 0
+      }
+    },
+    "docker-build.yml": {
+      "filename": "docker-build.yml",
+      "path": ".github/workflows/docker-build.yml",
+      "valid": true,
+      "issues": [
+        {
+          "type": "warning",
+          "category": "security",
+          "message": "第三方Action未固定版本: aquasecurity/trivy-action@master，建议固定到特定版本",
+          "line": null,
+          "job": "build-and-push",
+          "step": 7
+        }
+      ],
+      "categories": {
+        "structure": 0,
+        "triggers": 0,
+        "actions": 0,
+        "security": 1,
+        "performance": 0
+      },
+      "severity": {
+        "error": 0,
+        "warning": 1,
+        "info": 0
+      }
+    },
+    "notifications.yml": {
+      "filename": "notifications.yml",
+      "path": ".github/workflows/notifications.yml",
+      "valid": true,
+      "issues": [],
+      "categories": {
+        "structure": 0,
+        "triggers": 0,
+        "actions": 0,
+        "security": 0,
+        "performance": 0
+      },
+      "severity": {
+        "error": 0,
+        "warning": 0,
+        "info": 0
+      }
+    },
+    "performance-monitoring.yml": {
+      "filename": "performance-monitoring.yml",
+      "path": ".github/workflows/performance-monitoring.yml",
+      "valid": true,
+      "issues": [],
+      "categories": {
+        "structure": 0,
+        "triggers": 0,
+        "actions": 0,
+        "security": 0,
+        "performance": 0
+      },
+      "severity": {
+        "error": 0,
+        "warning": 0,
+        "info": 0
+      }
+    },
+    "test-report.yml": {
+      "filename": "test-report.yml",
+      "path": ".github/workflows/test-report.yml",
+      "valid": true,
+      "issues": [
+        {
+          "type": "warning",
+          "category": "actions",
+          "message": "使用了过时的Action: actions/upload-artifact@v3，建议升级到 actions/upload-artifact@v4",
+          "line": null,
+          "job": "generate-test-report",
+          "step": 6
+        }
+      ],
+      "categories": {
+        "structure": 0,
+        "triggers": 0,
+        "actions": 1,
+        "security": 0,
+        "performance": 0
+      },
+      "severity": {
+        "error": 0,
+        "warning": 1,
+        "info": 0
+      }
+    },
+    "test.yml": {
+      "filename": "test.yml",
+      "path": ".github/workflows/test.yml",
+      "valid": true,
+      "issues": [],
+      "categories": {
+        "structure": 0,
+        "triggers": 0,
+        "actions": 0,
+        "security": 0,
+        "performance": 0
+      },
+      "severity": {
+        "error": 0,
+        "warning": 0,
+        "info": 0
+      }
+    },
+    "update-badges.yml": {
+      "filename": "update-badges.yml",
+      "path": ".github/workflows/update-badges.yml",
+      "valid": true,
+      "issues": [],
+      "categories": {
+        "structure": 0,
+        "triggers": 0,
+        "actions": 0,
+        "security": 0,
+        "performance": 0
+      },
+      "severity": {
+        "error": 0,
+        "warning": 0,
+        "info": 0
+      }
+    }
+  },
+  "summary": {
+    "totalWorkflows": 9,
+    "validWorkflows": 9,
+    "invalidWorkflows": 0,
+    "warnings": 5
+  },
+  "globalIssues": [],
+  "recommendations": [
+    "建议升级过时的GitHub Actions到最新版本",
+    "检查并修复安全配置问题"
+  ]
+}

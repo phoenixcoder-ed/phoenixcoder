@@ -20,6 +20,7 @@ export interface UserQueryParams {
   sortOrder?: 'asc' | 'desc';
   skills?: string[];
   level?: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -101,12 +102,12 @@ export class UserService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       const response = await this.apiClient.get('/users/health');
-      return response.success;
+      return { success: response.success, status: 'healthy' };
     } catch (error: unknown) {
-      return false;
+      return { success: false, status: 'unhealthy', error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -158,7 +159,8 @@ export class UserService extends BaseService implements IService {
       return user;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'UserService', 'getUserById', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'UserService');
       }
       serviceError.message = '获取用户失败';
@@ -183,7 +185,8 @@ export class UserService extends BaseService implements IService {
       return user;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'UserService', 'getUserByUsername', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户名 ${username} 不存在`, 'user', 'UserService');
       }
       serviceError.message = '获取用户失败';
@@ -209,7 +212,8 @@ export class UserService extends BaseService implements IService {
       return user;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'UserService', 'createUser', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 400) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('用户数据验证失败', [{
           field: 'userData',
           message: '用户数据格式不正确',
@@ -239,10 +243,11 @@ export class UserService extends BaseService implements IService {
       return user;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'UserService', 'updateUser', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'UserService');
       }
-      if (serviceError.details?.response?.status === 400) {
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('用户数据验证失败', [{
           field: 'updateData',
           message: '更新数据格式不正确',
@@ -269,7 +274,8 @@ export class UserService extends BaseService implements IService {
       this.eventEmitter.emit('user:deleted', userId);
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'UserService', 'deleteUser', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'UserService');
       }
       serviceError.message = '删除用户失败';
@@ -291,7 +297,8 @@ export class UserService extends BaseService implements IService {
       return profile;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'UserService', 'getUserProfile', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 的资料不存在`, 'userProfile', 'UserService');
       }
       serviceError.message = '获取用户资料失败';
@@ -314,10 +321,11 @@ export class UserService extends BaseService implements IService {
       return profile;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'UserService', 'updateUserProfile', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'UserService');
       }
-      if (serviceError.details?.response?.status === 400) {
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('用户资料数据验证失败', [{
           field: 'profileData',
           message: '资料数据格式不正确',
@@ -343,7 +351,8 @@ export class UserService extends BaseService implements IService {
       return preferences;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'UserService', 'getUserPreferences', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 的偏好设置不存在`, 'userPreferences', 'UserService');
       }
       serviceError.message = '获取用户偏好设置失败';
@@ -366,10 +375,11 @@ export class UserService extends BaseService implements IService {
       return updatedPreferences;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'UserService', 'updateUserPreferences', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'UserService');
       }
-      if (serviceError.details?.response?.status === 400) {
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('用户偏好设置数据验证失败', [{
           field: 'preferences',
           message: '偏好设置数据格式不正确',
@@ -395,7 +405,8 @@ export class UserService extends BaseService implements IService {
       return stats;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'UserService', 'getUserStats', ServiceErrorType.BUSINESS_LOGIC);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 的统计信息不存在`, 'userStats', 'UserService');
       }
       serviceError.message = '获取用户统计信息失败';

@@ -1,0 +1,179 @@
+{
+  "timestamp": "2025-08-23T11:50:26.778Z",
+  "tests": [
+    {
+      "name": "Git 仓库检查",
+      "status": "passed",
+      "message": "Git 仓库状态正常",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:26.918Z"
+    },
+    {
+      "name": "远程仓库检查",
+      "status": "passed",
+      "message": "远程仓库已配置",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:26.960Z"
+    },
+    {
+      "name": "分支检查",
+      "status": "passed",
+      "message": "当前分支: fix-cicd-workflow",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.096Z"
+    },
+    {
+      "name": "工作流目录检查",
+      "status": "passed",
+      "message": "工作流目录存在",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.096Z"
+    },
+    {
+      "name": "工作流文件检查",
+      "status": "passed",
+      "message": "发现 9 个工作流文件",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.097Z"
+    },
+    {
+      "name": "工作流文件 ci.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.106Z"
+    },
+    {
+      "name": "工作流文件 code-quality.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.112Z"
+    },
+    {
+      "name": "工作流文件 deploy.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.114Z"
+    },
+    {
+      "name": "工作流文件 docker-build.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.116Z"
+    },
+    {
+      "name": "工作流文件 notifications.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.120Z"
+    },
+    {
+      "name": "工作流文件 performance-monitoring.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.123Z"
+    },
+    {
+      "name": "工作流文件 test-report.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.125Z"
+    },
+    {
+      "name": "工作流文件 test.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.129Z"
+    },
+    {
+      "name": "工作流文件 update-badges.yml",
+      "status": "passed",
+      "message": "语法和结构正确",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.131Z"
+    },
+    {
+      "name": "package.json 检查",
+      "status": "passed",
+      "message": "package.json 存在",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.131Z"
+    },
+    {
+      "name": "依赖安装检查",
+      "status": "passed",
+      "message": "依赖已安装",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:27.131Z"
+    },
+    {
+      "name": "代码检查 (lint)",
+      "status": "failed",
+      "message": "代码检查失败: Command failed: npm run lint",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:41.108Z"
+    },
+    {
+      "name": "类型检查",
+      "status": "skipped",
+      "message": "未配置类型检查脚本",
+      "details": {},
+      "timestamp": "2025-08-23T11:50:41.108Z"
+    },
+    {
+      "name": "项目构建",
+      "status": "passed",
+      "message": "项目构建成功",
+      "details": {},
+      "timestamp": "2025-08-23T11:51:07.706Z"
+    },
+    {
+      "name": "单元测试",
+      "status": "failed",
+      "message": "单元测试失败: Command failed: npm test",
+      "details": {},
+      "timestamp": "2025-08-23T11:51:09.517Z"
+    },
+    {
+      "name": "环境文件 .env",
+      "status": "passed",
+      "message": "环境配置文件存在",
+      "details": {},
+      "timestamp": "2025-08-23T11:51:09.517Z"
+    },
+    {
+      "name": "GitHub 环境配置",
+      "status": "passed",
+      "message": "发现 2 个环境配置",
+      "details": {},
+      "timestamp": "2025-08-23T11:51:09.517Z"
+    },
+    {
+      "name": ".gitignore 安全检查",
+      "status": "passed",
+      "message": "包含必要的安全模式",
+      "details": {},
+      "timestamp": "2025-08-23T11:51:09.518Z"
+    },
+    {
+      "name": "敏感文件检查",
+      "status": "passed",
+      "message": "未发现被提交的敏感文件",
+      "details": {},
+      "timestamp": "2025-08-23T11:51:09.586Z"
+    }
+  ],
+  "summary": {
+    "total": 24,
+    "passed": 21,
+    "failed": 2,
+    "skipped": 1
+  }
+}

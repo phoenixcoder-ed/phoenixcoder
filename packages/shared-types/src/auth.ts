@@ -145,7 +145,7 @@ export interface DeviceInfo {
 export interface PermissionCheck {
   resource: string;
   action: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 export interface PermissionResult {

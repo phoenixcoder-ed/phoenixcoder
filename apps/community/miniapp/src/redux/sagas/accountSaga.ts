@@ -6,25 +6,6 @@ declare module 'axios' {
     }
 }
 
-declare module '@/utils/httpUtil' {
-    export namespace HttpUtil {
-        export function verifyUserLoginWithEmail(_username: string, _password: string): Promise<AxiosResponse<any>>;
-        export function sendPhoneVerificationCode(_phone: string): Promise<AxiosResponse<any>>;
-        export function verifyUserLoginWithPhone(_phone: string, _code: string): Promise<AxiosResponse<any>>;
-        export function registerWithEmail(
-            _username: string,
-            _email: string,
-            _password: string,
-        ): Promise<AxiosResponse<any>>;
-        export function registerWithPhone(
-            _phone: string,
-            _code: string,
-            _password: string,
-        ): Promise<AxiosResponse<any>>;
-        export function logout(): Promise<AxiosResponse<any>>;
-    }
-}
-
 declare module '@/redux/actions' {
     export const accountActions: {
         loginWithEmailSaga: any;

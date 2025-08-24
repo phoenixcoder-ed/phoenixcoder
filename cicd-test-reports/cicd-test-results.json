@@ -1,0 +1,99 @@
+{
+  "timestamp": "2025-08-23T07:58:23.519Z",
+  "projectRoot": "/Users/zhuwencan/work/phoenixcoder",
+  "overall": {
+    "healthy": true,
+    "score": 70,
+    "maxScore": 100
+  },
+  "tests": {
+    "gitRepository": {
+      "passed": true,
+      "score": 8,
+      "maxScore": 10,
+      "details": [
+        "✅ Git 仓库检查通过",
+        "✅ 远程仓库配置正常",
+        "⚠️ 工作目录有 11 个未提交的更改",
+        "✅ 有提交历史"
+      ]
+    },
+    "workflowFiles": {
+      "passed": true,
+      "score": 14,
+      "maxScore": 15,
+      "details": [
+        "✅ 工作流目录存在",
+        "✅ 找到 9 个工作流文件",
+        "✅ 找到核心工作流: ci.yml, test.yml",
+        "✅ 所有工作流文件语法正确"
+      ]
+    },
+    "dependencies": {
+      "passed": true,
+      "score": 13,
+      "maxScore": 15,
+      "details": [
+        "✅ package.json 存在",
+        "✅ node_modules 目录存在",
+        "✅ 找到关键依赖: typescript, eslint",
+        "✅ 找到关键脚本: build, test, lint"
+      ]
+    },
+    "buildProcess": {
+      "passed": true,
+      "score": 15,
+      "maxScore": 20,
+      "details": [
+        "✅ 构建脚本存在",
+        "✅ 构建成功"
+      ]
+    },
+    "unitTests": {
+      "passed": true,
+      "score": 8,
+      "maxScore": 15,
+      "details": [
+        "✅ 测试脚本存在",
+        "✅ 找到 3 个测试文件在 tests",
+        "❌ 单元测试失败: Command failed: npm test"
+      ]
+    },
+    "linting": {
+      "passed": true,
+      "score": 5,
+      "maxScore": 10,
+      "details": [
+        "✅ 找到代码检查脚本: lint",
+        "❌ lint 失败: Command failed: npm run lint",
+        "✅ 找到配置文件: .eslintrc.js, .prettierrc"
+      ]
+    },
+    "environmentConfig": {
+      "passed": true,
+      "score": 7,
+      "maxScore": 10,
+      "details": [
+        "✅ 找到配置文件: tsconfig.json",
+        "✅ .env 文件已被 .gitignore 忽略"
+      ]
+    },
+    "securityScan": {
+      "passed": false,
+      "score": 0,
+      "maxScore": 5,
+      "details": [
+        "❌ .env 文件被提交到版本控制"
+      ]
+    }
+  },
+  "recommendations": [
+    "改进 安全扫描 (当前得分: 0/5)",
+    "修复失败的测试项目"
+  ],
+  "failedTests": [
+    "单元测试失败",
+    "代码检查 (lint) 失败",
+    "发现被提交的敏感文件 .env"
+  ]
+}

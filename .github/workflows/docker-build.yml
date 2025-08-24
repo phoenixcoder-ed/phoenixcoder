@@ -39,6 +39,11 @@ env:
   REGISTRY: ghcr.io
   IMAGE_PREFIX: ${{ github.repository }}
 
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
 jobs:
   detect-changes:
     runs-on: ubuntu-latest

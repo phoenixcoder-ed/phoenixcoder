@@ -1,5 +1,3 @@
-import React from 'react';
-
 // 表单字段属性类型
 export interface FormFieldProps {
   name: string;
@@ -9,8 +7,8 @@ export interface FormFieldProps {
   required?: boolean;
   disabled?: boolean;
   error?: string;
-  value?: any;
-  onChange?: (value: any) => void;
+  value?: unknown;
+  onChange?: (value: unknown) => void;
   onBlur?: () => void;
 }
 
@@ -20,13 +18,13 @@ export interface FormValidation {
   minLength?: number | { value: number; message: string };
   maxLength?: number | { value: number; message: string };
   pattern?: RegExp | { value: RegExp; message: string };
-  validate?: (value: any) => boolean | string;
-  custom?: (value: any, formData: any) => boolean | string;
+  validate?: (value: unknown) => boolean | string;
+  custom?: (value: unknown, formData: Record<string, unknown>) => boolean | string;
 }
 
 // 表单状态类型
 export interface FormState {
-  values: Record<string, any>;
+  values: Record<string, unknown>;
   errors: Record<string, string>;
   touched: Record<string, boolean>;
   isSubmitting: boolean;

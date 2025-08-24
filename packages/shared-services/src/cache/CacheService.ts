@@ -1,14 +1,14 @@
 import { BaseService } from '../base/BaseService';
 import { IService } from '../interfaces/IService';
-import { ServiceError, ServiceErrorType, ValidationError, NotFoundError } from '../types/ServiceError';
+import { ServiceError, ServiceErrorType, ValidationError } from '../types/ServiceError';
 import { CacheConfig } from '../types/ServiceConfig';
-import { SERVICE_EVENTS, CACHE_STRATEGIES } from '../types/ServiceConstants';
+import { SERVICE_EVENTS } from '../types/ServiceConstants';
 import { EventEmitter } from 'eventemitter3';
 
 /**
  * 缓存项接口
  */
-export interface CacheItem<T = any> {
+export interface CacheItem<T = unknown> {
   key: string;
   value: T;
   ttl?: number;
@@ -17,7 +17,7 @@ export interface CacheItem<T = any> {
   accessCount: number;
   lastAccessed: Date;
   tags?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -40,7 +40,7 @@ export interface CacheQueryParams {
 export interface CacheSetOptions {
   ttl?: number;
   tags?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   overwrite?: boolean;
   compress?: boolean;
   serialize?: boolean;
@@ -53,7 +53,7 @@ export interface CacheGetOptions {
   updateAccessTime?: boolean;
   deserialize?: boolean;
   decompress?: boolean;
-  defaultValue?: any;
+  defaultValue?: unknown;
 }
 
 /**
@@ -100,8 +100,8 @@ export interface CacheStats {
  * 缓存事件接口
  */
 export interface CacheEvents {
-  'cache:set': (key: string, value: any, options?: CacheSetOptions) => void;
-  'cache:get': (key: string, value: any | null, hit: boolean) => void;
+  'cache:set': (key: string, value: unknown, options?: CacheSetOptions) => void;
+  'cache:get': (key: string, value: unknown | null, hit: boolean) => void;
   'cache:delete': (key: string, existed: boolean) => void;
   'cache:clear': (pattern?: string) => void;
   'cache:expire': (key: string) => void;
@@ -116,7 +116,7 @@ export interface CacheEvents {
  */
 export interface CacheStrategy {
   name: string;
-  shouldEvict(item: CacheItem, stats: CacheStats): boolean;
+  shouldEvict(item: CacheItem, _stats: CacheStats): boolean;
   selectEvictionCandidate(items: CacheItem[]): CacheItem | null;
 }
 
@@ -126,7 +126,7 @@ export interface CacheStrategy {
 export class LRUCacheStrategy implements CacheStrategy {
   name = 'LRU';
 
-  shouldEvict(item: CacheItem, stats: CacheStats): boolean {
+  shouldEvict(_item: CacheItem, stats: CacheStats): boolean {
     return stats.memoryUsage.percentage > 90;
   }
 
@@ -145,7 +145,7 @@ export class LRUCacheStrategy implements CacheStrategy {
 export class LFUCacheStrategy implements CacheStrategy {
   name = 'LFU';
 
-  shouldEvict(item: CacheItem, stats: CacheStats): boolean {
+  shouldEvict(_item: CacheItem, stats: CacheStats): boolean {
     return stats.memoryUsage.percentage > 90;
   }
 
@@ -164,7 +164,7 @@ export class LFUCacheStrategy implements CacheStrategy {
 export class TTLCacheStrategy implements CacheStrategy {
   name = 'TTL';
 
-  shouldEvict(item: CacheItem, stats: CacheStats): boolean {
+  shouldEvict(item: CacheItem, _stats: CacheStats): boolean {
     return item.expiresAt ? item.expiresAt <= new Date() : false;
   }
 
@@ -259,7 +259,7 @@ export class CacheService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       // 测试基本缓存操作
       const testKey = '__health_check__';
@@ -269,9 +269,10 @@ export class CacheService extends BaseService implements IService {
       const retrieved = await this.get(testKey);
       await this.delete(testKey);
       
-      return retrieved !== null && (retrieved as any)?.timestamp === testValue.timestamp;
+      const isHealthy = retrieved !== null && (retrieved as { timestamp: number })?.timestamp === testValue.timestamp;
+      return { success: isHealthy, status: isHealthy ? 'healthy' : 'unhealthy', cacheSize: this.cache.size, hitRate: this.stats.hitRate };
     } catch (error) {
-      return false;
+      return { success: false, status: 'unhealthy', error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -353,7 +354,7 @@ export class CacheService extends BaseService implements IService {
         this.stats.recentActivity.gets++;
         this.eventEmitter.emit('cache:miss', key);
         this.eventEmitter.emit('cache:get', key, null, false);
-        return options.defaultValue || null;
+        return (options.defaultValue as T) || null;
       }
 
       // 检查是否过期
@@ -365,7 +366,7 @@ export class CacheService extends BaseService implements IService {
         this.eventEmitter.emit('cache:expire', key);
         this.eventEmitter.emit('cache:miss', key);
         this.eventEmitter.emit('cache:get', key, null, false);
-        return options.defaultValue || null;
+        return (options.defaultValue as T) || null;
       }
 
       // 更新访问信息
@@ -466,7 +467,6 @@ export class CacheService extends BaseService implements IService {
       const keysToDelete: string[] = [];
       
       for (const [key, item] of Array.from(this.cache.entries())) {
-        let shouldDelete = false;
         
         // 按模式匹配
         if (options.pattern && !this.matchPattern(key, options.pattern)) {
@@ -582,7 +582,7 @@ export class CacheService extends BaseService implements IService {
           const itemA = this.cache.get(a)!;
           const itemB = this.cache.get(b)!;
           
-          let valueA: any, valueB: any;
+          let valueA: unknown, valueB: unknown;
           
           switch (params.sortBy) {
             case 'key':
@@ -605,7 +605,7 @@ export class CacheService extends BaseService implements IService {
               return 0;
           }
           
-          const result = valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+          const result = (valueA as any) < (valueB as any) ? -1 : (valueA as any) > (valueB as any) ? 1 : 0;
           return params.sortOrder === 'desc' ? -result : result;
         });
       }
@@ -708,7 +708,7 @@ export class CacheService extends BaseService implements IService {
   /**
    * 监听缓存事件
    */
-  override on<T extends string | symbol>(event: T, fn: (...args: any[]) => void, context?: any): this {
+  override on<T extends string | symbol>(event: T, fn: (...args: unknown[]) => void, context?: unknown): this {
     return super.on(event, fn, context);
   }
 
@@ -716,13 +716,13 @@ export class CacheService extends BaseService implements IService {
    * 监听缓存事件（类型安全版本）
    */
   onCacheEvent<K extends keyof CacheEvents>(event: K, listener: CacheEvents[K]): void {
-    super.on(event as string, listener as any);
+    super.on(event as string, listener as (...args: unknown[]) => void);
   }
 
   /**
    * 移除缓存事件监听
    */
-  override off<T extends string | symbol>(event: T, fn?: ((...args: any[]) => void) | undefined, context?: any, once?: boolean | undefined): this {
+  override off<T extends string | symbol>(event: T, fn?: ((...args: unknown[]) => void) | undefined, context?: unknown, once?: boolean | undefined): this {
     return super.off(event, fn, context, once);
   }
 
@@ -730,7 +730,7 @@ export class CacheService extends BaseService implements IService {
    * 移除缓存事件监听（类型安全版本）
    */
   offCacheEvent<K extends keyof CacheEvents>(event: K, listener: CacheEvents[K]): void {
-    super.off(event as string, listener as any);
+    super.off(event as string, listener as (...args: unknown[]) => void);
   }
 
   /**
@@ -766,7 +766,7 @@ export class CacheService extends BaseService implements IService {
   /**
    * 序列化
    */
-  private serialize(value: any): string {
+  private serialize(value: unknown): string {
     try {
       return JSON.stringify(value);
     } catch (error) {
@@ -777,7 +777,7 @@ export class CacheService extends BaseService implements IService {
   /**
    * 反序列化
    */
-  private deserialize(value: any): any {
+  private deserialize(value: unknown): unknown {
     try {
       if (typeof value === 'string') {
         return JSON.parse(value);
@@ -791,7 +791,7 @@ export class CacheService extends BaseService implements IService {
   /**
    * 压缩
    */
-  private compress(value: any): any {
+  private compress(value: unknown): unknown {
     // 这里可以实现具体的压缩逻辑
     // 例如使用 zlib 或其他压缩库
     return value;
@@ -800,7 +800,7 @@ export class CacheService extends BaseService implements IService {
   /**
    * 解压缩
    */
-  private decompress(value: any): any {
+  private decompress(value: unknown): unknown {
     // 这里可以实现具体的解压缩逻辑
     return value;
   }

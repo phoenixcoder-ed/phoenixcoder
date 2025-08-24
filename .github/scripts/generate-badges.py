@@ -1,599 +1,578 @@
 #!/usr/bin/env python3
+
 """
-PhoenixCoder CI/CD 状态徽章生成脚本
-生成各种项目状态徽章和 README 文档
+徽章生成脚本
+用于生成项目的各种状态徽章
 """
 
 import os
 import sys
 import json
 import yaml
-import argparse
 import requests
-from datetime import datetime, timedelta
+import subprocess
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
-from jinja2 import Template, Environment, FileSystemLoader
-import logging
-import base64
-import urllib.parse
+from typing import Dict, List, Any, Optional
 
-# 配置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# 颜色定义
+class Colors:
+    RESET = '\033[0m'
+    RED = '\033[31m'
+    GREEN = '\033[32m'
+    YELLOW = '\033[33m'
+    BLUE = '\033[34m'
+    MAGENTA = '\033[35m'
+    CYAN = '\033[36m'
+
+# 日志函数
+def log_info(msg: str) -> None:
+    print(f"{Colors.BLUE}[INFO]{Colors.RESET} {msg}")
+
+def log_success(msg: str) -> None:
+    print(f"{Colors.GREEN}[SUCCESS]{Colors.RESET} {msg}")
+
+def log_warning(msg: str) -> None:
+    print(f"{Colors.YELLOW}[WARNING]{Colors.RESET} {msg}")
+
+def log_error(msg: str) -> None:
+    print(f"{Colors.RED}[ERROR]{Colors.RESET} {msg}")
+
+def log_badge(msg: str) -> None:
+    print(f"{Colors.MAGENTA}[BADGE]{Colors.RESET} {msg}")
+
+# 徽章配置
+BADGE_CONFIG = {
+    'shields_io_base': 'https://img.shields.io',
+    'colors': {
+        'success': 'brightgreen',
+        'warning': 'yellow',
+        'error': 'red',
+        'info': 'blue',
+        'inactive': 'lightgrey'
+    },
+    'styles': {
+        'flat': 'flat',
+        'flat_square': 'flat-square',
+        'plastic': 'plastic',
+        'for_the_badge': 'for-the-badge'
+    }
+}
 
 class BadgeGenerator:
-    """状态徽章生成器"""
+    """徽章生成器"""
     
-    def __init__(self, config_path: str = None):
-        self.config_path = config_path or '.github/config/notifications.yml'
-        self.templates_dir = '.github/templates'
-        self.output_dir = '.github/badges'
-        self.config = self._load_config()
-        self.jinja_env = Environment(
-            loader=FileSystemLoader(self.templates_dir),
-            autoescape=True
-        )
+    def __init__(self, config_path: str = 'config/badges.yml'):
+        self.config_path = config_path
+        self.config = self.load_config()
+        self.badges = []
         
-        # 创建输出目录
-        Path(self.output_dir).mkdir(parents=True, exist_ok=True)
-        
-    def _load_config(self) -> Dict:
-        """加载配置"""
+    def load_config(self) -> Dict[str, Any]:
+        """加载徽章配置"""
         try:
-            with open(self.config_path, 'r', encoding='utf-8') as f:
-                return yaml.safe_load(f)
-        except FileNotFoundError:
-            logger.error(f"配置文件未找到: {self.config_path}")
-            return {}
-        except yaml.YAMLError as e:
-            logger.error(f"配置文件解析错误: {e}")
-            return {}
-    
-    def _get_shield_url(self, label: str, message: str, color: str, style: str = 'flat') -> str:
-        """生成 shields.io 徽章 URL"""
-        base_url = 'https://img.shields.io/badge'
-        encoded_label = urllib.parse.quote(label)
-        encoded_message = urllib.parse.quote(message)
-        return f"{base_url}/{encoded_label}-{encoded_message}-{color}?style={style}"
-    
-    def _get_color_for_percentage(self, percentage: float) -> str:
-        """根据百分比获取颜色"""
-        if percentage >= 90:
-            return 'brightgreen'
-        elif percentage >= 80:
-            return 'green'
-        elif percentage >= 70:
-            return 'yellowgreen'
-        elif percentage >= 60:
-            return 'yellow'
-        elif percentage >= 50:
-            return 'orange'
-        else:
-            return 'red'
-    
-    def _get_color_for_status(self, status: str) -> str:
-        """根据状态获取颜色"""
-        status_colors = {
-            'passing': 'brightgreen',
-            'success': 'brightgreen',
-            'stable': 'brightgreen',
-            'failing': 'red',
-            'failed': 'red',
-            'error': 'red',
-            'unstable': 'orange',
-            'warning': 'yellow',
-            'pending': 'yellow',
-            'unknown': 'lightgrey',
-            'disabled': 'lightgrey'
-        }
-        return status_colors.get(status.lower(), 'lightgrey')
-    
-    def generate_build_status_badge(self, workflow_data: Dict) -> Dict[str, str]:
-        """生成构建状态徽章"""
-        total_runs = workflow_data.get('total_runs', 0)
-        successful_runs = workflow_data.get('successful_runs', 0)
-        
-        if total_runs == 0:
-            status = 'unknown'
-            color = 'lightgrey'
-        else:
-            success_rate = (successful_runs / total_runs) * 100
-            if success_rate >= 90:
-                status = 'passing'
-            elif success_rate >= 70:
-                status = 'unstable'
+            config_file = Path(self.config_path)
+            if config_file.exists():
+                with open(config_file, 'r', encoding='utf-8') as f:
+                    return yaml.safe_load(f)
             else:
-                status = 'failing'
-            color = self._get_color_for_status(status)
-        
-        url = self._get_shield_url('build', status, color)
-        
+                log_warning(f"配置文件不存在: {self.config_path}，使用默认配置")
+                return self.get_default_config()
+        except Exception as e:
+            log_error(f"加载配置失败: {e}")
+            return self.get_default_config()
+    
+    def get_default_config(self) -> Dict[str, Any]:
+        """获取默认配置"""
         return {
-            'name': 'build_status',
-            'label': 'Build',
-            'message': status,
-            'color': color,
-            'url': url,
-            'markdown': f'![Build Status]({url})'
+            'badge_config': {
+                'style': 'flat',
+                'logo_height': 20
+            },
+            'technology_badges': {
+                'python': {
+                    'label': 'Python',
+                    'logo': 'python',
+                    'colors': {'background': '3776ab', 'text': 'white'}
+                },
+                'typescript': {
+                    'label': 'TypeScript',
+                    'logo': 'typescript',
+                    'colors': {'background': '3178c6', 'text': 'white'}
+                },
+                'react': {
+                    'label': 'React',
+                    'logo': 'react',
+                    'colors': {'background': '61dafb', 'text': 'black'}
+                }
+            },
+            'project_badges': {
+                'version': {
+                    'label': 'Version',
+                    'data_source': 'package.json',
+                    'colors': {'background': 'blue', 'text': 'white'}
+                },
+                'license': {
+                    'label': 'License',
+                    'data_source': 'package.json',
+                    'colors': {'background': 'green', 'text': 'white'}
+                }
+            }
         }
     
-    def generate_success_rate_badge(self, workflow_data: Dict) -> Dict[str, str]:
-        """生成成功率徽章"""
-        total_runs = workflow_data.get('total_runs', 0)
-        successful_runs = workflow_data.get('successful_runs', 0)
-        
-        if total_runs == 0:
-            success_rate = 0
-        else:
-            success_rate = (successful_runs / total_runs) * 100
-        
-        color = self._get_color_for_percentage(success_rate)
-        message = f'{success_rate:.1f}%'
-        
-        url = self._get_shield_url('success rate', message, color)
-        
+    def get_git_info(self) -> Dict[str, str]:
+        """获取Git信息"""
+        try:
+            # 获取当前分支
+            branch = subprocess.check_output(
+                ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                encoding='utf-8'
+            ).strip()
+            
+            # 获取最新提交
+            commit = subprocess.check_output(
+                ['git', 'rev-parse', 'HEAD'],
+                encoding='utf-8'
+            ).strip()[:8]
+            
+            # 获取提交数量
+            commit_count = subprocess.check_output(
+                ['git', 'rev-list', '--count', 'HEAD'],
+                encoding='utf-8'
+            ).strip()
+            
+            return {
+                'branch': branch,
+                'commit': commit,
+                'commit_count': commit_count
+            }
+        except Exception as e:
+            log_warning(f"获取Git信息失败: {e}")
+            return {
+                'branch': 'unknown',
+                'commit': 'unknown',
+                'commit_count': '0'
+            }
+    
+    def get_package_info(self) -> Dict[str, Any]:
+        """获取包信息"""
+        try:
+            with open('package.json', 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            log_warning(f"读取package.json失败: {e}")
+            return {
+                'name': 'unknown',
+                'version': '0.0.0',
+                'license': 'unknown'
+            }
+    
+    def get_test_coverage(self) -> Optional[Dict[str, float]]:
+        """获取测试覆盖率"""
+        coverage_file = Path('coverage/coverage-summary.json')
+        if coverage_file.exists():
+            try:
+                with open(coverage_file, 'r', encoding='utf-8') as f:
+                    coverage_data = json.load(f)
+                    if 'total' in coverage_data:
+                        return {
+                            'lines': coverage_data['total']['lines']['pct'],
+                            'functions': coverage_data['total']['functions']['pct'],
+                            'branches': coverage_data['total']['branches']['pct'],
+                            'statements': coverage_data['total']['statements']['pct']
+                        }
+            except Exception as e:
+                log_warning(f"读取覆盖率数据失败: {e}")
+        return None
+    
+    def get_build_status(self) -> str:
+        """获取构建状态"""
+        # 检查是否存在构建产物
+        if Path('dist').exists() or Path('build').exists():
+            return 'passing'
+        return 'unknown'
+    
+    def get_dependency_count(self) -> Dict[str, int]:
+        """获取依赖数量"""
+        package_info = self.get_package_info()
         return {
-            'name': 'success_rate',
-            'label': 'Success Rate',
-            'message': message,
-            'color': color,
-            'url': url,
-            'markdown': f'![Success Rate]({url})'
+            'dependencies': len(package_info.get('dependencies', {})),
+            'devDependencies': len(package_info.get('devDependencies', {}))
         }
     
-    def generate_test_coverage_badge(self, coverage_data: Dict) -> Dict[str, str]:
-        """生成测试覆盖率徽章"""
-        coverage = coverage_data.get('coverage', 0)
-        color = self._get_color_for_percentage(coverage)
-        message = f'{coverage:.1f}%'
+    def create_shield_url(self, label: str, message: str, color: str, 
+                         logo: Optional[str] = None, style: str = 'flat') -> str:
+        """创建Shields.io徽章URL"""
+        base_url = BADGE_CONFIG['shields_io_base']
         
-        url = self._get_shield_url('coverage', message, color)
+        # URL编码标签和消息
+        label = label.replace('-', '--').replace('_', '__').replace(' ', '_')
+        message = str(message).replace('-', '--').replace('_', '__').replace(' ', '_')
         
-        return {
-            'name': 'test_coverage',
-            'label': 'Coverage',
-            'message': message,
-            'color': color,
-            'url': url,
-            'markdown': f'![Test Coverage]({url})'
-        }
+        url = f"{base_url}/badge/{label}-{message}-{color}"
+        
+        params = []
+        if style != 'flat':
+            params.append(f"style={style}")
+        if logo:
+            params.append(f"logo={logo}")
+        
+        if params:
+            url += '?' + '&'.join(params)
+        
+        return url
     
-    def generate_code_quality_badge(self, quality_data: Dict) -> Dict[str, str]:
-        """生成代码质量徽章"""
-        quality_gate = quality_data.get('quality_gate', 'unknown')
-        
-        if quality_gate.lower() in ['passed', 'ok', 'success']:
-            status = 'A'
-            color = 'brightgreen'
-        elif quality_gate.lower() in ['warning', 'minor_issues']:
-            status = 'B'
-            color = 'yellow'
-        elif quality_gate.lower() in ['failed', 'error', 'major_issues']:
-            status = 'C'
-            color = 'red'
-        else:
-            status = 'unknown'
-            color = 'lightgrey'
-        
-        url = self._get_shield_url('quality', status, color)
-        
-        return {
-            'name': 'code_quality',
-            'label': 'Quality',
-            'message': status,
-            'color': color,
-            'url': url,
-            'markdown': f'![Code Quality]({url})'
-        }
-    
-    def generate_security_badge(self, security_data: Dict) -> Dict[str, str]:
-        """生成安全扫描徽章"""
-        vulnerabilities = security_data.get('vulnerabilities', 0)
-        critical = security_data.get('critical', 0)
-        high = security_data.get('high', 0)
-        
-        if critical > 0:
-            status = 'critical'
-            color = 'red'
-        elif high > 0:
-            status = 'high'
-            color = 'orange'
-        elif vulnerabilities > 0:
-            status = 'medium'
-            color = 'yellow'
-        else:
-            status = 'secure'
-            color = 'brightgreen'
-        
-        url = self._get_shield_url('security', status, color)
-        
-        return {
-            'name': 'security',
-            'label': 'Security',
-            'message': status,
-            'color': color,
-            'url': url,
-            'markdown': f'![Security]({url})'
-        }
-    
-    def generate_deployment_badge(self, deployment_data: Dict) -> Dict[str, str]:
-        """生成部署状态徽章"""
-        environments = deployment_data.get('environments', {})
-        
-        # 检查生产环境状态
-        prod_status = environments.get('production', {}).get('status', 'unknown')
-        
-        if prod_status == 'deployed':
-            status = 'deployed'
-            color = 'brightgreen'
-        elif prod_status == 'deploying':
-            status = 'deploying'
-            color = 'yellow'
-        elif prod_status == 'failed':
-            status = 'failed'
-            color = 'red'
-        else:
-            status = 'unknown'
-            color = 'lightgrey'
-        
-        url = self._get_shield_url('deployment', status, color)
-        
-        return {
-            'name': 'deployment',
-            'label': 'Deployment',
-            'message': status,
-            'color': color,
-            'url': url,
-            'markdown': f'![Deployment]({url})'
-        }
-    
-    def generate_uptime_badge(self, uptime_data: Dict) -> Dict[str, str]:
-        """生成正常运行时间徽章"""
-        uptime = uptime_data.get('uptime', 0)
-        color = self._get_color_for_percentage(uptime)
-        message = f'{uptime:.2f}%'
-        
-        url = self._get_shield_url('uptime', message, color)
-        
-        return {
-            'name': 'uptime',
-            'label': 'Uptime',
-            'message': message,
-            'color': color,
-            'url': url,
-            'markdown': f'![Uptime]({url})'
-        }
-    
-    def generate_version_badge(self, version_data: Dict) -> Dict[str, str]:
-        """生成版本徽章"""
-        version = version_data.get('version', 'unknown')
-        color = 'blue'
-        
-        url = self._get_shield_url('version', version, color)
-        
-        return {
-            'name': 'version',
-            'label': 'Version',
-            'message': version,
-            'color': color,
-            'url': url,
-            'markdown': f'![Version]({url})'
-        }
-    
-    def generate_license_badge(self, license_info: str = 'MIT') -> Dict[str, str]:
-        """生成许可证徽章"""
-        color = 'blue'
-        url = self._get_shield_url('license', license_info, color)
-        
-        return {
-            'name': 'license',
-            'label': 'License',
-            'message': license_info,
-            'color': color,
-            'url': url,
-            'markdown': f'![License]({url})'
-        }
-    
-    def generate_tech_stack_badges(self, tech_stack: Dict) -> List[Dict[str, str]]:
+    def generate_technology_badges(self) -> List[Dict[str, str]]:
         """生成技术栈徽章"""
         badges = []
+        tech_config = self.config.get('technology_badges', {})
         
-        tech_colors = {
-            'node.js': '339933',
-            'python': '3776AB',
-            'typescript': '3178C6',
-            'react': '61DAFB',
-            'vue': '4FC08D',
-            'docker': '2496ED',
-            'kubernetes': '326CE5',
-            'postgresql': '336791',
-            'redis': 'DC382D',
-            'nginx': '009639',
-            'github actions': '2088FF'
-        }
-        
-        for tech, version in tech_stack.items():
-            tech_lower = tech.lower()
-            color = tech_colors.get(tech_lower, 'lightgrey')
+        for tech, config in tech_config.items():
+            label = config.get('label', tech.title())
+            logo = config.get('logo', tech)
+            colors = config.get('colors', {})
+            color = colors.get('background', 'blue')
             
-            if version:
-                message = version
-            else:
-                message = 'latest'
-            
-            url = self._get_shield_url(tech, message, color)
+            url = self.create_shield_url(
+                label=label,
+                message='',
+                color=color,
+                logo=logo,
+                style=self.config.get('badge_config', {}).get('style', 'flat')
+            )
             
             badges.append({
-                'name': f'tech_{tech_lower.replace(".", "_").replace(" ", "_")}',
-                'label': tech,
-                'message': message,
-                'color': color,
+                'name': f'{tech}_badge',
+                'label': label,
                 'url': url,
-                'markdown': f'![{tech}]({url})'
+                'type': 'technology'
             })
         
         return badges
     
-    def generate_last_updated_badge(self) -> Dict[str, str]:
-        """生成最后更新时间徽章"""
-        now = datetime.now()
-        message = now.strftime('%Y-%m-%d')
-        color = 'blue'
-        
-        url = self._get_shield_url('last updated', message, color)
-        
-        return {
-            'name': 'last_updated',
-            'label': 'Last Updated',
-            'message': message,
-            'color': color,
-            'url': url,
-            'markdown': f'![Last Updated]({url})'
-        }
-    
-    def generate_all_badges(self, data: Dict) -> Dict[str, Any]:
-        """生成所有徽章"""
-        badges = {}
-        
-        # 基础状态徽章
-        if 'workflow_stats' in data:
-            badges['build_status'] = self.generate_build_status_badge(data['workflow_stats'])
-            badges['success_rate'] = self.generate_success_rate_badge(data['workflow_stats'])
-        
-        # 测试覆盖率徽章
-        if 'code_quality' in data:
-            badges['test_coverage'] = self.generate_test_coverage_badge(data['code_quality'])
-            badges['code_quality'] = self.generate_code_quality_badge(data['code_quality'])
-        
-        # 安全徽章
-        if 'security_results' in data:
-            badges['security'] = self.generate_security_badge(data['security_results'])
-        
-        # 部署状态徽章
-        if 'deployment_stats' in data:
-            badges['deployment'] = self.generate_deployment_badge(data['deployment_stats'])
-        
-        # 正常运行时间徽章
-        if 'performance_metrics' in data:
-            badges['uptime'] = self.generate_uptime_badge(data['performance_metrics'])
+    def generate_project_badges(self) -> List[Dict[str, str]]:
+        """生成项目信息徽章"""
+        badges = []
+        project_config = self.config.get('project_badges', {})
+        package_info = self.get_package_info()
+        git_info = self.get_git_info()
         
         # 版本徽章
-        if 'version' in data:
-            badges['version'] = self.generate_version_badge(data['version'])
+        if 'version' in project_config:
+            version = package_info.get('version', '0.0.0')
+            url = self.create_shield_url('Version', version, 'blue')
+            badges.append({
+                'name': 'version_badge',
+                'label': 'Version',
+                'url': url,
+                'type': 'project'
+            })
         
         # 许可证徽章
-        badges['license'] = self.generate_license_badge(data.get('license', 'MIT'))
+        if 'license' in project_config:
+            license_name = package_info.get('license', 'Unknown')
+            url = self.create_shield_url('License', license_name, 'green')
+            badges.append({
+                'name': 'license_badge',
+                'label': 'License',
+                'url': url,
+                'type': 'project'
+            })
         
-        # 技术栈徽章
-        if 'tech_stack' in data:
-            tech_badges = self.generate_tech_stack_badges(data['tech_stack'])
-            for badge in tech_badges:
-                badges[badge['name']] = badge
-        
-        # 最后更新时间徽章
-        badges['last_updated'] = self.generate_last_updated_badge()
+        # 提交数徽章
+        commit_count = git_info.get('commit_count', '0')
+        url = self.create_shield_url('Commits', commit_count, 'blue')
+        badges.append({
+            'name': 'commits_badge',
+            'label': 'Commits',
+            'url': url,
+            'type': 'project'
+        })
         
         return badges
     
-    def save_badges_json(self, badges: Dict[str, Any], filename: str = 'badges.json') -> str:
-        """保存徽章数据为 JSON 文件"""
-        output_path = Path(self.output_dir) / filename
+    def generate_build_badges(self) -> List[Dict[str, str]]:
+        """生成构建状态徽章"""
+        badges = []
         
-        with open(output_path, 'w', encoding='utf-8') as f:
-            json.dump(badges, f, indent=2, ensure_ascii=False)
+        # 构建状态
+        build_status = self.get_build_status()
+        color = 'brightgreen' if build_status == 'passing' else 'red'
+        url = self.create_shield_url('Build', build_status, color)
+        badges.append({
+            'name': 'build_badge',
+            'label': 'Build',
+            'url': url,
+            'type': 'build'
+        })
         
-        logger.info(f"徽章数据已保存到: {output_path}")
-        return str(output_path)
+        # 测试覆盖率
+        coverage = self.get_test_coverage()
+        if coverage:
+            lines_coverage = coverage.get('lines', 0)
+            if lines_coverage >= 80:
+                color = 'brightgreen'
+            elif lines_coverage >= 60:
+                color = 'yellow'
+            else:
+                color = 'red'
+            
+            url = self.create_shield_url('Coverage', f"{lines_coverage}%", color)
+            badges.append({
+                'name': 'coverage_badge',
+                'label': 'Coverage',
+                'url': url,
+                'type': 'build'
+            })
+        
+        return badges
     
-    def save_badges_markdown(self, badges: Dict[str, Any], filename: str = 'badges.md') -> str:
-        """保存徽章为 Markdown 文件"""
-        output_path = Path(self.output_dir) / filename
+    def generate_dependency_badges(self) -> List[Dict[str, str]]:
+        """生成依赖徽章"""
+        badges = []
+        deps = self.get_dependency_count()
         
-        markdown_content = "# PhoenixCoder 项目状态徽章\n\n"
+        # 生产依赖
+        dep_count = deps.get('dependencies', 0)
+        url = self.create_shield_url('Dependencies', str(dep_count), 'blue')
+        badges.append({
+            'name': 'dependencies_badge',
+            'label': 'Dependencies',
+            'url': url,
+            'type': 'dependency'
+        })
         
-        # 按类别组织徽章
-        categories = {
-            '构建状态': ['build_status', 'success_rate'],
-            '代码质量': ['test_coverage', 'code_quality'],
-            '安全': ['security'],
-            '部署': ['deployment', 'uptime'],
-            '项目信息': ['version', 'license', 'last_updated'],
-            '技术栈': [name for name in badges.keys() if name.startswith('tech_')]
-        }
+        # 开发依赖
+        dev_dep_count = deps.get('devDependencies', 0)
+        url = self.create_shield_url('Dev Dependencies', str(dev_dep_count), 'lightgrey')
+        badges.append({
+            'name': 'dev_dependencies_badge',
+            'label': 'Dev Dependencies',
+            'url': url,
+            'type': 'dependency'
+        })
         
-        for category, badge_names in categories.items():
-            if any(name in badges for name in badge_names):
-                markdown_content += f"## {category}\n\n"
-                
-                for badge_name in badge_names:
-                    if badge_name in badges:
-                        badge = badges[badge_name]
-                        markdown_content += f"{badge['markdown']} "
-                
-                markdown_content += "\n\n"
-        
-        # 添加使用说明
-        markdown_content += """
-## 使用说明
-
-这些徽章可以直接复制到项目的 README.md 文件中：
-
-```markdown
-<!-- 项目状态 -->
-"""
-        
-        # 添加主要徽章的示例
-        main_badges = ['build_status', 'success_rate', 'test_coverage', 'code_quality', 'security']
-        for badge_name in main_badges:
-            if badge_name in badges:
-                badge = badges[badge_name]
-                markdown_content += f"{badge['markdown']} "
-        
-        markdown_content += "\n```\n"
-        
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(markdown_content)
-        
-        logger.info(f"徽章 Markdown 已保存到: {output_path}")
-        return str(output_path)
+        return badges
     
-    def update_readme_badges(self, badges: Dict[str, Any], readme_path: str = 'README.md') -> bool:
-        """更新 README 文件中的徽章"""
-        if not Path(readme_path).exists():
-            logger.warning(f"README 文件不存在: {readme_path}")
-            return False
+    def generate_custom_badges(self) -> List[Dict[str, str]]:
+        """生成自定义徽章"""
+        badges = []
+        custom_config = self.config.get('custom_badges', {})
         
+        for badge_name, config in custom_config.items():
+            label = config.get('label', badge_name.title())
+            
+            # 根据数据源获取值
+            data_source = config.get('data_source')
+            value = self.get_custom_badge_value(data_source, config)
+            
+            if value is not None:
+                color = self.get_badge_color(value, config.get('thresholds', {}))
+                url = self.create_shield_url(label, str(value), color)
+                
+                badges.append({
+                    'name': f'{badge_name}_badge',
+                    'label': label,
+                    'url': url,
+                    'type': 'custom'
+                })
+        
+        return badges
+    
+    def get_custom_badge_value(self, data_source: str, config: Dict[str, Any]) -> Optional[str]:
+        """获取自定义徽章值"""
+        if data_source == 'file_count':
+            # 统计代码行数
+            try:
+                result = subprocess.check_output(
+                    ['find', '.', '-name', '*.py', '-o', '-name', '*.js', '-o', '-name', '*.ts', '|', 'wc', '-l'],
+                    shell=True,
+                    encoding='utf-8'
+                ).strip()
+                return result
+            except:
+                return None
+        
+        elif data_source == 'code_lines':
+            # 统计代码行数
+            try:
+                result = subprocess.check_output(
+                    ['find', '.', '-name', '*.py', '-o', '-name', '*.js', '-o', '-name', '*.ts', '-exec', 'wc', '-l', '{}', '+'],
+                    shell=True,
+                    encoding='utf-8'
+                )
+                lines = sum(int(line.split()[0]) for line in result.strip().split('\n') if line.strip())
+                return str(lines)
+            except:
+                return None
+        
+        return None
+    
+    def get_badge_color(self, value: str, thresholds: Dict[str, Any]) -> str:
+        """根据阈值获取徽章颜色"""
         try:
-            with open(readme_path, 'r', encoding='utf-8') as f:
-                content = f.read()
+            num_value = float(value)
             
-            # 查找徽章区域
-            badge_start = '<!-- BADGES_START -->'
-            badge_end = '<!-- BADGES_END -->'
+            if 'good' in thresholds and num_value >= thresholds['good']:
+                return 'brightgreen'
+            elif 'warning' in thresholds and num_value >= thresholds['warning']:
+                return 'yellow'
+            else:
+                return 'red'
+        except:
+            return 'blue'
+    
+    def generate_all_badges(self) -> List[Dict[str, str]]:
+        """生成所有徽章"""
+        all_badges = []
+        
+        log_badge("生成技术栈徽章...")
+        all_badges.extend(self.generate_technology_badges())
+        
+        log_badge("生成项目信息徽章...")
+        all_badges.extend(self.generate_project_badges())
+        
+        log_badge("生成构建状态徽章...")
+        all_badges.extend(self.generate_build_badges())
+        
+        log_badge("生成依赖徽章...")
+        all_badges.extend(self.generate_dependency_badges())
+        
+        log_badge("生成自定义徽章...")
+        all_badges.extend(self.generate_custom_badges())
+        
+        return all_badges
+    
+    def save_badges(self, badges: List[Dict[str, str]], output_file: str = 'badges.json') -> bool:
+        """保存徽章数据"""
+        try:
+            output_path = Path(output_file)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
             
-            start_index = content.find(badge_start)
-            end_index = content.find(badge_end)
+            badge_data = {
+                'generated_at': datetime.now().isoformat(),
+                'total_badges': len(badges),
+                'badges': badges
+            }
             
-            if start_index == -1 or end_index == -1:
-                logger.warning("README 中未找到徽章标记区域")
-                return False
+            with open(output_path, 'w', encoding='utf-8') as f:
+                json.dump(badge_data, f, indent=2, ensure_ascii=False)
             
-            # 生成新的徽章内容
-            new_badges_content = f"{badge_start}\n"
-            
-            # 添加主要徽章
-            main_badges = ['build_status', 'success_rate', 'test_coverage', 'code_quality', 'security']
-            for badge_name in main_badges:
-                if badge_name in badges:
-                    new_badges_content += f"{badges[badge_name]['markdown']} "
-            
-            new_badges_content += f"\n{badge_end}"
-            
-            # 替换内容
-            new_content = (
-                content[:start_index] + 
-                new_badges_content + 
-                content[end_index + len(badge_end):]
-            )
-            
-            with open(readme_path, 'w', encoding='utf-8') as f:
-                f.write(new_content)
-            
-            logger.info(f"README 徽章已更新: {readme_path}")
             return True
-            
         except Exception as e:
-            logger.error(f"更新 README 徽章失败: {e}")
+            log_error(f"保存徽章数据失败: {e}")
             return False
     
-    def generate_status_summary(self, badges: Dict[str, Any]) -> Dict[str, Any]:
-        """生成状态摘要"""
-        summary = {
-            'generated_at': datetime.now().isoformat(),
-            'total_badges': len(badges),
-            'categories': {},
-            'status_overview': {}
+    def generate_markdown_badges(self, badges: List[Dict[str, str]]) -> str:
+        """生成Markdown格式的徽章"""
+        markdown = "# 项目徽章\n\n"
+        
+        # 按类型分组
+        badge_groups = {}
+        for badge in badges:
+            badge_type = badge.get('type', 'other')
+            if badge_type not in badge_groups:
+                badge_groups[badge_type] = []
+            badge_groups[badge_type].append(badge)
+        
+        # 生成各组徽章
+        type_names = {
+            'technology': '🛠️ 技术栈',
+            'project': '📋 项目信息',
+            'build': '🚀 构建状态',
+            'dependency': '📦 依赖',
+            'custom': '🎯 自定义'
         }
         
-        # 统计各类别徽章数量
-        categories = {
-            'build': [name for name in badges.keys() if 'build' in name or 'success' in name],
-            'quality': [name for name in badges.keys() if 'coverage' in name or 'quality' in name],
-            'security': [name for name in badges.keys() if 'security' in name],
-            'deployment': [name for name in badges.keys() if 'deployment' in name or 'uptime' in name],
-            'tech_stack': [name for name in badges.keys() if name.startswith('tech_')],
-            'info': [name for name in badges.keys() if name in ['version', 'license', 'last_updated']]
-        }
+        for badge_type, group_badges in badge_groups.items():
+            type_name = type_names.get(badge_type, badge_type.title())
+            markdown += f"## {type_name}\n\n"
+            
+            for badge in group_badges:
+                markdown += f"![{badge['label']}]({badge['url']}) "
+            
+            markdown += "\n\n"
         
-        for category, badge_names in categories.items():
-            summary['categories'][category] = len(badge_names)
-        
-        # 生成状态概览
-        if 'build_status' in badges:
-            summary['status_overview']['build'] = badges['build_status']['message']
-        
-        if 'code_quality' in badges:
-            summary['status_overview']['quality'] = badges['code_quality']['message']
-        
-        if 'security' in badges:
-            summary['status_overview']['security'] = badges['security']['message']
-        
-        if 'deployment' in badges:
-            summary['status_overview']['deployment'] = badges['deployment']['message']
-        
-        return summary
+        return markdown
+    
+    def save_markdown_badges(self, badges: List[Dict[str, str]], output_file: str = 'BADGES.md') -> bool:
+        """保存Markdown格式的徽章"""
+        try:
+            markdown = self.generate_markdown_badges(badges)
+            
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(markdown)
+            
+            return True
+        except Exception as e:
+            log_error(f"保存Markdown徽章失败: {e}")
+            return False
 
 def main():
     """主函数"""
-    parser = argparse.ArgumentParser(description='PhoenixCoder CI/CD 状态徽章生成器')
-    parser.add_argument('--data', required=True, help='状态数据 JSON 文件路径')
-    parser.add_argument('--config', help='配置文件路径')
-    parser.add_argument('--output-dir', help='输出目录路径')
-    parser.add_argument('--update-readme', help='更新 README 文件路径')
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='生成项目徽章')
+    parser.add_argument('--config', '-c', default='config/badges.yml', help='徽章配置文件路径')
+    parser.add_argument('--output', '-o', default='badges.json', help='输出JSON文件路径')
+    parser.add_argument('--markdown', '-m', default='BADGES.md', help='输出Markdown文件路径')
+    parser.add_argument('--type', '-t', choices=['all', 'technology', 'project', 'build', 'dependency', 'custom'], 
+                       default='all', help='生成特定类型的徽章')
     
     args = parser.parse_args()
     
-    # 加载状态数据
-    try:
-        with open(args.data, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-    except Exception as e:
-        logger.error(f"加载状态数据失败: {e}")
-        sys.exit(1)
+    log_info("开始生成徽章...")
     
     # 创建徽章生成器
     generator = BadgeGenerator(args.config)
     
-    if args.output_dir:
-        generator.output_dir = args.output_dir
-        Path(generator.output_dir).mkdir(parents=True, exist_ok=True)
+    # 生成徽章
+    if args.type == 'all':
+        badges = generator.generate_all_badges()
+    elif args.type == 'technology':
+        badges = generator.generate_technology_badges()
+    elif args.type == 'project':
+        badges = generator.generate_project_badges()
+    elif args.type == 'build':
+        badges = generator.generate_build_badges()
+    elif args.type == 'dependency':
+        badges = generator.generate_dependency_badges()
+    elif args.type == 'custom':
+        badges = generator.generate_custom_badges()
+    else:
+        badges = []
     
-    # 生成所有徽章
-    badges = generator.generate_all_badges(data)
+    if not badges:
+        log_warning("未生成任何徽章")
+        return
     
-    # 保存徽章数据
-    json_path = generator.save_badges_json(badges)
-    md_path = generator.save_badges_markdown(badges)
+    # 保存结果
+    success_count = 0
     
-    # 生成状态摘要
-    summary = generator.generate_status_summary(badges)
-    summary_path = Path(generator.output_dir) / 'summary.json'
-    with open(summary_path, 'w', encoding='utf-8') as f:
-        json.dump(summary, f, indent=2, ensure_ascii=False)
+    if generator.save_badges(badges, args.output):
+        log_success(f"徽章数据已保存到: {args.output}")
+        success_count += 1
     
-    # 更新 README（如果指定）
-    if args.update_readme:
-        generator.update_readme_badges(badges, args.update_readme)
+    if generator.save_markdown_badges(badges, args.markdown):
+        log_success(f"Markdown徽章已保存到: {args.markdown}")
+        success_count += 1
     
-    logger.info(f"徽章生成完成:")
-    logger.info(f"  JSON: {json_path}")
-    logger.info(f"  Markdown: {md_path}")
-    logger.info(f"  Summary: {summary_path}")
-    logger.info(f"  总计: {len(badges)} 个徽章")
+    # 输出摘要
+    print(f"\n📊 徽章生成摘要:")
+    print(f"  总计: {len(badges)} 个徽章")
+    
+    badge_types = {}
+    for badge in badges:
+        badge_type = badge.get('type', 'other')
+        badge_types[badge_type] = badge_types.get(badge_type, 0) + 1
+    
+    for badge_type, count in badge_types.items():
+        print(f"  {badge_type}: {count} 个")
+    
+    if success_count > 0:
+        log_success(f"徽章生成完成! 共保存 {success_count} 个文件")
+    else:
+        log_error("徽章生成失败")
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

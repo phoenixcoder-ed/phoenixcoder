@@ -2,7 +2,7 @@ name: Deploy to Environment
 
 on:
   workflow_run:
-    workflows: ["CI Pipeline"]
+    workflows: ["CI/CD 流程"]
     types: [completed]
     branches: [main, develop]
   workflow_dispatch:
@@ -37,6 +37,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_PREFIX: ${{ github.repository }}
+  DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+  DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
 
 jobs:
   determine-environment:

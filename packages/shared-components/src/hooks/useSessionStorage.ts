@@ -14,8 +14,8 @@ export function useSessionStorage<T>(
     try {
       const item = window.sessionStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.warn(`Error reading sessionStorage key "${key}":`, error);
+    } catch {
+      // 静默处理 sessionStorage 读取错误，返回默认值
       return initialValue;
     }
   });
@@ -29,8 +29,8 @@ export function useSessionStorage<T>(
       if (typeof window !== 'undefined') {
         window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
       }
-    } catch (error) {
-      console.warn(`Error setting sessionStorage key "${key}":`, error);
+    } catch {
+      // 静默处理 sessionStorage 设置错误
     }
   }, [key, storedValue]);
 
@@ -41,8 +41,8 @@ export function useSessionStorage<T>(
       if (typeof window !== 'undefined') {
         window.sessionStorage.removeItem(key);
       }
-    } catch (error) {
-      console.warn(`Error removing sessionStorage key "${key}":`, error);
+    } catch {
+      // 静默处理 sessionStorage 移除错误
     }
   }, [key, initialValue]);
 
@@ -56,8 +56,8 @@ export function useSessionStorage<T>(
       if (e.key === key && e.newValue !== null) {
         try {
           setStoredValue(JSON.parse(e.newValue));
-        } catch (error) {
-          console.warn(`Error parsing sessionStorage value for key "${key}":`, error);
+        } catch {
+          // 静默处理 sessionStorage 解析错误
         }
       }
     };

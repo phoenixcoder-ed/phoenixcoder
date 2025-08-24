@@ -103,7 +103,7 @@ export function useCopyWithFallback() {
           error: null,
         });
         return true;
-      } catch (error) {
+      } catch {
         // 继续尝试回退方案
       }
     }

@@ -1,13 +1,13 @@
 import { BaseService } from '../base/BaseService';
 import { IService } from '../interfaces/IService';
-import { ServiceError, ServiceErrorType, ValidationError, NotFoundError } from '../types/ServiceError';
+import { ServiceError, ServiceErrorType, ValidationError } from '../types/ServiceError';
 import { FileServiceConfig } from '../types/ServiceConfig';
 import { SERVICE_EVENTS } from '../types/ServiceConstants';
 import { EventEmitter } from 'eventemitter3';
-import { createReadStream, createWriteStream, promises as fs, Stats } from 'fs';
-import { join, extname, basename, dirname } from 'path';
+import { createReadStream, promises as fs } from 'fs';
+import { join, extname, dirname } from 'path';
 import { createHash } from 'crypto';
-import { pipeline } from 'stream/promises';
+// import { pipeline } from 'stream/promises';
 
 /**
  * 文件信息接口
@@ -26,7 +26,7 @@ export interface FileInfo {
   uploadedAt: Date;
   lastModified: Date;
   isPublic: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   tags?: string[];
   category?: string;
   description?: string;
@@ -40,7 +40,7 @@ export interface FileUploadOptions {
   isPublic?: boolean;
   tags?: string[];
   description?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   overwrite?: boolean;
   generateThumbnail?: boolean;
   maxSize?: number;
@@ -78,7 +78,7 @@ export interface FileDownloadOptions {
   transform?: (stream: NodeJS.ReadableStream) => NodeJS.ReadableStream;
   metadata?: {
     userId?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -152,7 +152,7 @@ export interface FileEvents {
   'file:downloaded': (fileId: string, userId?: string) => void;
   'file:deleted': (fileId: string, userId?: string) => void;
   'file:updated': (file: FileInfo) => void;
-  'file:processed': (fileId: string, result: any) => void;
+  'file:processed': (fileId: string, result: unknown) => void;
   'file:thumbnail:generated': (fileId: string, thumbnailPath: string) => void;
   'file:virus:detected': (fileId: string, virusName: string) => void;
   'file:quota:exceeded': (userId: string, currentUsage: number, limit: number) => void;
@@ -224,16 +224,17 @@ export class FileService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       // 检查存储目录是否可访问
       await fs.access(this.storage.localPath || './uploads');
       
       // 检查存储空间
       const stats = await fs.stat(this.storage.localPath || './uploads');
-      return stats.isDirectory();
+      const isHealthy = stats.isDirectory();
+      return { success: isHealthy, status: isHealthy ? 'healthy' : 'unhealthy', filesCount: this.files.size, storagePath: this.storage.localPath || './uploads' };
     } catch (error) {
-      return false;
+      return { success: false, status: 'unhealthy', error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -284,7 +285,7 @@ export class FileService extends BaseService implements IService {
         mimeType,
         extension,
         hash,
-        uploadedBy: options.metadata?.uploadedBy,
+        uploadedBy: options.metadata?.uploadedBy as string | undefined,
         uploadedAt: new Date(),
         lastModified: new Date(),
         isPublic: options.isPublic || false,
@@ -442,7 +443,7 @@ export class FileService extends BaseService implements IService {
       // 排序
       if (params.sortBy) {
         files.sort((a, b) => {
-          let aValue: any, bValue: any;
+          let aValue: string | number, bValue: string | number;
           
           switch (params.sortBy) {
             case 'name':
@@ -501,7 +502,7 @@ export class FileService extends BaseService implements IService {
       
       for (const [key, value] of Object.entries(updates)) {
         if (allowedFields.includes(key)) {
-          (updatedInfo as any)[key] = value;
+          (updatedInfo as Record<string, unknown>)[key] = value;
         }
       }
       
@@ -661,7 +662,7 @@ export class FileService extends BaseService implements IService {
   /**
    * 监听文件事件
    */
-  override on<T extends string | symbol>(event: T, fn: (...args: any[]) => void, context?: any): this {
+  override on<T extends string | symbol>(event: T, fn: (...args: unknown[]) => void, context?: unknown): this {
     return super.on(event, fn, context);
   }
 
@@ -669,13 +670,13 @@ export class FileService extends BaseService implements IService {
    * 监听文件事件（类型安全版本）
    */
   onFileEvent<K extends keyof FileEvents>(event: K, listener: FileEvents[K]): void {
-    this.eventEmitter.on(event, listener as any);
+    this.eventEmitter.on(event, listener as (...args: unknown[]) => void);
   }
 
   /**
    * 移除文件事件监听
    */
-  override off<T extends string | symbol>(event: T, fn?: ((...args: any[]) => void) | undefined, context?: any, once?: boolean | undefined): this {
+  override off<T extends string | symbol>(event: T, fn?: ((...args: unknown[]) => void) | undefined, context?: unknown, once?: boolean | undefined): this {
     return super.off(event, fn, context, once);
   }
 
@@ -683,7 +684,7 @@ export class FileService extends BaseService implements IService {
    * 移除文件事件监听（类型安全版本）
    */
   offFileEvent<K extends keyof FileEvents>(event: K, listener: FileEvents[K]): void {
-    this.eventEmitter.off(event, listener as any);
+    this.eventEmitter.off(event, listener as (...args: unknown[]) => void);
   }
 
   /**

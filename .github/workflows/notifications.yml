@@ -3,10 +3,10 @@ name: Notifications and Reporting
 on:
   workflow_run:
     workflows:
-      - "CI Pipeline"
-      - "Deploy"
+      - "CI/CD 流程"
+      - "Deploy to Environment"
       - "Performance Monitoring"
-      - "Code Quality"
+      - "Code Quality Analysis"
       - "Docker Build and Push"
     types:
       - completed
@@ -51,6 +51,12 @@ env:
   EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
   EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
   EMAIL_TO: ${{ secrets.EMAIL_TO }}
+
+permissions:
+  contents: read
+  actions: read
+  issues: read
+  pull-requests: read
 
 jobs:
   determine-notification-context:

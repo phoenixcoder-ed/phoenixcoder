@@ -16,7 +16,7 @@ export interface IService {
   /**
    * 健康检查
    */
-  healthCheck(): Promise<{ status: 'healthy' | 'unhealthy'; details?: any }>;
+  healthCheck(): Promise<{ status: 'healthy' | 'unhealthy'; details?: unknown }>;
 
   /**
    * 获取服务信息
@@ -33,7 +33,7 @@ export interface IService {
   /**
    * 获取服务指标
    */
-  getMetrics(): Record<string, any>;
+  getMetrics(): Record<string, unknown>;
 }
 
 /**
@@ -43,12 +43,12 @@ export interface IConfigurableService extends IService {
   /**
    * 更新配置
    */
-  updateConfig(config: Partial<any>): Promise<void>;
+  updateConfig(config: Partial<Record<string, unknown>>): Promise<void>;
 
   /**
    * 获取当前配置
    */
-  getConfig(): any;
+  getConfig(): Record<string, unknown>;
 }
 
 /**
@@ -88,7 +88,7 @@ export interface IMonitorableService extends IService {
   /**
    * 获取监控数据
    */
-  getMonitoringData(): any;
+  getMonitoringData(): Record<string, unknown>;
 }
 
 /**
@@ -98,7 +98,7 @@ export interface IExtensibleService extends IService {
   /**
    * 注册插件
    */
-  registerPlugin(name: string, plugin: any): void;
+  registerPlugin(name: string, plugin: unknown): void;
 
   /**
    * 卸载插件
@@ -108,7 +108,7 @@ export interface IExtensibleService extends IService {
   /**
    * 获取已注册的插件
    */
-  getPlugins(): Record<string, any>;
+  getPlugins(): Record<string, unknown>;
 }
 
 /**
@@ -168,22 +168,22 @@ export interface IServiceEvents {
   /**
    * 监听事件
    */
-  on(event: string, listener: (...args: any[]) => void): void;
+  on(event: string, listener: (...args: unknown[]) => void): void;
 
   /**
    * 移除事件监听
    */
-  off(event: string, listener: (...args: any[]) => void): void;
+  off(event: string, listener: (...args: unknown[]) => void): void;
 
   /**
    * 触发事件
    */
-  emit(event: string, ...args: any[]): boolean;
+  emit(event: string, ...args: unknown[]): boolean;
 
   /**
    * 一次性事件监听
    */
-  once(event: string, listener: (...args: any[]) => void): void;
+  once(event: string, listener: (...args: unknown[]) => void): void;
 }
 
 /**

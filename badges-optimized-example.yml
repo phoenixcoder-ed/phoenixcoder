@@ -1,0 +1,450 @@
+common_config:
+  default_colors:
+    success: '#28a745'
+    warning: '#ffc107'
+    error: '#dc3545'
+    info: '#17a2b8'
+    primary: '#007bff'
+    secondary: '#6c757d'
+  default_logos:
+    github: github
+    nodejs: node.js
+    python: python
+    typescript: typescript
+  default_formats:
+    percentage: '{value}%'
+    time: '{value}ms'
+    count: '{value:,}'
+badge_config:
+  style: flat-square
+  logo_width: 14
+  logo_height: 14
+  colors:
+    success: '#28a745'
+    warning: '#ffc107'
+    error: '#dc3545'
+    info: '#17a2b8'
+    primary: '#007bff'
+    secondary: '#6c757d'
+  custom_colors:
+    excellent: '#00d4aa'
+    good: '#97ca00'
+    fair: '#dfb317'
+    poor: '#fe7d37'
+    critical: '#e05d44'
+  dimensions:
+    height: 20
+    font_size: 11
+    padding: 4
+build_badges:
+  ci_status:
+    label: Build
+    data_source: github_actions
+    workflow_name: CI/CD Pipeline
+    colors:
+      passing: success
+      failing: error
+      pending: warning
+    logo: github-actions
+  test_coverage:
+    label: Coverage
+    data_source: coverage_report
+    file_path: coverage/coverage-summary.json
+    colors:
+      excellent: '#00d4aa'
+      good: '#97ca00'
+      fair: '#dfb317'
+      poor: '#fe7d37'
+      critical: '#e05d44'
+    thresholds:
+      excellent: 90
+      good: 80
+      fair: 70
+      poor: 60
+    format: '{value}%'
+    logo: codecov
+  code_quality:
+    label: Quality
+    data_source: sonarqube
+    project_key: phoenixcoder
+    colors:
+      A: success
+      B: good
+      C: warning
+      D: poor
+      E: error
+    logo: sonarqube
+  security_scan:
+    label: Security
+    data_source: security_report
+    file_path: security/security-report.json
+    colors:
+      no_issues: success
+      low_risk: good
+      medium_risk: warning
+      high_risk: error
+      critical_risk: critical
+    logo: shield
+deployment_badges:
+  production_status:
+    label: Production
+    data_source: deployment_status
+    environment: production
+    colors:
+      deployed: success
+      deploying: warning
+      failed: error
+      rollback: secondary
+    logo: vercel
+  staging_status:
+    label: Staging
+    data_source: deployment_status
+    environment: staging
+    colors:
+      deployed: success
+      deploying: warning
+      failed: error
+    logo: vercel
+  uptime:
+    label: Uptime
+    data_source: uptime_monitor
+    service_url: https://api.phoenixcoder.com/health
+    colors:
+      excellent: success
+      good: good
+      fair: warning
+      poor: error
+    thresholds:
+      excellent: 99.9
+      good: 99.5
+      fair: 99
+    format: '{value}%'
+    logo: uptimerobot
+performance_badges:
+  response_time:
+    label: Response Time
+    data_source: performance_report
+    metric: avg_response_time
+    colors:
+      excellent: success
+      good: good
+      fair: warning
+      poor: error
+    thresholds:
+      excellent: 200
+      good: 500
+      fair: 1000
+    format: '{value}ms'
+    logo: speedtest
+  throughput:
+    label: Throughput
+    data_source: performance_report
+    metric: requests_per_second
+    colors:
+      excellent: success
+      good: good
+      fair: warning
+      poor: error
+    thresholds:
+      excellent: 1000
+      good: 500
+      fair: 100
+    format: '{value} RPS'
+    logo: gauge
+  lighthouse_performance:
+    label: Lighthouse
+    data_source: lighthouse_report
+    metric: performance_score
+    colors:
+      excellent: success
+      good: good
+      fair: warning
+      poor: error
+    thresholds:
+      excellent: 90
+      good: 80
+      fair: 70
+    format: '{value}/100'
+    logo: lighthouse
+technology_badges:
+  nodejs_version:
+    label: Node.js
+    data_source: package_json
+    field: engines.node
+    color: success
+    logo: node.js
+  python_version:
+    label: Python
+    data_source: pyproject_toml
+    field: tool.poetry.dependencies.python
+    color: success
+    logo: python
+  typescript:
+    label: TypeScript
+    data_source: static
+    value: 5.x
+    color: primary
+    logo: typescript
+  react:
+    label: React
+    data_source: package_json
+    field: dependencies.react
+    color: info
+    logo: react
+  vue:
+    label: Vue.js
+    data_source: package_json
+    field: dependencies.vue
+    color: success
+    logo: vue.js
+  fastapi:
+    label: FastAPI
+    data_source: pyproject_toml
+    field: tool.poetry.dependencies.fastapi
+    color: good
+    logo: fastapi
+  postgresql:
+    label: PostgreSQL
+    data_source: static
+    value: '16'
+    color: primary
+    logo: postgresql
+  redis:
+    label: Redis
+    data_source: static
+    value: 7.x
+    color: error
+    logo: redis
+project_badges:
+  version:
+    label: Version
+    data_source: package_json
+    field: version
+    color: primary
+    logo: tag
+  license:
+    label: License
+    data_source: package_json
+    field: license
+    color: secondary
+    logo: license
+  contributors:
+    label: Contributors
+    data_source: github_api
+    endpoint: /repos/{owner}/{repo}/contributors
+    color: info
+    logo: contributors
+  stars:
+    label: Stars
+    data_source: github_api
+    endpoint: /repos/{owner}/{repo}
+    field: stargazers_count
+    color: warning
+    logo: star
+  forks:
+    label: Forks
+    data_source: github_api
+    endpoint: /repos/{owner}/{repo}
+    field: forks_count
+    color: secondary
+    logo: fork
+  issues:
+    label: Issues
+    data_source: github_api
+    endpoint: /repos/{owner}/{repo}
+    field: open_issues_count
+    colors:
+      low: success
+      medium: warning
+      high: error
+    thresholds:
+      low: 10
+      medium: 50
+    logo: issue
+  last_commit:
+    label: Last Commit
+    data_source: github_api
+    endpoint: /repos/{owner}/{repo}/commits
+    field: commit.author.date
+    color: info
+    format: relative_time
+    logo: commit
+custom_badges:
+  lines_of_code:
+    label: Lines of Code
+    data_source: cloc_report
+    file_path: reports/cloc.json
+    field: SUM.code
+    color: secondary
+    format: '{value:,}'
+    logo: code
+  tech_debt:
+    label: Tech Debt
+    data_source: sonarqube
+    metric: sqale_index
+    colors:
+      low: success
+      medium: warning
+      high: error
+    thresholds:
+      low: 60
+      medium: 480
+    format: duration
+    logo: debt
+  api_endpoints:
+    label: API Endpoints
+    data_source: openapi_spec
+    file_path: docs/openapi.json
+    field: paths
+    color: info
+    logo: api
+  database_tables:
+    label: DB Tables
+    data_source: database_schema
+    query: SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public'
+    color: primary
+    logo: database
+generation_rules:
+  update_frequency:
+    build_badges: on_workflow_completion
+    deployment_badges: on_deployment
+    performance_badges: daily
+    technology_badges: on_dependency_change
+    project_badges: weekly
+    custom_badges: daily
+  cache:
+    enabled: true
+    ttl: 3600
+  error_handling:
+    fallback_color: secondary
+    fallback_value: unknown
+    retry_attempts: 3
+    retry_delay: 5
+  output:
+    formats:
+      - shields_io
+      - markdown
+      - html
+      - json
+    output_dir: badges
+    markdown_file: README-badges.md
+    json_file: badges.json
+  display_order:
+    - ci_status
+    - test_coverage
+    - code_quality
+    - security_scan
+    - production_status
+    - uptime
+    - response_time
+    - lighthouse_performance
+    - version
+    - license
+    - nodejs_version
+    - python_version
+    - typescript
+    - react
+    - fastapi
+    - postgresql
+    - contributors
+    - stars
+    - last_commit
+data_sources:
+  github_api:
+    base_url: https://api.github.com
+    headers:
+      Accept: application/vnd.github.v3+json
+      User-Agent: PhoenixCoder-Badge-Generator
+    auth:
+      token: ${GITHUB_TOKEN}
+  github_actions:
+    api_url: https://api.github.com/repos/{owner}/{repo}/actions
+  sonarqube:
+    base_url: ${SONARQUBE_URL}
+    auth:
+      token: ${SONARQUBE_TOKEN}
+  coverage_report:
+    formats:
+      - lcov
+      - json-summary
+      - cobertura
+  performance_report:
+    file_patterns:
+      - performance-results/*.json
+      - lighthouse-results/*.json
+  uptime_monitor:
+    providers:
+      - uptimerobot
+      - pingdom
+      - custom
+  package_json:
+    file_path: package.json
+  pyproject_toml:
+    file_path: pyproject.toml
+  static:
+    values: {}
+notifications:
+  status_changes:
+    enabled: true
+    channels:
+      - slack
+      - github_pr_comment
+    conditions:
+      - build_status_changed
+      - coverage_decreased
+      - quality_gate_failed
+      - security_issues_found
+      - deployment_failed
+  templates:
+    slack:
+      build_failed: |
+        🚨 构建失败
+        项目: {project_name}
+        分支: {branch}
+        提交: {commit_sha}
+        查看详情: {workflow_url}
+    github_pr_comment: |
+      ## 📊 状态徽章更新
+
+      {badge_changes}
+
+      查看完整报告: [性能报告]({report_url})
+i18n:
+  default_language: zh-CN
+  labels:
+    zh-CN:
+      build: 构建
+      coverage: 覆盖率
+      quality: 质量
+      security: 安全
+      production: 生产环境
+      staging: 预发布
+      uptime: 正常运行时间
+      response_time: 响应时间
+      throughput: 吞吐量
+      lighthouse: Lighthouse
+      version: 版本
+      license: 许可证
+      contributors: 贡献者
+      stars: 星标
+      forks: 分支
+      issues: 问题
+      last_commit: 最后提交
+    en-US:
+      build: Build
+      coverage: Coverage
+      quality: Quality
+      security: Security
+      production: Production
+      staging: Staging
+      uptime: Uptime
+      response_time: Response Time
+      throughput: Throughput
+      lighthouse: Lighthouse
+      version: Version
+      license: License
+      contributors: Contributors
+      stars: Stars
+      forks: Forks
+      issues: Issues
+      last_commit: Last Commit

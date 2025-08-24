@@ -1,0 +1,75 @@
+{
+  "total": 65,
+  "valid": 48,
+  "invalid": 17,
+  "errors": [
+    {
+      "file": "k8s/configmaps/app-config-secure.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/configmaps/app-config.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/namespace-multi-edition.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/namespace.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/production/admin-deployment.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/production/configmap.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/production/namespace.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/production/oidc-deployment.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/production/secrets.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/production/server-deployment.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/services/services.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/staging/admin-deployment.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/staging/configmap.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/staging/namespace.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/staging/oidc-deployment.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/staging/secrets.yaml",
+      "error": "expected a single document in the stream, but found more"
+    },
+    {
+      "file": "k8s/staging/server-deployment.yaml",
+      "error": "expected a single document in the stream, but found more"
+    }
+  ]
+}

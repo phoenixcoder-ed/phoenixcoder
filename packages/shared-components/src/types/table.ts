@@ -1,11 +1,11 @@
 import React from 'react';
 
 // 表格列定义类型
-export interface TableColumn<T = any> {
+export interface TableColumn<T = Record<string, unknown>> {
   key: string;
   title: string;
   dataIndex?: keyof T;
-  render?: (value: any, record: T, index: number) => React.ReactNode;
+  render?: (value: unknown, record: T, index: number) => React.ReactNode;
   width?: number | string;
   align?: 'left' | 'center' | 'right';
   sortable?: boolean;
@@ -15,7 +15,7 @@ export interface TableColumn<T = any> {
 
 // 表格数据类型
 export interface TableData {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // 表格配置类型
@@ -31,10 +31,10 @@ export interface TableConfig {
     field: string;
     order: 'asc' | 'desc';
   };
-  filtering?: Record<string, any>;
+  filtering?: Record<string, unknown>;
   selection?: {
     type: 'checkbox' | 'radio';
     selectedRowKeys: string[];
-    onChange: (selectedRowKeys: string[], selectedRows: any[]) => void;
+    onChange: (selectedRowKeys: string[], selectedRows: TableData[]) => void;
   };
 }

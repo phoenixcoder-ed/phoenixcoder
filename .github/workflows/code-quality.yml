@@ -58,7 +58,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install black isort flake8 mypy pylint bandit safety
           # Install service-specific dependencies
-          for service in services/*/; do
+          for service in apps/*/server apps/*/oidc-server; do
             if [[ -f "$service/requirements.txt" ]]; then
               pip install -r "$service/requirements.txt"
             fi
@@ -98,19 +98,19 @@ jobs:
           
           # Black formatting check
           echo "Checking code formatting with Black..."
-          black --check --diff services/
+          black --check --diff apps/*/server apps/*/oidc-server
           
           # isort import sorting check
           echo "Checking import sorting with isort..."
-          isort --check-only --diff services/
+          isort --check-only --diff apps/*/server apps/*/oidc-server
           
           # Flake8 style check
           echo "Running Flake8 style checks..."
-          flake8 services/ --max-line-length=88 --extend-ignore=E203,W503
+          flake8 apps/*/server apps/*/oidc-server --max-line-length=88 --extend-ignore=E203,W503
           
           # MyPy type checking
           echo "Running MyPy type checking..."
-          for service in services/*/; do
+          for service in apps/*/server apps/*/oidc-server; do
             if [[ -f "$service/pyproject.toml" ]] || [[ -f "$service/mypy.ini" ]]; then
               mypy "$service" || true  # Don't fail on type errors for now
             fi
@@ -118,11 +118,11 @@ jobs:
           
           # Pylint code analysis
           echo "Running Pylint code analysis..."
-          pylint services/ --output-format=json > pylint-report.json || true
+          pylint apps/*/server apps/*/oidc-server --output-format=json > pylint-report.json || true
           
           # Bandit security check
           echo "Running Bandit security checks..."
-          bandit -r services/ -f json -o bandit-report.json || true
+          bandit -r apps/*/server apps/*/oidc-server -f json -o bandit-report.json || true
           
           # Safety dependency check
           echo "Running Safety dependency checks..."
@@ -179,7 +179,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install coverage pytest pytest-cov
-          for service in services/*/; do
+          for service in apps/*/server apps/*/oidc-server; do
             if [[ -f "$service/requirements.txt" ]]; then
               pip install -r "$service/requirements.txt"
             fi
@@ -191,7 +191,7 @@ jobs:
           pnpm run test:coverage
           
           # Backend tests
-          for service in services/*/; do
+          for service in apps/*/server apps/*/oidc-server; do
             if [[ -f "$service/pytest.ini" ]] || [[ -f "$service/pyproject.toml" ]]; then
               cd "$service"
               python -m pytest --cov=. --cov-report=xml --cov-report=html
@@ -215,12 +215,12 @@ jobs:
           args: >
             -Dsonar.projectKey=phoenixcoder
             -Dsonar.organization=phoenixcoder
-            -Dsonar.sources=apps,services,shared
-            -Dsonar.tests=apps,services,shared
+            -Dsonar.sources=apps,packages
+            -Dsonar.tests=apps,packages
             -Dsonar.test.inclusions=**/*test*/**,**/*.test.*,**/*.spec.*
             -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/*.min.js,**/coverage/**,**/__pycache__/**,**/*.pyc
             -Dsonar.javascript.lcov.reportPaths=apps/*/coverage/lcov.info,shared/*/coverage/lcov.info
-            -Dsonar.python.coverage.reportPaths=services/*/coverage.xml
+            -Dsonar.python.coverage.reportPaths=apps/*/server/coverage.xml,apps/*/oidc-server/coverage.xml
             -Dsonar.python.pylint.reportPaths=quality-reports/pylint-report.json
             -Dsonar.python.bandit.reportPaths=quality-reports/bandit-report.json
 
@@ -324,18 +324,18 @@ jobs:
           echo "Running Python dependency security checks..."
           
           # Safety check
-          for service in services/*/; do
+          for service in apps/*/server apps/*/oidc-server; do
             if [[ -f "$service/requirements.txt" ]]; then
               echo "Checking $service with Safety..."
-              safety check -r "$service/requirements.txt" --json > "safety-$(basename $service).json" || true
+              safety check -r "$service/requirements.txt" --json > "safety-$(basename $(dirname $service))-$(basename $service).json" || true
             fi
           done
           
           # pip-audit check
-          for service in services/*/; do
+          for service in apps/*/server apps/*/oidc-server; do
             if [[ -f "$service/requirements.txt" ]]; then
               echo "Checking $service with pip-audit..."
-              pip-audit -r "$service/requirements.txt" --format=json --output="pip-audit-$(basename $service).json" || true
+              pip-audit -r "$service/requirements.txt" --format=json --output="pip-audit-$(basename $(dirname $service))-$(basename $service).json" || true
             fi
           done
 

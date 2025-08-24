@@ -20,6 +20,12 @@ interface ToastState {
 export function useToast() {
   const [state, setState] = useState<ToastState>({ toasts: [] });
 
+  const removeToast = useCallback((id: string) => {
+    setState(prev => ({
+      toasts: prev.toasts.filter(toast => toast.id !== id),
+    }));
+  }, []);
+
   const addToast = useCallback((toast: Omit<Toast, 'id'>) => {
     const id = Math.random().toString(36).substr(2, 9);
     const newToast: Toast = {
@@ -41,13 +47,7 @@ export function useToast() {
     }
 
     return id;
-  }, []);
-
-  const removeToast = useCallback((id: string) => {
-    setState(prev => ({
-      toasts: prev.toasts.filter(toast => toast.id !== id),
-    }));
-  }, []);
+  }, [removeToast]);
 
   const clearToasts = useCallback(() => {
     setState({ toasts: [] });

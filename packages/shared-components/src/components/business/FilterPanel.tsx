@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Filter, 
   X, 
@@ -10,56 +10,17 @@ import {
   MapPin, 
   Star, 
   Tag, 
-  User, 
   Target, 
-  Award, 
   Clock, 
-  TrendingUp, 
   BarChart, 
   Settings, 
   RotateCcw, 
   Check, 
-  Plus, 
-  Minus, 
   Eye, 
-  EyeOff, 
-  ArrowUp, 
-  ArrowDown, 
-  SortAsc, 
-  SortDesc, 
   Grid, 
   List, 
   Layers, 
-  Folder, 
-  File, 
-  Image, 
-  Video, 
-  Music, 
-  Code, 
-  FileText, 
-  Link, 
-  Globe, 
-  Lock, 
-  Unlock, 
   Heart, 
-  Share, 
-  Archive, 
-  Trash, 
-  Flag, 
-  Bell, 
-  Mail, 
-  Phone, 
-  MessageSquare, 
-  Home, 
-  Building, 
-  Store, 
-  School, 
-  Hospital, 
-  Factory, 
-  Car, 
-  Plane, 
-  Ship, 
-  Bike,
   Zap
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -71,7 +32,7 @@ import { Separator } from '../ui/Separator';
 import { Slider } from '../ui/Slider';
 import { Switch } from '../ui/Switch';
 import { Popover } from '../ui/Popover';
-import { Tooltip } from '../ui/Tooltip';
+
 import { Accordion } from '../ui/Accordion';
 
 // 过滤器类型枚举

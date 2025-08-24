@@ -1,5 +1,11 @@
 name: Performance Monitoring
 
+permissions:
+  contents: read
+  actions: read
+  issues: write
+  pull-requests: write
+
 on:
   schedule:
     # Run performance tests daily at 2 AM UTC

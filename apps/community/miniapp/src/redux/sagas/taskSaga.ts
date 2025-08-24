@@ -3,7 +3,7 @@ import { taskActions } from '@/redux/actions';
 import { fetchTasksWithDelay, takeTaskWithDelay } from '@/utils/httpUtil';
 
 // 获取任务列表Saga
-function* fetchTasksSaga() {
+function* fetchTasksHandler() {
     try {
         // 调用API获取数据
         const response = yield call(fetchTasksWithDelay);
@@ -18,7 +18,7 @@ function* fetchTasksSaga() {
 }
 
 // 接单Saga
-function* takeTaskSaga(action: any) {
+function* takeTaskHandler(action: any) {
     try {
         const { taskId } = action.payload;
         // 调用API接单
@@ -35,9 +35,9 @@ function* takeTaskSaga(action: any) {
 
 // 监听Action
 export function* watchFetchTasks() {
-    yield takeLatest(taskActions.fetchTasks, fetchTasksSaga);
+    yield takeLatest(taskActions.fetchTasks, fetchTasksHandler);
 }
 
 export function* watchTakeTask() {
-    yield takeLatest(taskActions.takeTask, takeTaskSaga);
+    yield takeLatest(taskActions.takeTask, takeTaskHandler);
 }

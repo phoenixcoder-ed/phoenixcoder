@@ -2,8 +2,8 @@ import { BaseService } from '../base/BaseService';
 import { IService } from '../interfaces/IService';
 import { ServiceError, ValidationError, TimeoutError, NetworkError, ServiceErrorType } from '../types/ServiceError';
 import { ApiConfig } from '../types/ServiceConfig';
-import { SERVICE_EVENTS, HTTP_STATUS, HTTP_METHODS } from '../types/ServiceConstants';
-import type { ApiResponse as SharedApiResponse, ApiError, PaginationInfo } from '@phoenixcoder/shared-types';
+import { SERVICE_EVENTS, HTTP_METHODS } from '../types/ServiceConstants';
+import type { ApiResponse as SharedApiResponse } from '@phoenixcoder/shared-types';
 import type { RequestConfig, HttpMethod } from '@phoenixcoder/shared-utils';
 import { ApiClient } from '@phoenixcoder/shared-utils';
 import { EventEmitter } from 'eventemitter3';
@@ -14,8 +14,8 @@ import { EventEmitter } from 'eventemitter3';
 export interface ApiRequestOptions {
   method?: string;
   url?: string;
-  data?: any;
-  params?: Record<string, any>;
+  data?: unknown;
+  params?: Record<string, unknown>;
   headers?: Record<string, string>;
   responseType?: 'json' | 'blob' | 'text' | 'arrayBuffer';
   timeout?: number;
@@ -31,7 +31,7 @@ export interface ApiRequestOptions {
 /**
  * API 响应接口 - 扩展 shared-types 中的 ApiResponse
  */
-export interface ApiResponse<T = any> extends SharedApiResponse<T> {
+export interface ApiResponse<T = unknown> extends SharedApiResponse<T> {
   config?: ApiRequestOptions;
 }
 
@@ -51,7 +51,7 @@ export interface ApiEvents {
 export class ApiService extends BaseService implements IService {
   private apiClient: ApiClient;
   private eventEmitter: EventEmitter<ApiEvents>;
-  private requestCache: Map<string, { data: any; timestamp: number; ttl: number }>;
+  private requestCache: Map<string, { data: unknown; timestamp: number; ttl: number }>;
   private pendingRequests: Map<string, Promise<ApiResponse>>;
 
   constructor(config: ApiConfig) {
@@ -89,68 +89,78 @@ export class ApiService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       const response = await this.apiClient.get('/health');
-      return response.success;
+      return {
+        success: response.success,
+        status: response.success ? 'healthy' : 'unhealthy',
+        endpoint: '/health',
+        responseTime: Date.now()
+      };
     } catch (error) {
-      return false;
+      return {
+        success: false,
+        status: 'unhealthy',
+        endpoint: '/health',
+        error: error instanceof Error ? error.message : String(error)
+      };
     }
   }
 
   /**
    * GET 请求
    */
-  async get<T = any>(url: string, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
+  async get<T = unknown>(url: string, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
     return this.request<T>({ ...options, method: HTTP_METHODS.GET, url });
   }
 
   /**
    * POST 请求
    */
-  async post<T = any>(url: string, data?: any, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
+  async post<T = unknown>(url: string, data?: unknown, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
     return this.request<T>({ ...options, method: HTTP_METHODS.POST, url, data });
   }
 
   /**
    * PUT 请求
    */
-  async put<T = any>(url: string, data?: any, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
+  async put<T = unknown>(url: string, data?: unknown, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
     return this.request<T>({ ...options, method: HTTP_METHODS.PUT, url, data });
   }
 
   /**
    * PATCH 请求
    */
-  async patch<T = any>(url: string, data?: any, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
+  async patch<T = unknown>(url: string, data?: unknown, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
     return this.request<T>({ ...options, method: HTTP_METHODS.PATCH, url, data });
   }
 
   /**
    * DELETE 请求
    */
-  async delete<T = any>(url: string, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
+  async delete<T = unknown>(url: string, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
     return this.request<T>({ ...options, method: HTTP_METHODS.DELETE, url });
   }
 
   /**
    * HEAD 请求
    */
-  async head<T = any>(url: string, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
+  async head<T = unknown>(url: string, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
     return this.request<T>({ ...options, method: HTTP_METHODS.HEAD, url });
   }
 
   /**
    * OPTIONS 请求
    */
-  async options<T = any>(url: string, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
+  async options<T = unknown>(url: string, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
     return this.request<T>({ ...options, method: HTTP_METHODS.OPTIONS, url });
   }
 
   /**
    * 通用请求方法
    */
-  async request<T = any>(config: ApiRequestOptions): Promise<ApiResponse<T>> {
+  async request<T = unknown>(config: ApiRequestOptions): Promise<ApiResponse<T>> {
     const cacheKey = this.getCacheKey(config);
     
     // 检查缓存
@@ -205,7 +215,7 @@ export class ApiService extends BaseService implements IService {
         };
         const response = await this.apiClient.request(config.url || '', requestConfig);
         const apiResponse: ApiResponse<T> = {
-          data: response.data,
+          data: response.data as T,
           success: response.success,
           message: response.message,
           error: response.error,
@@ -248,7 +258,7 @@ export class ApiService extends BaseService implements IService {
   /**
    * 批量请求
    */
-  async batch<T = any>(requests: ApiRequestOptions[]): Promise<ApiResponse<T>[]> {
+  async batch<T = unknown>(requests: ApiRequestOptions[]): Promise<ApiResponse<T>[]> {
     const promises = requests.map(config => this.request<T>(config));
     return Promise.all(promises);
   }
@@ -256,7 +266,7 @@ export class ApiService extends BaseService implements IService {
   /**
    * 并发请求（限制并发数）
    */
-  async concurrent<T = any>(requests: ApiRequestOptions[], concurrency: number = 5): Promise<ApiResponse<T>[]> {
+  async concurrent<T = unknown>(requests: ApiRequestOptions[], concurrency: number = 5): Promise<ApiResponse<T>[]> {
     const results: ApiResponse<T>[] = [];
     const executing: Promise<void>[] = [];
 
@@ -352,14 +362,14 @@ export class ApiService extends BaseService implements IService {
    * 监听API事件
    */
   onApiEvent<K extends keyof ApiEvents>(event: K, listener: ApiEvents[K]): void {
-    this.eventEmitter.on(event as any, listener as any);
+    this.eventEmitter.on(event, listener as (...args: unknown[]) => void);
   }
 
   /**
    * 移除API事件监听
    */
   offApiEvent<K extends keyof ApiEvents>(event: K, listener: ApiEvents[K]): void {
-    this.eventEmitter.off(event as any, listener as any);
+    this.eventEmitter.off(event, listener as (...args: unknown[]) => void);
   }
 
   /**
@@ -376,7 +386,7 @@ export class ApiService extends BaseService implements IService {
   private getFromCache<T>(key: string): ApiResponse<T> | null {
     const cached = this.requestCache.get(key);
     if (cached && Date.now() - cached.timestamp < cached.ttl) {
-      return cached.data;
+      return cached.data as ApiResponse<T>;
     }
     if (cached) {
       this.requestCache.delete(key);
@@ -398,16 +408,17 @@ export class ApiService extends BaseService implements IService {
   /**
    * 判断是否应该重试
    */
-  private shouldRetry(error: any, attempt: number): boolean {
+  private shouldRetry(error: unknown, _attempt: number): boolean {
     // 网络错误或5xx服务器错误可以重试
-    if (error.code === 'NETWORK_ERROR' || error.code === 'TIMEOUT') {
+    const err = error as { code?: string; response?: { status?: number } };
+    if (err.code === 'NETWORK_ERROR' || err.code === 'TIMEOUT') {
       return true;
     }
     
-    if (error.response) {
-      const status = error.response.status;
+    if (err.response) {
+      const status = err.response.status;
       // 5xx服务器错误可以重试
-      if (status >= 500 && status < 600) {
+      if (status && status >= 500 && status < 600) {
         return true;
       }
       // 429 限流错误可以重试
@@ -422,20 +433,30 @@ export class ApiService extends BaseService implements IService {
   /**
    * 转换错误类型
    */
-  private convertError(error: any): ServiceError {
-    if (error.code === 'TIMEOUT') {
+  private convertError(error: unknown): ServiceError {
+    const err = error as { 
+      code?: string; 
+      message?: string;
+      response?: { 
+        status?: number;
+        message?: string;
+        error?: { code?: string };
+      };
+    };
+    
+    if (err.code === 'TIMEOUT') {
       return new TimeoutError('请求超时', 30000, 'ApiService');
     }
     
-    if (error.code === 'NETWORK_ERROR') {
-      return new NetworkError('网络错误', undefined, 'ApiService');
+    if (err.code === 'NETWORK_ERROR') {
+      return new NetworkError('网络错误', 'ApiService');
     }
     
-    if (error.response) {
-      const message = error.response.message || error.message;
+    if (err.response) {
+      const message = err.response.message || err.message || '未知错误';
       
-      if (error.response.error?.code) {
-        return new ValidationError(message, [{ field: 'response', message, code: error.response.error.code }], 'ApiService');
+      if (err.response.error?.code) {
+        return new ValidationError(message, [{ field: 'response', message, code: err.response.error.code }], 'ApiService');
       }
       
       return new NetworkError(`HTTP错误: ${message}`, 'ApiService');
@@ -473,6 +494,7 @@ export class ApiService extends BaseService implements IService {
     this.apiClient.addResponseInterceptor((response) => {
       // 记录响应时间
       if (this.config.debug) {
+        // eslint-disable-next-line no-console
         console.log('[ApiService] Response received');
       }
       
@@ -480,9 +502,10 @@ export class ApiService extends BaseService implements IService {
     });
 
     // 错误拦截器
-    this.apiClient.addErrorInterceptor((error) => {
+    this.apiClient.addErrorInterceptor((error: Error) => {
       // 记录错误
       if (this.config.debug) {
+        // eslint-disable-next-line no-console
         console.log('[ApiService] Error occurred:', error);
       }
       return error;
@@ -503,6 +526,7 @@ export class ApiService extends BaseService implements IService {
     // 这里可以集成监控系统，如 Prometheus、DataDog 等
     // 目前只是简单记录到控制台
     if (this.config.debug) {
+      // eslint-disable-next-line no-console
       console.log(`[ApiService] Metric: ${name} = ${value}`);
     }
   }

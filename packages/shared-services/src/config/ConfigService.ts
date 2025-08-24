@@ -35,8 +35,8 @@ export interface ConfigValidation {
   min?: number;
   max?: number;
   pattern?: RegExp;
-  enum?: any[];
-  custom?: (value: any) => boolean | string;
+  enum?: unknown[];
+  custom?: (value: unknown) => boolean | string;
 }
 
 /**
@@ -191,7 +191,7 @@ class FileConfigProvider implements ConfigProvider {
   priority = 50;
   private filePath: string;
   private watchCallback?: (changes: Record<string, ConfigValue>) => void;
-  private watcher?: any;
+  private watcher?: unknown;
 
   constructor(filePath: string) {
     this.filePath = filePath;
@@ -238,23 +238,29 @@ class FileConfigProvider implements ConfigProvider {
     // 这里应该实现文件监听逻辑
     // 为了简化，这里只是模拟
     if (typeof window === 'undefined') {
-      const fs = require('fs');
-      this.watcher = fs.watchFile(this.filePath, async () => {
-        try {
-          const newConfigs = await this.load();
-          this.watchCallback?.(newConfigs);
-        } catch (error: unknown) {
-          // 忽略监听错误
-        }
+      import('fs').then(fs => {
+        this.watcher = fs.watchFile(this.filePath, async () => {
+          try {
+            const newConfigs = await this.load();
+            this.watchCallback?.(newConfigs);
+          } catch (error: unknown) {
+            // 忽略监听错误
+          }
+        });
+      }).catch(() => {
+        // 忽略导入错误
       });
     }
   }
 
   unwatch(): void {
     if (this.watcher) {
-      const fs = require('fs');
-      fs.unwatchFile(this.filePath);
-      this.watcher = null;
+      import('fs').then(fs => {
+        fs.unwatchFile(this.filePath);
+        this.watcher = null;
+      }).catch(() => {
+        // 忽略导入错误
+      });
     }
     this.watchCallback = undefined;
   }
@@ -388,17 +394,17 @@ export class ConfigService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       // 检查必需配置是否存在
       for (const [key, schemaItem] of Object.entries(this.schema)) {
         if (schemaItem.required && !this.has(key)) {
-          return false;
+          return { success: false, status: 'unhealthy', error: `Required config ${key} is missing` };
         }
       }
-      return true;
+      return { success: true, status: 'healthy' };
     } catch (error) {
-      return false;
+      return { success: false, status: 'unhealthy', error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -505,7 +511,7 @@ export class ConfigService extends BaseService implements IService {
         try {
           const configs = await provider.load();
           for (const [key, value] of Object.entries(configs)) {
-            this.setConfigItem(key, value, source as any);
+            this.setConfigItem(key, value, source as 'env' | 'file' | 'default' | 'override');
           }
           this.eventEmitter.emit('config:reloaded', source);
         } catch (error: unknown) {
@@ -587,7 +593,7 @@ export class ConfigService extends BaseService implements IService {
   /**
    * 获取对象配置
    */
-  getObject<T = any>(key: string, defaultValue?: T): T {
+  getObject<T = unknown>(key: string, defaultValue?: T): T {
     const value = this.get(key, defaultValue);
     if (typeof value === 'object' && value !== null) {
       return value as T;
@@ -605,7 +611,7 @@ export class ConfigService extends BaseService implements IService {
   /**
    * 获取数组配置
    */
-  getArray<T = any>(key: string, defaultValue?: T[]): T[] {
+  getArray<T = unknown>(key: string, defaultValue?: T[]): T[] {
     const value = this.get(key, defaultValue) as ConfigValue;
     if (Array.isArray(value)) {
       return value as T[];
@@ -618,7 +624,7 @@ export class ConfigService extends BaseService implements IService {
         }
       } catch {
         // 尝试按逗号分割
-        return value.split(',').map((item: any) => item.trim()) as T[];
+        return value.split(',').map((item: string) => item.trim()) as T[];
       }
     }
     throw new ValidationError(`配置项 ${key} 不是数组类型: ${value}`, [{ field: key, message: `配置项 ${key} 不是数组类型: ${value}`, code: 'INVALID_ARRAY' }]);
@@ -904,7 +910,7 @@ export class ConfigService extends BaseService implements IService {
   /**
    * 监听配置事件
    */
-  override on<T extends string | symbol>(event: T, fn: (...args: any[]) => void, context?: any): this {
+  override on<T extends string | symbol>(event: T, fn: (...args: unknown[]) => void, context?: unknown): this {
     return super.on(event, fn, context);
   }
 
@@ -912,13 +918,13 @@ export class ConfigService extends BaseService implements IService {
    * 监听配置事件（类型安全版本）
    */
   onConfigEvent<K extends keyof ConfigEvents>(event: K, listener: ConfigEvents[K]): void {
-    this.eventEmitter.on(event, listener as any);
+    this.eventEmitter.on(event, listener as (...args: unknown[]) => void);
   }
 
   /**
    * 移除配置事件监听
    */
-  override off<T extends string | symbol>(event: T, fn?: ((...args: any[]) => void) | undefined, context?: any, once?: boolean | undefined): this {
+  override off<T extends string | symbol>(event: T, fn?: ((...args: unknown[]) => void) | undefined, context?: unknown, once?: boolean | undefined): this {
     return super.off(event, fn, context, once);
   }
 
@@ -926,7 +932,7 @@ export class ConfigService extends BaseService implements IService {
    * 移除配置事件监听（类型安全版本）
    */
   offConfigEvent<K extends keyof ConfigEvents>(event: K, listener: ConfigEvents[K]): void {
-    this.eventEmitter.off(event, listener as any);
+    this.eventEmitter.off(event, listener as (...args: unknown[]) => void);
   }
 
   /**
@@ -1060,7 +1066,7 @@ export class ConfigService extends BaseService implements IService {
         provider.watch(async (changes) => {
           try {
             for (const [key, value] of Object.entries(changes)) {
-              this.setConfigItem(key, value, provider.name as any);
+              this.setConfigItem(key, value, provider.name as 'env' | 'file' | 'default' | 'override');
             }
             this.validateAllConfigs();
             this.updateStats();

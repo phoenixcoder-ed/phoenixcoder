@@ -6,22 +6,6 @@ declare module 'axios' {
     }
 }
 
-declare module '@/utils/httpUtil' {
-    export namespace HttpUtil {
-        export function fetchPosts(_category?: string, _page?: number, _pageSize?: number): Promise<AxiosResponse<any>>;
-        export function fetchPostDetail(_postId: string): Promise<AxiosResponse<any>>;
-        export function publishPost(
-            _title: string,
-            _content: string,
-            _category: string,
-            _tags?: string[],
-        ): Promise<AxiosResponse<any>>;
-        export function commentPost(_postId: string, _content: string): Promise<AxiosResponse<any>>;
-        export function likePost(_postId: string): Promise<AxiosResponse<any>>;
-        export function favoritePost(_postId: string): Promise<AxiosResponse<any>>;
-    }
-}
-
 declare module '@/redux/actions' {
     export const postActions: {
         fetchPostsRequest: any;

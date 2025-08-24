@@ -10,7 +10,7 @@ export interface AsyncState<T> {
 // 异步操作 Hook
 export function useAsync<T>(
   asyncFunction: () => Promise<T>,
-  dependencies: any[] = []
+  dependencies: React.DependencyList = []
 ): AsyncState<T> & { execute: () => Promise<void> } {
   const [state, setState] = useState<AsyncState<T>>({
     data: null,

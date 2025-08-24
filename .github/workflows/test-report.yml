@@ -1,9 +1,15 @@
 name: Test Report Generator
 
+permissions:
+  contents: read
+  actions: read
+  issues: write
+  pull-requests: write
+
 # 在CI工作流完成后运行
 on:
   workflow_run:
-    workflows: ["PhoenixCoder CI/CD Pipeline"]
+    workflows: ["CI/CD 流程"]
     types:
       - completed
 
@@ -411,7 +417,7 @@ jobs:
           EOF
       
       - name: 上传测试报告
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: comprehensive-test-report
           path: |

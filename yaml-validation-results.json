@@ -1,0 +1,6599 @@
+{
+  "totalFiles": 13,
+  "validFiles": 13,
+  "invalidFiles": 0,
+  "errors": [],
+  "warnings": [
+    {
+      "file": "config/badges.yml",
+      "warning": "第 49 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 50 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 52 行: 可能存在重复键 'colors'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 59 行: 可能存在重复键 'excellent'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 60 行: 可能存在重复键 'good'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 61 行: 可能存在重复键 'fair'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 62 行: 可能存在重复键 'poor'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 64 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 68 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 69 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 71 行: 可能存在重复键 'colors'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 77 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 81 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 82 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 83 行: 可能存在重复键 'file_path'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 84 行: 可能存在重复键 'colors'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 90 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 96 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 97 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 99 行: 可能存在重复键 'colors'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 104 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 108 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 109 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 110 行: 可能存在重复键 'environment'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 111 行: 可能存在重复键 'colors'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 112 行: 可能存在重复键 'deployed'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 113 行: 可能存在重复键 'deploying'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 114 行: 可能存在重复键 'failed'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 115 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 119 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 120 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 122 行: 可能存在重复键 'colors'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 123 行: 可能存在重复键 'excellent'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 124 行: 可能存在重复键 'good'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 125 行: 可能存在重复键 'fair'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 126 行: 可能存在重复键 'poor'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 127 行: 可能存在重复键 'thresholds'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 128 行: 可能存在重复键 'excellent'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 129 行: 可能存在重复键 'good'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 130 行: 可能存在重复键 'fair'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 131 行: 可能存在重复键 'format'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 132 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 138 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 139 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 141 行: 可能存在重复键 'colors'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 142 行: 可能存在重复键 'excellent'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 143 行: 可能存在重复键 'good'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 144 行: 可能存在重复键 'fair'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 145 行: 可能存在重复键 'poor'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 146 行: 可能存在重复键 'thresholds'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 147 行: 可能存在重复键 'excellent'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 148 行: 可能存在重复键 'good'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 149 行: 可能存在重复键 'fair'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 150 行: 可能存在重复键 'format'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 151 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 155 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 156 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 157 行: 可能存在重复键 'metric'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 158 行: 可能存在重复键 'colors'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 159 行: 可能存在重复键 'excellent'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 160 行: 可能存在重复键 'good'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 161 行: 可能存在重复键 'fair'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 162 行: 可能存在重复键 'poor'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 163 行: 可能存在重复键 'thresholds'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 164 行: 可能存在重复键 'excellent'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 165 行: 可能存在重复键 'good'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 166 行: 可能存在重复键 'fair'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 167 行: 可能存在重复键 'format'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 168 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 172 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 173 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 174 行: 可能存在重复键 'metric'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 175 行: 可能存在重复键 'colors'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 176 行: 可能存在重复键 'excellent'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 177 行: 可能存在重复键 'good'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 178 行: 可能存在重复键 'fair'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 179 行: 可能存在重复键 'poor'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 180 行: 可能存在重复键 'thresholds'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 181 行: 可能存在重复键 'excellent'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 182 行: 可能存在重复键 'good'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 183 行: 可能存在重复键 'fair'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 184 行: 可能存在重复键 'format'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 185 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 191 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 192 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 195 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 199 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 200 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 201 行: 可能存在重复键 'field'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 202 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 203 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 207 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 208 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 210 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 211 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 215 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 216 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 217 行: 可能存在重复键 'field'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 218 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 219 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 223 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 224 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 225 行: 可能存在重复键 'field'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 226 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 227 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 231 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 232 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 233 行: 可能存在重复键 'field'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 234 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 235 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 239 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 240 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 241 行: 可能存在重复键 'value'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 242 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 243 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 247 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 248 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 249 行: 可能存在重复键 'value'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 250 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 251 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 257 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 258 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 259 行: 可能存在重复键 'field'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 260 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 261 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 265 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 266 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 267 行: 可能存在重复键 'field'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 268 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 269 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 273 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 274 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 276 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 277 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 281 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 282 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 283 行: 可能存在重复键 'endpoint'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 284 行: 可能存在重复键 'field'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 285 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 286 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 290 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 291 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 292 行: 可能存在重复键 'endpoint'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 293 行: 可能存在重复键 'field'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 294 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 295 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 299 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 300 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 301 行: 可能存在重复键 'endpoint'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 302 行: 可能存在重复键 'field'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 303 行: 可能存在重复键 'colors'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 307 行: 可能存在重复键 'thresholds'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 308 行: 可能存在重复键 'low'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 309 行: 可能存在重复键 'medium'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 310 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 314 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 315 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 316 行: 可能存在重复键 'endpoint'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 317 行: 可能存在重复键 'field'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 318 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 319 行: 可能存在重复键 'format'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 320 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 326 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 327 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 328 行: 可能存在重复键 'file_path'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 329 行: 可能存在重复键 'field'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 330 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 331 行: 可能存在重复键 'format'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 332 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 336 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 337 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 338 行: 可能存在重复键 'metric'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 339 行: 可能存在重复键 'colors'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 340 行: 可能存在重复键 'low'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 341 行: 可能存在重复键 'medium'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 342 行: 可能存在重复键 'high'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 343 行: 可能存在重复键 'thresholds'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 344 行: 可能存在重复键 'low'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 345 行: 可能存在重复键 'medium'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 346 行: 可能存在重复键 'format'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 347 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 351 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 352 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 353 行: 可能存在重复键 'file_path'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 354 行: 可能存在重复键 'field'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 355 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 356 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 360 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 361 行: 可能存在重复键 'data_source'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 363 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 364 行: 可能存在重复键 'logo'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 441 行: 可能存在重复键 'base_url'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 442 行: 可能存在重复键 'auth'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 443 行: 可能存在重复键 'token'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 447 行: 可能存在重复键 'formats'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 467 行: 可能存在重复键 'file_path'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 470 行: 可能存在重复键 'file_path'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 481 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 536 行: 可能存在重复键 'build'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 537 行: 可能存在重复键 'coverage'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 538 行: 可能存在重复键 'quality'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 539 行: 可能存在重复键 'security'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 540 行: 可能存在重复键 'production'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 541 行: 可能存在重复键 'staging'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 542 行: 可能存在重复键 'uptime'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 543 行: 可能存在重复键 'response_time'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 544 行: 可能存在重复键 'throughput'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 545 行: 可能存在重复键 'lighthouse'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 546 行: 可能存在重复键 'version'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 547 行: 可能存在重复键 'license'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 548 行: 可能存在重复键 'contributors'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 549 行: 可能存在重复键 'stars'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 550 行: 可能存在重复键 'forks'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 551 行: 可能存在重复键 'issues'"
+    },
+    {
+      "file": "config/badges.yml",
+      "warning": "第 552 行: 可能存在重复键 'last_commit'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 16 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 17 行: 可能存在重复键 'events'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 22 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 23 行: 可能存在重复键 'events'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 45 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 46 行: 可能存在重复键 'webhook_url_secret'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 47 行: 可能存在重复键 'channels'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 49 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 50 行: 可能存在重复键 'events'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 54 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 55 行: 可能存在重复键 'events'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 62 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 74 行: 可能存在重复键 'events'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 78 行: 可能存在重复键 'management'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 79 行: 可能存在重复键 'addresses'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 81 行: 可能存在重复键 'events'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 86 行: 可能存在重复键 'addresses'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 88 行: 可能存在重复键 'events'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 98 行: 可能存在重复键 'subject'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 102 行: 可能存在重复键 'subject'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 108 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 119 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 120 行: 可能存在重复键 'events'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 132 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 145 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 153 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 154 行: 可能存在重复键 'format'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 157 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 158 行: 可能存在重复键 'success_message'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 159 行: 可能存在重复键 'failure_message'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 161 行: 可能存在重复键 'label'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 168 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 180 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 181 行: 可能存在重复键 'schedule'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 182 行: 可能存在重复键 'include'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 188 行: 可能存在重复键 'format'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 189 行: 可能存在重复键 'retention_days'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 192 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 193 行: 可能存在重复键 'schedule'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 194 行: 可能存在重复键 'include'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 199 行: 可能存在重复键 'format'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 200 行: 可能存在重复键 'retention_days'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 209 行: 可能存在重复键 'warning'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 210 行: 可能存在重复键 'critical'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 212 行: 可能存在重复键 'warning'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 213 行: 可能存在重复键 'critical'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 215 行: 可能存在重复键 'warning'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 216 行: 可能存在重复键 'critical'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 236 行: 可能存在重复键 'notify_on'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 241 行: 可能存在重复键 'notify_on'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 257 行: 可能存在重复键 'notify_on'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 263 行: 可能存在重复键 'channels'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 272 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 276 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 280 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 305 行: 可能存在重复键 '*Workflow'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 306 行: 可能存在重复键 '*Branch'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 307 行: 可能存在重复键 '*Environment'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 308 行: 可能存在重复键 '*Author'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 316 行: 可能存在重复键 '*Environment'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 319 行: 可能存在重复键 '*Duration'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 333 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 334 行: 可能存在重复键 'base_url'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 335 行: 可能存在重复键 'username_secret'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 343 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 351 行: 可能存在重复键 'enabled'"
+    },
+    {
+      "file": "config/notifications.yml",
+      "warning": "第 354 行: 可能存在重复键 'events'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 71 行: 可能存在重复键 'url'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 72 行: 可能存在重复键 'timeout'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 73 行: 可能存在重复键 'expected_status'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 74 行: 可能存在重复键 'auth_service'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 75 行: 可能存在重复键 'url'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 76 行: 可能存在重复键 'timeout'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 77 行: 可能存在重复键 'expected_status'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 78 行: 可能存在重复键 'notification_service'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 79 行: 可能存在重复键 'url'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 80 行: 可能存在重复键 'timeout'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 81 行: 可能存在重复键 'expected_status'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 94 行: 可能存在重复键 'community_server'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 98 行: 可能存在重复键 'enterprise_server'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 99 行: 可能存在重复键 'cpu'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 100 行: 可能存在重复键 'memory'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 101 行: 可能存在重复键 'replicas'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 102 行: 可能存在重复键 'auth_service'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 103 行: 可能存在重复键 'cpu'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 104 行: 可能存在重复键 'memory'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 105 行: 可能存在重复键 'replicas'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 106 行: 可能存在重复键 'notification_service'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 107 行: 可能存在重复键 'cpu'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 108 行: 可能存在重复键 'memory'"
+    },
+    {
+      "file": "environments/production.yml",
+      "warning": "第 109 行: 可能存在重复键 'replicas'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 54 行: 可能存在重复键 'url'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 55 行: 可能存在重复键 'timeout'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 56 行: 可能存在重复键 'expected_status'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 57 行: 可能存在重复键 'auth_service'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 58 行: 可能存在重复键 'url'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 59 行: 可能存在重复键 'timeout'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 60 行: 可能存在重复键 'expected_status'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 61 行: 可能存在重复键 'notification_service'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 62 行: 可能存在重复键 'url'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 63 行: 可能存在重复键 'timeout'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 64 行: 可能存在重复键 'expected_status'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 75 行: 可能存在重复键 'community_server'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 78 行: 可能存在重复键 'enterprise_server'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 79 行: 可能存在重复键 'cpu'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 80 行: 可能存在重复键 'memory'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 81 行: 可能存在重复键 'auth_service'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 82 行: 可能存在重复键 'cpu'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 83 行: 可能存在重复键 'memory'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 84 行: 可能存在重复键 'notification_service'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 85 行: 可能存在重复键 'cpu'"
+    },
+    {
+      "file": "environments/staging.yml",
+      "warning": "第 86 行: 可能存在重复键 'memory'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 7 行: 可能存在重复键 'branches'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 24 行: 可能存在重复键 'node-version'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 31 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 34 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 35 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 40 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 41 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 43 行: 可能存在重复键 'strategy'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 44 行: 可能存在重复键 'matrix'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 45 行: 可能存在重复键 'node-version'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 47 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 51 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 52 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 53 行: 可能存在重复键 'node-version'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 54 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 57 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 60 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 63 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 64 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 65 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 66 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 69 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 70 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 71 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 72 行: 可能存在重复键 'strategy'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 73 行: 可能存在重复键 'matrix'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 76 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 80 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 81 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 87 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 129 行: 可能存在重复键 '\"VulnerabilityID\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 130 行: 可能存在重复键 '\"PkgName\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 131 行: 可能存在重复键 '\"InstalledVersion\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 132 行: 可能存在重复键 '\"FixedVersion\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 133 行: 可能存在重复键 '\"Severity\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 134 行: 可能存在重复键 '\"Description\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 172 行: 可能存在重复键 '\"id\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 173 行: 可能存在重复键 '\"name\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 174 行: 可能存在重复键 '\"version\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 175 行: 可能存在重复键 '\"severity\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 176 行: 可能存在重复键 '\"recommendation\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 188 行: 可能存在重复键 'try'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 195 行: 可能存在重复键 '\"name\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 198 行: 可能存在重复键 '\"severity\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 202 行: 可能存在重复键 '\"name\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 203 行: 可能存在重复键 '\"installed_version\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 204 行: 可能存在重复键 '\"vulnerable_version\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 205 行: 可能存在重复键 '\"severity\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 206 行: 可能存在重复键 '\"advisory\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 212 行: 可能存在重复键 'except Exception as e'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 246 行: 可能存在重复键 'try'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 250 行: 可能存在重复键 '\"name\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 253 行: 可能存在重复键 '\"severity\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 254 行: 可能存在重复键 '\"service\"'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 261 行: 可能存在重复键 'except Exception as e'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 283 行: 可能存在重复键 'for root, dirs, files in os.walk('.')'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 287 行: 可能存在重复键 'for file in files'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 328 行: 可能存在重复键 'try'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 330 行: 可能存在重复键 'except Exception as e'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 334 行: 可能存在重复键 'try'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 336 行: 可能存在重复键 'except Exception as e'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 380 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 381 行: 可能存在重复键 'ENVIRONMENT'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 382 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 419 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 420 行: 可能存在重复键 'ENVIRONMENT'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 421 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 425 行: 可能存在重复键 'echo \"url=https'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 427 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 430 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 432 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 433 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 434 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 437 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 438 行: 可能存在重复键 'ENVIRONMENT'"
+    },
+    {
+      "file": "workflows/ci.yml",
+      "warning": "第 441 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 7 行: 可能存在重复键 'branches'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 37 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 38 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 44 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 45 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 47 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 53 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 56 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 57 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 68 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 69 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 73 行: 可能存在重复键 'pnpm run lint'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 77 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 78 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 82 行: 可能存在重复键 'pnpm run format'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 86 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 87 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 91 行: 可能存在重复键 'pnpm run type-check'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 95 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 96 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 132 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 133 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 134 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 143 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 144 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 148 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 150 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 151 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 152 行: 可能存在重复键 'fetch-depth'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 155 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 156 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 157 行: 可能存在重复键 'node-version'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 158 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 161 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 162 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 163 行: 可能存在重复键 'python-version'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 164 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 167 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 168 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 173 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 176 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 179 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 189 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 203 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 204 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 205 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 206 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 209 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 213 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 228 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 229 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 230 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 231 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 233 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 235 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 236 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 237 行: 可能存在重复键 'fetch-depth'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 240 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 241 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 242 行: 可能存在重复键 'node-version'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 243 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 246 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 249 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 252 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 255 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 261 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 277 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 279 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 284 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 285 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 287 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 289 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 292 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 293 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 294 行: 可能存在重复键 'node-version'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 295 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 298 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 299 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 300 行: 可能存在重复键 'python-version'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 301 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 304 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 307 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 310 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 315 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 323 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 343 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 356 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 399 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 400 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 401 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 402 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 409 行: 可能存在重复键 'retention-days'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 412 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 413 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 414 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 415 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 417 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 419 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 433 行: 可能存在重复键 'echo \"❌ Quality gate failed'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 443 行: 可能存在重复键 'echo \"⚠️  Warning'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 449 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 450 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 451 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 501 行: 可能存在重复键 'owner'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 502 行: 可能存在重复键 'repo'"
+    },
+    {
+      "file": "workflows/code-quality.yml",
+      "warning": "第 504 行: 可能存在重复键 'body'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 19 行: 可能存在重复键 'description'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 20 行: 可能存在重复键 'required'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 21 行: 可能存在重复键 'default'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 22 行: 可能存在重复键 'type'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 23 行: 可能存在重复键 'options'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 28 行: 可能存在重复键 'description'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 29 行: 可能存在重复键 'required'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 30 行: 可能存在重复键 'default'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 31 行: 可能存在重复键 'type'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 33 行: 可能存在重复键 'description'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 34 行: 可能存在重复键 'required'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 35 行: 可能存在重复键 'type'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 45 行: 可能存在重复键 'environment'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 47 行: 可能存在重复键 'deployment_strategy'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 61 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 62 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 77 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 78 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 90 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 93 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 98 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 110 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 144 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 163 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 164 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 165 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 166 行: 可能存在重复键 'environment'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 168 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 170 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 173 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 178 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 184 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 213 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 223 行: 可能存在重复键 '\"https'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 224 行: 可能存在重复键 '\"https'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 225 行: 可能存在重复键 '\"https'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 247 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 267 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 268 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 269 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 270 行: 可能存在重复键 'environment'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 272 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 274 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 277 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 278 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 279 行: 可能存在重复键 'version'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 282 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 288 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 306 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 364 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 365 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 392 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 397 行: 可能存在重复键 '\"https'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 398 行: 可能存在重复键 '\"https'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 399 行: 可能存在重复键 '\"https'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 425 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 440 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 441 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 442 行: 可能存在重复键 'environment'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 444 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 446 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 449 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 450 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 451 行: 可能存在重复键 'version'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 454 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 464 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 484 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 485 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 486 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 488 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 490 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 503 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 513 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 537 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/deploy.yml",
+      "warning": "第 538 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 14 行: 可能存在重复键 'branches'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 15 行: 可能存在重复键 'paths'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 33 行: 可能存在重复键 'description'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 34 行: 可能存在重复键 'required'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 35 行: 可能存在重复键 'default'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 36 行: 可能存在重复键 'type'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 61 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 63 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 99 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 110 行: 可能存在重复键 'dockerfile'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 111 行: 可能存在重复键 'context'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 112 行: 可能存在重复键 'build-args'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 116 行: 可能存在重复键 'dockerfile'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 117 行: 可能存在重复键 'context'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 118 行: 可能存在重复键 'build-args'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 122 行: 可能存在重复键 'dockerfile'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 123 行: 可能存在重复键 'context'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 124 行: 可能存在重复键 'build-args'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 128 行: 可能存在重复键 'dockerfile'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 129 行: 可能存在重复键 'context'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 130 行: 可能存在重复键 'build-args'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 134 行: 可能存在重复键 'dockerfile'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 135 行: 可能存在重复键 'context'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 136 行: 可能存在重复键 'build-args'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 140 行: 可能存在重复键 'dockerfile'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 141 行: 可能存在重复键 'context'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 142 行: 可能存在重复键 'build-args'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 147 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 149 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 150 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 151 行: 可能存在重复键 'fetch-depth'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 154 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 155 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 160 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 161 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 167 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 168 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 169 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 180 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 199 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 200 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 204 行: 可能存在重复键 'tags'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 212 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 213 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 214 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 220 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 221 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 222 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 227 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 228 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 244 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 245 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 246 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 252 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 253 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 254 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 255 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 257 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 258 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 260 行: 可能存在重复键 'fetch-depth'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 263 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 264 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 266 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 270 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 303 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 321 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 322 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 323 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 324 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 326 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 327 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/docker-build.yml",
+      "warning": "第 335 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 14 行: 可能存在重复键 'types'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 16 行: 可能存在重复键 'types'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 18 行: 可能存在重复键 'types'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 36 行: 可能存在重复键 'description'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 37 行: 可能存在重复键 'required'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 38 行: 可能存在重复键 'type'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 40 行: 可能存在重复键 'description'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 41 行: 可能存在重复键 'required'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 42 行: 可能存在重复键 'default'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 43 行: 可能存在重复键 'type'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 59 行: 可能存在重复键 'notification_type'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 108 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 111 行: 可能存在重复键 'outputs'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 113 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 120 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 123 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 204 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 205 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 206 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 207 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 209 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 219 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 236 行: 可能存在重复键 'return ''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 238 行: 可能存在重复键 'return ''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 240 行: 可能存在重复键 'return ''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 244 行: 可能存在重复键 'return ''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 246 行: 可能存在重复键 'return ''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 247 行: 可能存在重复键 'else'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 248 行: 可能存在重复键 'return ''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 269 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 270 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 271 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 272 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 273 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 301 行: 可能存在重复键 ''text''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 302 行: 可能存在重复键 ''attachments''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 303 行: 可能存在重复键 ''color''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 304 行: 可能存在重复键 ''fields''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 305 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 306 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 307 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 308 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 309 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 311 行: 可能存在重复键 ''footer''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 312 行: 可能存在重复键 ''ts''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 322 行: 可能存在重复键 ''text''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 323 行: 可能存在重复键 ''attachments''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 324 行: 可能存在重复键 ''color''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 325 行: 可能存在重复键 ''fields''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 326 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 327 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 328 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 330 行: 可能存在重复键 ''footer''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 331 行: 可能存在重复键 ''ts''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 340 行: 可能存在重复键 ''text''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 341 行: 可能存在重复键 ''attachments''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 342 行: 可能存在重复键 ''color''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 343 行: 可能存在重复键 ''fields''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 344 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 345 行: 可能存在重复键 '{'title''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 347 行: 可能存在重复键 ''footer''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 348 行: 可能存在重复键 ''ts''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 372 行: 可能存在重复键 'else'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 380 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 381 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 382 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 383 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 385 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 386 行: 可能存在重复键 'NOTIFICATION_TYPE'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 387 行: 可能存在重复键 'WORKFLOW_NAME'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 388 行: 可能存在重复键 'WORKFLOW_STATUS'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 389 行: 可能存在重复键 'BRANCH'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 390 行: 可能存在重复键 'COMMIT_SHA'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 391 行: 可能存在重复键 'AUTHOR'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 392 行: 可能存在重复键 'ENVIRONMENT'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 393 行: 可能存在重复键 'WORKFLOW_DATA'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 394 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 523 行: 可能存在重复键 'if notification_type == 'workflow_completion''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 554 行: 可能存在重复键 'elif notification_type == 'daily_summary''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 561 行: 可能存在重复键 'top_workflows = sorted(workflows.items(), key=lambda x'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 590 行: 可能存在重复键 'else'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 602 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 603 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 604 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 605 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 607 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 608 行: 可能存在重复键 'GITHUB_TOKEN'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 609 行: 可能存在重复键 'PR_NUMBER'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 610 行: 可能存在重复键 'WORKFLOW_NAME'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 611 行: 可能存在重复键 'WORKFLOW_STATUS'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 612 行: 可能存在重复键 'COMMIT_SHA'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 613 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 620 行: 可能存在重复键 'def get_status_emoji(status)'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 621 行: 可能存在重复键 'if status == 'success''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 623 行: 可能存在重复键 'elif status == 'failure''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 625 行: 可能存在重复键 'elif status == 'cancelled''"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 627 行: 可能存在重复键 'else'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 672 行: 可能存在重复键 'else'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 679 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 680 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 681 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 682 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 684 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 685 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 687 行: 可能存在重复键 'fetch-depth'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 690 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 691 行: 可能存在重复键 'WORKFLOW_DATA'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 692 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 710 行: 可能存在重复键 'else'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 757 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 758 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 766 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 767 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 768 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 769 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/notifications.yml",
+      "warning": "第 771 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 18 行: 可能存在重复键 'description'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 19 行: 可能存在重复键 'required'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 20 行: 可能存在重复键 'default'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 21 行: 可能存在重复键 'type'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 23 行: 可能存在重复键 'description'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 24 行: 可能存在重复键 'required'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 25 行: 可能存在重复键 'default'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 26 行: 可能存在重复键 'type'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 27 行: 可能存在重复键 'options'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 33 行: 可能存在重复键 'description'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 34 行: 可能存在重复键 'required'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 35 行: 可能存在重复键 'default'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 36 行: 可能存在重复键 'type'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 46 行: 可能存在重复键 'environment'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 47 行: 可能存在重复键 'test_duration'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 48 行: 可能存在重复键 'load_pattern'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 69 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 75 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 80 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 86 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 87 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 89 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 92 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 100 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 101 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 114 行: 可能存在重复键 'echo \"service_url=https'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 118 行: 可能存在重复键 'echo \"service_url=https'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 122 行: 可能存在重复键 'echo \"service_url=https'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 130 行: 可能存在重复键 'echo \"service_url=https'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 134 行: 可能存在重复键 'echo \"service_url=https'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 138 行: 可能存在重复键 'echo \"service_url=https'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 142 行: 可能存在重复键 'echo \"service_url=https'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 150 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 198 行: 可能存在重复键 ''status_code''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 199 行: 可能存在重复键 ''response_time''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 200 行: 可能存在重复键 ''success''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 202 行: 可能存在重复键 ''timestamp''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 248 行: 可能存在重复键 'return {'error''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 277 行: 可能存在重复键 ''test_duration''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 332 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 347 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 348 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 354 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 355 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 356 行: 可能存在重复键 'strategy'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 357 行: 可能存在重复键 'matrix'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 359 行: 可能存在重复键 'fail-fast'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 361 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 363 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 366 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 367 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 368 行: 可能存在重复键 'node-version'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 369 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 372 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 376 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 377 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 389 行: 可能存在重复键 'echo \"app_url=https'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 392 行: 可能存在重复键 'echo \"app_url=https'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 399 行: 可能存在重复键 'echo \"app_url=https'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 402 行: 可能存在重复键 'echo \"app_url=https'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 405 行: 可能存在重复键 'echo \"app_url=https'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 412 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 432 行: 可能存在重复键 '\"categories'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 433 行: 可能存在重复键 '\"categories'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 434 行: 可能存在重复键 '\"categories'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 446 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 451 行: 可能存在重复键 'echo \"URL'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 535 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 536 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 537 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 538 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 539 行: 可能存在重复键 'retention-days'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 542 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 543 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 544 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 545 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 546 行: 可能存在重复键 'retention-days'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 549 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 550 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 552 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 554 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 557 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 558 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 559 行: 可能存在重复键 'node-version'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 560 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 563 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 568 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 658 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 659 行: 可能存在重复键 'totalTime'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 660 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 661 行: 可能存在重复键 'navigation'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 662 行: 可能存在重复键 'formFilling'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 663 行: 可能存在重复键 'submission'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 696 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 697 行: 可能存在重复键 'totalTime'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 698 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 699 行: 可能存在重复键 'navigation'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 737 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 738 行: 可能存在重复键 'totalTime'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 739 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 742 行: 可能存在重复键 'submission'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 752 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 761 行: 可能存在重复键 'export BASE_URL=\"https'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 771 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 772 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 773 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 774 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 775 行: 可能存在重复键 'retention-days'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 778 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 780 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 782 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 784 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 787 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 788 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 789 行: 可能存在重复键 'python-version'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 790 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 793 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 794 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 797 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 800 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 807 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 811 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 826 行: 可能存在重复键 ''timestamp''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 891 行: 可能存在重复键 ''component''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 892 行: 可能存在重复键 ''metric''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 893 行: 可能存在重复键 ''current''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 894 行: 可能存在重复键 ''baseline''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 895 行: 可能存在重复键 ''change_percent''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 907 行: 可能存在重复键 ''component''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 908 行: 可能存在重复键 ''metric''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 909 行: 可能存在重复键 ''current''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 910 行: 可能存在重复键 ''baseline''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 911 行: 可能存在重复键 ''change_percent''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 915 行: 可能存在重复键 ''component''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 916 行: 可能存在重复键 ''metric''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 917 行: 可能存在重复键 ''current''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 918 行: 可能存在重复键 ''baseline''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 919 行: 可能存在重复键 ''change_percent''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 965 行: 可能存在重复键 'for service, data in results['backend'].items()'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 969 行: 可能存在重复键 'for app, data in results['frontend'].items()'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 970 行: 可能存在重复键 'if 'metrics' in data and 'lighthouse' in data['metrics']'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1023 行: 可能存在重复键 'if __name__ == \"__main__\"'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1056 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1065 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1122 行: 可能存在重复键 'if analysis['regressions']'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1131 行: 可能存在重复键 'if __name__ == \"__main__\"'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1143 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1144 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1145 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1146 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1149 行: 可能存在重复键 'retention-days'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1153 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1154 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1186 行: 可能存在重复键 'owner'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1187 行: 可能存在重复键 'repo'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1189 行: 可能存在重复键 'body'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1197 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1198 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1199 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1201 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1203 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1204 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1208 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1209 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1210 行: 可能存在重复键 'pattern'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1211 行: 可能存在重复键 'merge-multiple'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1212 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1215 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1237 行: 可能存在重复键 ''throughput''"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1262 行: 可能存在重复键 'with open(file, 'r') as f'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1279 行: 可能存在重复键 'if baseline'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1305 行: 可能存在重复键 'if baseline'"
+    },
+    {
+      "file": "workflows/performance-monitoring.yml",
+      "warning": "第 1313 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 21 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 26 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 27 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 57 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 152 行: 可能存在重复键 'tests'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 153 行: 可能存在重复键 'coverage'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 195 行: 可能存在重复键 'margin'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 202 行: 可能存在重复键 'background'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 204 行: 可能存在重复键 'padding'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 208 行: 可能存在重复键 'margin'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 212 行: 可能存在重复键 'margin'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 219 行: 可能存在重复键 'padding'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 220 行: 可能存在重复键 'background'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 223 行: 可能存在重复键 'background'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 224 行: 可能存在重复键 'padding'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 225 行: 可能存在重复键 'border-radius'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 226 行: 可能存在重复键 'text-align'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 227 行: 可能存在重复键 'box-shadow'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 230 行: 可能存在重复键 'margin'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 231 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 234 行: 可能存在重复键 'font-size'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 236 行: 可能存在重复键 'margin'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 243 行: 可能存在重复键 'padding'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 249 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 254 行: 可能存在重复键 'display'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 255 行: 可能存在重复键 'grid-template-columns'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 256 行: 可能存在重复键 'gap'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 260 行: 可能存在重复键 'background'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 262 行: 可能存在重复键 'border-radius'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 263 行: 可能存在重复键 'padding'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 266 行: 可能存在重复键 'margin'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 267 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 270 行: 可能存在重复键 'display'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 272 行: 可能存在重复键 'margin-bottom'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 275 行: 可能存在重复键 'background'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 276 行: 可能存在重复键 'border-radius'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 278 行: 可能存在重复键 'overflow'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 279 行: 可能存在重复键 'margin-top'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 282 行: 可能存在重复键 'height'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 283 行: 可能存在重复键 'background'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 287 行: 可能存在重复键 'background'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 288 行: 可能存在重复键 'color'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 289 行: 可能存在重复键 'padding'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 290 行: 可能存在重复键 'text-align'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 293 行: 可能存在重复键 'display'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 294 行: 可能存在重复键 'padding'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 295 行: 可能存在重复键 'border-radius'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 296 行: 可能存在重复键 'font-size'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 297 行: 可能存在重复键 'font-weight'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 354 行: 可能存在重复键 '<div class=\"coverage-fill\" style=\"width'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 369 行: 可能存在重复键 '<span>通过'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 370 行: 可能存在重复键 '<span>失败'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 371 行: 可能存在重复键 '<span>跳过'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 414 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 415 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 423 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 424 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 431 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 432 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 433 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test-report.yml",
+      "warning": "第 434 行: 可能存在重复键 'script'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 7 行: 可能存在重复键 'branches'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 26 行: 可能存在重复键 'description'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 27 行: 可能存在重复键 'required'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 28 行: 可能存在重复键 'default'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 29 行: 可能存在重复键 'type'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 30 行: 可能存在重复键 'options'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 34 行: 可能存在重复键 'description'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 35 行: 可能存在重复键 'required'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 36 行: 可能存在重复键 'default'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 37 行: 可能存在重复键 'type'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 72 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 73 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 78 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 79 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 86 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 89 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 92 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 95 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 98 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 103 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 105 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 114 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 115 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 116 行: 可能存在重复键 'timeout-minutes'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 129 行: 可能存在重复键 'options'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 138 行: 可能存在重复键 'image'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 139 行: 可能存在重复键 'options'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 144 行: 可能存在重复键 'ports'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 147 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 149 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 152 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 153 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 155 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 159 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 165 行: 可能存在重复键 'working-directory'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 166 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 168 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 172 行: 可能存在重复键 'working-directory'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 173 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 183 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 184 行: 可能存在重复键 'DATABASE_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 188 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 189 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 192 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 196 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 197 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 198 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 199 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 200 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 203 行: 可能存在重复键 'retention-days'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 207 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 208 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 209 行: 可能存在重复键 'timeout-minutes'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 210 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 212 行: 可能存在重复键 'strategy'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 213 行: 可能存在重复键 'matrix'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 216 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 218 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 221 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 222 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 223 行: 可能存在重复键 'node-version'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 224 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 227 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 228 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 229 行: 可能存在重复键 'version'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 232 行: 可能存在重复键 'working-directory'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 233 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 236 行: 可能存在重复键 'working-directory'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 237 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 243 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 247 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 248 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 249 行: 可能存在重复键 'file'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 250 行: 可能存在重复键 'flags'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 251 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 252 行: 可能存在重复键 'fail_ci_if_error'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 255 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 256 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 257 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 258 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 259 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 262 行: 可能存在重复键 'retention-days'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 266 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 267 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 268 行: 可能存在重复键 'timeout-minutes'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 269 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 272 行: 可能存在重复键 'services'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 273 行: 可能存在重复键 'postgres'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 274 行: 可能存在重复键 'image'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 275 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 276 行: 可能存在重复键 'POSTGRES_PASSWORD'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 277 行: 可能存在重复键 'POSTGRES_DB'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 278 行: 可能存在重复键 'options'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 283 行: 可能存在重复键 'ports'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 286 行: 可能存在重复键 'redis'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 287 行: 可能存在重复键 'image'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 288 行: 可能存在重复键 'options'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 293 行: 可能存在重复键 'ports'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 297 行: 可能存在重复键 'image'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 298 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 301 行: 可能存在重复键 'options'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 306 行: 可能存在重复键 'ports'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 309 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 311 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 314 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 315 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 316 行: 可能存在重复键 'python-version'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 317 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 320 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 321 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 322 行: 可能存在重复键 'node-version'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 323 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 326 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 327 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 328 行: 可能存在重复键 'version'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 331 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 341 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 343 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 344 行: 可能存在重复键 'DATABASE_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 345 行: 可能存在重复键 'REDIS_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 348 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 358 行: 可能存在重复键 'curl -f http'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 359 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 360 行: 可能存在重复键 'DATABASE_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 361 行: 可能存在重复键 'REDIS_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 364 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 372 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 373 行: 可能存在重复键 'DATABASE_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 374 行: 可能存在重复键 'REDIS_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 379 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 380 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 381 行: 可能存在重复键 'file'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 382 行: 可能存在重复键 'flags'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 383 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 384 行: 可能存在重复键 'fail_ci_if_error'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 387 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 388 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 389 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 390 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 391 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 394 行: 可能存在重复键 'retention-days'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 398 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 399 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 400 行: 可能存在重复键 'timeout-minutes'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 401 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 402 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 404 行: 可能存在重复键 'strategy'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 405 行: 可能存在重复键 'matrix'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 409 行: 可能存在重复键 'services'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 410 行: 可能存在重复键 'postgres'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 411 行: 可能存在重复键 'image'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 412 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 413 行: 可能存在重复键 'POSTGRES_PASSWORD'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 414 行: 可能存在重复键 'POSTGRES_DB'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 415 行: 可能存在重复键 'options'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 420 行: 可能存在重复键 'ports'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 423 行: 可能存在重复键 'redis'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 424 行: 可能存在重复键 'image'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 425 行: 可能存在重复键 'options'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 430 行: 可能存在重复键 'ports'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 433 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 435 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 438 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 439 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 440 行: 可能存在重复键 'python-version'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 441 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 444 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 445 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 446 行: 可能存在重复键 'node-version'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 447 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 450 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 451 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 452 行: 可能存在重复键 'version'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 455 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 464 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 468 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 470 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 471 行: 可能存在重复键 'DATABASE_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 472 行: 可能存在重复键 'REDIS_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 475 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 489 行: 可能存在重复键 'curl -f http'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 490 行: 可能存在重复键 'curl -f http'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 491 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 492 行: 可能存在重复键 'DATABASE_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 493 行: 可能存在重复键 'REDIS_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 496 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 502 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 503 行: 可能存在重复键 'CI'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 507 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 508 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 509 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 510 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 511 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 514 行: 可能存在重复键 'retention-days'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 517 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 518 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 519 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 520 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 521 行: 可能存在重复键 'path'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 522 行: 可能存在重复键 'retention-days'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 526 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 527 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 528 行: 可能存在重复键 'timeout-minutes'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 529 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 530 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 532 行: 可能存在重复键 'services'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 533 行: 可能存在重复键 'postgres'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 534 行: 可能存在重复键 'image'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 535 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 536 行: 可能存在重复键 'POSTGRES_PASSWORD'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 537 行: 可能存在重复键 'POSTGRES_DB'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 538 行: 可能存在重复键 'options'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 543 行: 可能存在重复键 'ports'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 546 行: 可能存在重复键 'redis'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 547 行: 可能存在重复键 'image'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 548 行: 可能存在重复键 'options'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 553 行: 可能存在重复键 'ports'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 556 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 558 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 561 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 562 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 563 行: 可能存在重复键 'python-version'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 564 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 567 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 568 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 569 行: 可能存在重复键 'node-version'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 570 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 573 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 574 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 575 行: 可能存在重复键 'version'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 578 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 586 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 595 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 597 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 598 行: 可能存在重复键 'DATABASE_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 599 行: 可能存在重复键 'REDIS_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 602 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 612 行: 可能存在重复键 'curl -f http'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 613 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 614 行: 可能存在重复键 'DATABASE_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 615 行: 可能存在重复键 'REDIS_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 618 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 622 行: 可能存在重复键 'env'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 623 行: 可能存在重复键 'API_BASE_URL'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 627 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 632 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/test.yml",
+      "warning": "第 633 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 29 行: 可能存在重复键 'description'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 30 行: 可能存在重复键 'required'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 31 行: 可能存在重复键 'default'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 32 行: 可能存在重复键 'type'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 58 行: 可能存在重复键 'badge_types'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 88 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 89 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 119 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 120 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 159 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 160 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 163 行: 可能存在重复键 'outputs'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 169 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 171 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 174 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 175 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 180 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 181 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 183 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 186 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 190 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 191 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 209 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 210 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 235 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 236 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 251 行: 可能存在重复键 'id'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 252 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 272 行: 可能存在重复键 'name'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 273 行: 可能存在重复键 'runs-on'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 274 行: 可能存在重复键 'needs'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 275 行: 可能存在重复键 'if'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 277 行: 可能存在重复键 'steps'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 279 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 280 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 281 行: 可能存在重复键 'token'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 284 行: 可能存在重复键 'uses'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 285 行: 可能存在重复键 'with'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 286 行: 可能存在重复键 'python-version'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 287 行: 可能存在重复键 'cache'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 290 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 294 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 308 行: 可能存在重复键 'run'"
+    },
+    {
+      "file": "workflows/update-badges.yml",
+      "warning": "第 325 行: 可能存在重复键 'run'"
+    }
+  ],
+  "fileDetails": {
+    "config/badges.yml": {
+      "path": "config/badges.yml",
+      "isValid": true,
+      "message": "语法正确",
+      "warnings": [
+        "第 49 行: 可能存在重复键 'label'",
+        "第 50 行: 可能存在重复键 'data_source'",
+        "第 52 行: 可能存在重复键 'colors'",
+        "第 59 行: 可能存在重复键 'excellent'",
+        "第 60 行: 可能存在重复键 'good'",
+        "第 61 行: 可能存在重复键 'fair'",
+        "第 62 行: 可能存在重复键 'poor'",
+        "第 64 行: 可能存在重复键 'logo'",
+        "第 68 行: 可能存在重复键 'label'",
+        "第 69 行: 可能存在重复键 'data_source'",
+        "第 71 行: 可能存在重复键 'colors'",
+        "第 77 行: 可能存在重复键 'logo'",
+        "第 81 行: 可能存在重复键 'label'",
+        "第 82 行: 可能存在重复键 'data_source'",
+        "第 83 行: 可能存在重复键 'file_path'",
+        "第 84 行: 可能存在重复键 'colors'",
+        "第 90 行: 可能存在重复键 'logo'",
+        "第 96 行: 可能存在重复键 'label'",
+        "第 97 行: 可能存在重复键 'data_source'",
+        "第 99 行: 可能存在重复键 'colors'",
+        "第 104 行: 可能存在重复键 'logo'",
+        "第 108 行: 可能存在重复键 'label'",
+        "第 109 行: 可能存在重复键 'data_source'",
+        "第 110 行: 可能存在重复键 'environment'",
+        "第 111 行: 可能存在重复键 'colors'",
+        "第 112 行: 可能存在重复键 'deployed'",
+        "第 113 行: 可能存在重复键 'deploying'",
+        "第 114 行: 可能存在重复键 'failed'",
+        "第 115 行: 可能存在重复键 'logo'",
+        "第 119 行: 可能存在重复键 'label'",
+        "第 120 行: 可能存在重复键 'data_source'",
+        "第 122 行: 可能存在重复键 'colors'",
+        "第 123 行: 可能存在重复键 'excellent'",
+        "第 124 行: 可能存在重复键 'good'",
+        "第 125 行: 可能存在重复键 'fair'",
+        "第 126 行: 可能存在重复键 'poor'",
+        "第 127 行: 可能存在重复键 'thresholds'",
+        "第 128 行: 可能存在重复键 'excellent'",
+        "第 129 行: 可能存在重复键 'good'",
+        "第 130 行: 可能存在重复键 'fair'",
+        "第 131 行: 可能存在重复键 'format'",
+        "第 132 行: 可能存在重复键 'logo'",
+        "第 138 行: 可能存在重复键 'label'",
+        "第 139 行: 可能存在重复键 'data_source'",
+        "第 141 行: 可能存在重复键 'colors'",
+        "第 142 行: 可能存在重复键 'excellent'",
+        "第 143 行: 可能存在重复键 'good'",
+        "第 144 行: 可能存在重复键 'fair'",
+        "第 145 行: 可能存在重复键 'poor'",
+        "第 146 行: 可能存在重复键 'thresholds'",
+        "第 147 行: 可能存在重复键 'excellent'",
+        "第 148 行: 可能存在重复键 'good'",
+        "第 149 行: 可能存在重复键 'fair'",
+        "第 150 行: 可能存在重复键 'format'",
+        "第 151 行: 可能存在重复键 'logo'",
+        "第 155 行: 可能存在重复键 'label'",
+        "第 156 行: 可能存在重复键 'data_source'",
+        "第 157 行: 可能存在重复键 'metric'",
+        "第 158 行: 可能存在重复键 'colors'",
+        "第 159 行: 可能存在重复键 'excellent'",
+        "第 160 行: 可能存在重复键 'good'",
+        "第 161 行: 可能存在重复键 'fair'",
+        "第 162 行: 可能存在重复键 'poor'",
+        "第 163 行: 可能存在重复键 'thresholds'",
+        "第 164 行: 可能存在重复键 'excellent'",
+        "第 165 行: 可能存在重复键 'good'",
+        "第 166 行: 可能存在重复键 'fair'",
+        "第 167 行: 可能存在重复键 'format'",
+        "第 168 行: 可能存在重复键 'logo'",
+        "第 172 行: 可能存在重复键 'label'",
+        "第 173 行: 可能存在重复键 'data_source'",
+        "第 174 行: 可能存在重复键 'metric'",
+        "第 175 行: 可能存在重复键 'colors'",
+        "第 176 行: 可能存在重复键 'excellent'",
+        "第 177 行: 可能存在重复键 'good'",
+        "第 178 行: 可能存在重复键 'fair'",
+        "第 179 行: 可能存在重复键 'poor'",
+        "第 180 行: 可能存在重复键 'thresholds'",
+        "第 181 行: 可能存在重复键 'excellent'",
+        "第 182 行: 可能存在重复键 'good'",
+        "第 183 行: 可能存在重复键 'fair'",
+        "第 184 行: 可能存在重复键 'format'",
+        "第 185 行: 可能存在重复键 'logo'",
+        "第 191 行: 可能存在重复键 'label'",
+        "第 192 行: 可能存在重复键 'data_source'",
+        "第 195 行: 可能存在重复键 'logo'",
+        "第 199 行: 可能存在重复键 'label'",
+        "第 200 行: 可能存在重复键 'data_source'",
+        "第 201 行: 可能存在重复键 'field'",
+        "第 202 行: 可能存在重复键 'color'",
+        "第 203 行: 可能存在重复键 'logo'",
+        "第 207 行: 可能存在重复键 'label'",
+        "第 208 行: 可能存在重复键 'data_source'",
+        "第 210 行: 可能存在重复键 'color'",
+        "第 211 行: 可能存在重复键 'logo'",
+        "第 215 行: 可能存在重复键 'label'",
+        "第 216 行: 可能存在重复键 'data_source'",
+        "第 217 行: 可能存在重复键 'field'",
+        "第 218 行: 可能存在重复键 'color'",
+        "第 219 行: 可能存在重复键 'logo'",
+        "第 223 行: 可能存在重复键 'label'",
+        "第 224 行: 可能存在重复键 'data_source'",
+        "第 225 行: 可能存在重复键 'field'",
+        "第 226 行: 可能存在重复键 'color'",
+        "第 227 行: 可能存在重复键 'logo'",
+        "第 231 行: 可能存在重复键 'label'",
+        "第 232 行: 可能存在重复键 'data_source'",
+        "第 233 行: 可能存在重复键 'field'",
+        "第 234 行: 可能存在重复键 'color'",
+        "第 235 行: 可能存在重复键 'logo'",
+        "第 239 行: 可能存在重复键 'label'",
+        "第 240 行: 可能存在重复键 'data_source'",
+        "第 241 行: 可能存在重复键 'value'",
+        "第 242 行: 可能存在重复键 'color'",
+        "第 243 行: 可能存在重复键 'logo'",
+        "第 247 行: 可能存在重复键 'label'",
+        "第 248 行: 可能存在重复键 'data_source'",
+        "第 249 行: 可能存在重复键 'value'",
+        "第 250 行: 可能存在重复键 'color'",
+        "第 251 行: 可能存在重复键 'logo'",
+        "第 257 行: 可能存在重复键 'label'",
+        "第 258 行: 可能存在重复键 'data_source'",
+        "第 259 行: 可能存在重复键 'field'",
+        "第 260 行: 可能存在重复键 'color'",
+        "第 261 行: 可能存在重复键 'logo'",
+        "第 265 行: 可能存在重复键 'label'",
+        "第 266 行: 可能存在重复键 'data_source'",
+        "第 267 行: 可能存在重复键 'field'",
+        "第 268 行: 可能存在重复键 'color'",
+        "第 269 行: 可能存在重复键 'logo'",
+        "第 273 行: 可能存在重复键 'label'",
+        "第 274 行: 可能存在重复键 'data_source'",
+        "第 276 行: 可能存在重复键 'color'",
+        "第 277 行: 可能存在重复键 'logo'",
+        "第 281 行: 可能存在重复键 'label'",
+        "第 282 行: 可能存在重复键 'data_source'",
+        "第 283 行: 可能存在重复键 'endpoint'",
+        "第 284 行: 可能存在重复键 'field'",
+        "第 285 行: 可能存在重复键 'color'",
+        "第 286 行: 可能存在重复键 'logo'",
+        "第 290 行: 可能存在重复键 'label'",
+        "第 291 行: 可能存在重复键 'data_source'",
+        "第 292 行: 可能存在重复键 'endpoint'",
+        "第 293 行: 可能存在重复键 'field'",
+        "第 294 行: 可能存在重复键 'color'",
+        "第 295 行: 可能存在重复键 'logo'",
+        "第 299 行: 可能存在重复键 'label'",
+        "第 300 行: 可能存在重复键 'data_source'",
+        "第 301 行: 可能存在重复键 'endpoint'",
+        "第 302 行: 可能存在重复键 'field'",
+        "第 303 行: 可能存在重复键 'colors'",
+        "第 307 行: 可能存在重复键 'thresholds'",
+        "第 308 行: 可能存在重复键 'low'",
+        "第 309 行: 可能存在重复键 'medium'",
+        "第 310 行: 可能存在重复键 'logo'",
+        "第 314 行: 可能存在重复键 'label'",
+        "第 315 行: 可能存在重复键 'data_source'",
+        "第 316 行: 可能存在重复键 'endpoint'",
+        "第 317 行: 可能存在重复键 'field'",
+        "第 318 行: 可能存在重复键 'color'",
+        "第 319 行: 可能存在重复键 'format'",
+        "第 320 行: 可能存在重复键 'logo'",
+        "第 326 行: 可能存在重复键 'label'",
+        "第 327 行: 可能存在重复键 'data_source'",
+        "第 328 行: 可能存在重复键 'file_path'",
+        "第 329 行: 可能存在重复键 'field'",
+        "第 330 行: 可能存在重复键 'color'",
+        "第 331 行: 可能存在重复键 'format'",
+        "第 332 行: 可能存在重复键 'logo'",
+        "第 336 行: 可能存在重复键 'label'",
+        "第 337 行: 可能存在重复键 'data_source'",
+        "第 338 行: 可能存在重复键 'metric'",
+        "第 339 行: 可能存在重复键 'colors'",
+        "第 340 行: 可能存在重复键 'low'",
+        "第 341 行: 可能存在重复键 'medium'",
+        "第 342 行: 可能存在重复键 'high'",
+        "第 343 行: 可能存在重复键 'thresholds'",
+        "第 344 行: 可能存在重复键 'low'",
+        "第 345 行: 可能存在重复键 'medium'",
+        "第 346 行: 可能存在重复键 'format'",
+        "第 347 行: 可能存在重复键 'logo'",
+        "第 351 行: 可能存在重复键 'label'",
+        "第 352 行: 可能存在重复键 'data_source'",
+        "第 353 行: 可能存在重复键 'file_path'",
+        "第 354 行: 可能存在重复键 'field'",
+        "第 355 行: 可能存在重复键 'color'",
+        "第 356 行: 可能存在重复键 'logo'",
+        "第 360 行: 可能存在重复键 'label'",
+        "第 361 行: 可能存在重复键 'data_source'",
+        "第 363 行: 可能存在重复键 'color'",
+        "第 364 行: 可能存在重复键 'logo'",
+        "第 441 行: 可能存在重复键 'base_url'",
+        "第 442 行: 可能存在重复键 'auth'",
+        "第 443 行: 可能存在重复键 'token'",
+        "第 447 行: 可能存在重复键 'formats'",
+        "第 467 行: 可能存在重复键 'file_path'",
+        "第 470 行: 可能存在重复键 'file_path'",
+        "第 481 行: 可能存在重复键 'enabled'",
+        "第 536 行: 可能存在重复键 'build'",
+        "第 537 行: 可能存在重复键 'coverage'",
+        "第 538 行: 可能存在重复键 'quality'",
+        "第 539 行: 可能存在重复键 'security'",
+        "第 540 行: 可能存在重复键 'production'",
+        "第 541 行: 可能存在重复键 'staging'",
+        "第 542 行: 可能存在重复键 'uptime'",
+        "第 543 行: 可能存在重复键 'response_time'",
+        "第 544 行: 可能存在重复键 'throughput'",
+        "第 545 行: 可能存在重复键 'lighthouse'",
+        "第 546 行: 可能存在重复键 'version'",
+        "第 547 行: 可能存在重复键 'license'",
+        "第 548 行: 可能存在重复键 'contributors'",
+        "第 549 行: 可能存在重复键 'stars'",
+        "第 550 行: 可能存在重复键 'forks'",
+        "第 551 行: 可能存在重复键 'issues'",
+        "第 552 行: 可能存在重复键 'last_commit'"
+      ],
+      "errors": []
+    },
+    "config/notifications.yml": {
+      "path": "config/notifications.yml",
+      "isValid": true,
+      "message": "语法正确",
+      "warnings": [
+        "第 16 行: 可能存在重复键 'name'",
+        "第 17 行: 可能存在重复键 'events'",
+        "第 22 行: 可能存在重复键 'name'",
+        "第 23 行: 可能存在重复键 'events'",
+        "第 45 行: 可能存在重复键 'enabled'",
+        "第 46 行: 可能存在重复键 'webhook_url_secret'",
+        "第 47 行: 可能存在重复键 'channels'",
+        "第 49 行: 可能存在重复键 'name'",
+        "第 50 行: 可能存在重复键 'events'",
+        "第 54 行: 可能存在重复键 'name'",
+        "第 55 行: 可能存在重复键 'events'",
+        "第 62 行: 可能存在重复键 'enabled'",
+        "第 74 行: 可能存在重复键 'events'",
+        "第 78 行: 可能存在重复键 'management'",
+        "第 79 行: 可能存在重复键 'addresses'",
+        "第 81 行: 可能存在重复键 'events'",
+        "第 86 行: 可能存在重复键 'addresses'",
+        "第 88 行: 可能存在重复键 'events'",
+        "第 98 行: 可能存在重复键 'subject'",
+        "第 102 行: 可能存在重复键 'subject'",
+        "第 108 行: 可能存在重复键 'enabled'",
+        "第 119 行: 可能存在重复键 'enabled'",
+        "第 120 行: 可能存在重复键 'events'",
+        "第 132 行: 可能存在重复键 'enabled'",
+        "第 145 行: 可能存在重复键 'label'",
+        "第 153 行: 可能存在重复键 'label'",
+        "第 154 行: 可能存在重复键 'format'",
+        "第 157 行: 可能存在重复键 'label'",
+        "第 158 行: 可能存在重复键 'success_message'",
+        "第 159 行: 可能存在重复键 'failure_message'",
+        "第 161 行: 可能存在重复键 'label'",
+        "第 168 行: 可能存在重复键 'enabled'",
+        "第 180 行: 可能存在重复键 'enabled'",
+        "第 181 行: 可能存在重复键 'schedule'",
+        "第 182 行: 可能存在重复键 'include'",
+        "第 188 行: 可能存在重复键 'format'",
+        "第 189 行: 可能存在重复键 'retention_days'",
+        "第 192 行: 可能存在重复键 'enabled'",
+        "第 193 行: 可能存在重复键 'schedule'",
+        "第 194 行: 可能存在重复键 'include'",
+        "第 199 行: 可能存在重复键 'format'",
+        "第 200 行: 可能存在重复键 'retention_days'",
+        "第 209 行: 可能存在重复键 'warning'",
+        "第 210 行: 可能存在重复键 'critical'",
+        "第 212 行: 可能存在重复键 'warning'",
+        "第 213 行: 可能存在重复键 'critical'",
+        "第 215 行: 可能存在重复键 'warning'",
+        "第 216 行: 可能存在重复键 'critical'",
+        "第 236 行: 可能存在重复键 'notify_on'",
+        "第 241 行: 可能存在重复键 'notify_on'",
+        "第 257 行: 可能存在重复键 'notify_on'",
+        "第 263 行: 可能存在重复键 'channels'",
+        "第 272 行: 可能存在重复键 'enabled'",
+        "第 276 行: 可能存在重复键 'enabled'",
+        "第 280 行: 可能存在重复键 'enabled'",
+        "第 305 行: 可能存在重复键 '*Workflow'",
+        "第 306 行: 可能存在重复键 '*Branch'",
+        "第 307 行: 可能存在重复键 '*Environment'",
+        "第 308 行: 可能存在重复键 '*Author'",
+        "第 316 行: 可能存在重复键 '*Environment'",
+        "第 319 行: 可能存在重复键 '*Duration'",
+        "第 333 行: 可能存在重复键 'enabled'",
+        "第 334 行: 可能存在重复键 'base_url'",
+        "第 335 行: 可能存在重复键 'username_secret'",
+        "第 343 行: 可能存在重复键 'enabled'",
+        "第 351 行: 可能存在重复键 'enabled'",
+        "第 354 行: 可能存在重复键 'events'"
+      ],
+      "errors": []
+    },
+    "environments/production.yml": {
+      "path": "environments/production.yml",
+      "isValid": true,
+      "message": "语法正确",
+      "warnings": [
+        "第 71 行: 可能存在重复键 'url'",
+        "第 72 行: 可能存在重复键 'timeout'",
+        "第 73 行: 可能存在重复键 'expected_status'",
+        "第 74 行: 可能存在重复键 'auth_service'",
+        "第 75 行: 可能存在重复键 'url'",
+        "第 76 行: 可能存在重复键 'timeout'",
+        "第 77 行: 可能存在重复键 'expected_status'",
+        "第 78 行: 可能存在重复键 'notification_service'",
+        "第 79 行: 可能存在重复键 'url'",
+        "第 80 行: 可能存在重复键 'timeout'",
+        "第 81 行: 可能存在重复键 'expected_status'",
+        "第 94 行: 可能存在重复键 'community_server'",
+        "第 98 行: 可能存在重复键 'enterprise_server'",
+        "第 99 行: 可能存在重复键 'cpu'",
+        "第 100 行: 可能存在重复键 'memory'",
+        "第 101 行: 可能存在重复键 'replicas'",
+        "第 102 行: 可能存在重复键 'auth_service'",
+        "第 103 行: 可能存在重复键 'cpu'",
+        "第 104 行: 可能存在重复键 'memory'",
+        "第 105 行: 可能存在重复键 'replicas'",
+        "第 106 行: 可能存在重复键 'notification_service'",
+        "第 107 行: 可能存在重复键 'cpu'",
+        "第 108 行: 可能存在重复键 'memory'",
+        "第 109 行: 可能存在重复键 'replicas'"
+      ],
+      "errors": []
+    },
+    "environments/staging.yml": {
+      "path": "environments/staging.yml",
+      "isValid": true,
+      "message": "语法正确",
+      "warnings": [
+        "第 54 行: 可能存在重复键 'url'",
+        "第 55 行: 可能存在重复键 'timeout'",
+        "第 56 行: 可能存在重复键 'expected_status'",
+        "第 57 行: 可能存在重复键 'auth_service'",
+        "第 58 行: 可能存在重复键 'url'",
+        "第 59 行: 可能存在重复键 'timeout'",
+        "第 60 行: 可能存在重复键 'expected_status'",
+        "第 61 行: 可能存在重复键 'notification_service'",
+        "第 62 行: 可能存在重复键 'url'",
+        "第 63 行: 可能存在重复键 'timeout'",
+        "第 64 行: 可能存在重复键 'expected_status'",
+        "第 75 行: 可能存在重复键 'community_server'",
+        "第 78 行: 可能存在重复键 'enterprise_server'",
+        "第 79 行: 可能存在重复键 'cpu'",
+        "第 80 行: 可能存在重复键 'memory'",
+        "第 81 行: 可能存在重复键 'auth_service'",
+        "第 82 行: 可能存在重复键 'cpu'",
+        "第 83 行: 可能存在重复键 'memory'",
+        "第 84 行: 可能存在重复键 'notification_service'",
+        "第 85 行: 可能存在重复键 'cpu'",
+        "第 86 行: 可能存在重复键 'memory'"
+      ],
+      "errors": []
+    },
+    "workflows/ci.yml": {
+      "path": "workflows/ci.yml",
+      "isValid": true,
+      "message": "语法正确",
+      "warnings": [
+        "第 7 行: 可能存在重复键 'branches'",
+        "第 24 行: 可能存在重复键 'node-version'",
+        "第 31 行: 可能存在重复键 'run'",
+        "第 34 行: 可能存在重复键 'uses'",
+        "第 35 行: 可能存在重复键 'with'",
+        "第 40 行: 可能存在重复键 'name'",
+        "第 41 行: 可能存在重复键 'runs-on'",
+        "第 43 行: 可能存在重复键 'strategy'",
+        "第 44 行: 可能存在重复键 'matrix'",
+        "第 45 行: 可能存在重复键 'node-version'",
+        "第 47 行: 可能存在重复键 'steps'",
+        "第 51 行: 可能存在重复键 'uses'",
+        "第 52 行: 可能存在重复键 'with'",
+        "第 53 行: 可能存在重复键 'node-version'",
+        "第 54 行: 可能存在重复键 'cache'",
+        "第 57 行: 可能存在重复键 'run'",
+        "第 60 行: 可能存在重复键 'run'",
+        "第 63 行: 可能存在重复键 'uses'",
+        "第 64 行: 可能存在重复键 'with'",
+        "第 65 行: 可能存在重复键 'name'",
+        "第 66 行: 可能存在重复键 'path'",
+        "第 69 行: 可能存在重复键 'name'",
+        "第 70 行: 可能存在重复键 'runs-on'",
+        "第 71 行: 可能存在重复键 'needs'",
+        "第 72 行: 可能存在重复键 'strategy'",
+        "第 73 行: 可能存在重复键 'matrix'",
+        "第 76 行: 可能存在重复键 'steps'",
+        "第 80 行: 可能存在重复键 'uses'",
+        "第 81 行: 可能存在重复键 'with'",
+        "第 87 行: 可能存在重复键 'run'",
+        "第 129 行: 可能存在重复键 '\"VulnerabilityID\"'",
+        "第 130 行: 可能存在重复键 '\"PkgName\"'",
+        "第 131 行: 可能存在重复键 '\"InstalledVersion\"'",
+        "第 132 行: 可能存在重复键 '\"FixedVersion\"'",
+        "第 133 行: 可能存在重复键 '\"Severity\"'",
+        "第 134 行: 可能存在重复键 '\"Description\"'",
+        "第 172 行: 可能存在重复键 '\"id\"'",
+        "第 173 行: 可能存在重复键 '\"name\"'",
+        "第 174 行: 可能存在重复键 '\"version\"'",
+        "第 175 行: 可能存在重复键 '\"severity\"'",
+        "第 176 行: 可能存在重复键 '\"recommendation\"'",
+        "第 188 行: 可能存在重复键 'try'",
+        "第 195 行: 可能存在重复键 '\"name\"'",
+        "第 198 行: 可能存在重复键 '\"severity\"'",
+        "第 202 行: 可能存在重复键 '\"name\"'",
+        "第 203 行: 可能存在重复键 '\"installed_version\"'",
+        "第 204 行: 可能存在重复键 '\"vulnerable_version\"'",
+        "第 205 行: 可能存在重复键 '\"severity\"'",
+        "第 206 行: 可能存在重复键 '\"advisory\"'",
+        "第 212 行: 可能存在重复键 'except Exception as e'",
+        "第 246 行: 可能存在重复键 'try'",
+        "第 250 行: 可能存在重复键 '\"name\"'",
+        "第 253 行: 可能存在重复键 '\"severity\"'",
+        "第 254 行: 可能存在重复键 '\"service\"'",
+        "第 261 行: 可能存在重复键 'except Exception as e'",
+        "第 283 行: 可能存在重复键 'for root, dirs, files in os.walk('.')'",
+        "第 287 行: 可能存在重复键 'for file in files'",
+        "第 328 行: 可能存在重复键 'try'",
+        "第 330 行: 可能存在重复键 'except Exception as e'",
+        "第 334 行: 可能存在重复键 'try'",
+        "第 336 行: 可能存在重复键 'except Exception as e'",
+        "第 380 行: 可能存在重复键 'env'",
+        "第 381 行: 可能存在重复键 'ENVIRONMENT'",
+        "第 382 行: 可能存在重复键 'run'",
+        "第 419 行: 可能存在重复键 'env'",
+        "第 420 行: 可能存在重复键 'ENVIRONMENT'",
+        "第 421 行: 可能存在重复键 'run'",
+        "第 425 行: 可能存在重复键 'echo \"url=https'",
+        "第 427 行: 可能存在重复键 'id'",
+        "第 430 行: 可能存在重复键 'uses'",
+        "第 432 行: 可能存在重复键 'with'",
+        "第 433 行: 可能存在重复键 'name'",
+        "第 434 行: 可能存在重复键 'path'",
+        "第 437 行: 可能存在重复键 'env'",
+        "第 438 行: 可能存在重复键 'ENVIRONMENT'",
+        "第 441 行: 可能存在重复键 'run'"
+      ],
+      "errors": []
+    },
+    "workflows/code-quality.yml": {
+      "path": "workflows/code-quality.yml",
+      "isValid": true,
+      "message": "语法正确",
+      "warnings": [
+        "第 7 行: 可能存在重复键 'branches'",
+        "第 37 行: 可能存在重复键 'uses'",
+        "第 38 行: 可能存在重复键 'with'",
+        "第 44 行: 可能存在重复键 'uses'",
+        "第 45 行: 可能存在重复键 'with'",
+        "第 47 行: 可能存在重复键 'cache'",
+        "第 53 行: 可能存在重复键 'run'",
+        "第 56 行: 可能存在重复键 'if'",
+        "第 57 行: 可能存在重复键 'run'",
+        "第 68 行: 可能存在重复键 'if'",
+        "第 69 行: 可能存在重复键 'run'",
+        "第 73 行: 可能存在重复键 'pnpm run lint'",
+        "第 77 行: 可能存在重复键 'if'",
+        "第 78 行: 可能存在重复键 'run'",
+        "第 82 行: 可能存在重复键 'pnpm run format'",
+        "第 86 行: 可能存在重复键 'if'",
+        "第 87 行: 可能存在重复键 'run'",
+        "第 91 行: 可能存在重复键 'pnpm run type-check'",
+        "第 95 行: 可能存在重复键 'if'",
+        "第 96 行: 可能存在重复键 'run'",
+        "第 132 行: 可能存在重复键 'if'",
+        "第 133 行: 可能存在重复键 'uses'",
+        "第 134 行: 可能存在重复键 'with'",
+        "第 143 行: 可能存在重复键 'name'",
+        "第 144 行: 可能存在重复键 'runs-on'",
+        "第 148 行: 可能存在重复键 'steps'",
+        "第 150 行: 可能存在重复键 'uses'",
+        "第 151 行: 可能存在重复键 'with'",
+        "第 152 行: 可能存在重复键 'fetch-depth'",
+        "第 155 行: 可能存在重复键 'uses'",
+        "第 156 行: 可能存在重复键 'with'",
+        "第 157 行: 可能存在重复键 'node-version'",
+        "第 158 行: 可能存在重复键 'cache'",
+        "第 161 行: 可能存在重复键 'uses'",
+        "第 162 行: 可能存在重复键 'with'",
+        "第 163 行: 可能存在重复键 'python-version'",
+        "第 164 行: 可能存在重复键 'cache'",
+        "第 167 行: 可能存在重复键 'uses'",
+        "第 168 行: 可能存在重复键 'with'",
+        "第 173 行: 可能存在重复键 'run'",
+        "第 176 行: 可能存在重复键 'run'",
+        "第 179 行: 可能存在重复键 'run'",
+        "第 189 行: 可能存在重复键 'run'",
+        "第 203 行: 可能存在重复键 'uses'",
+        "第 204 行: 可能存在重复键 'with'",
+        "第 205 行: 可能存在重复键 'name'",
+        "第 206 行: 可能存在重复键 'path'",
+        "第 209 行: 可能存在重复键 'uses'",
+        "第 213 行: 可能存在重复键 'with'",
+        "第 228 行: 可能存在重复键 'name'",
+        "第 229 行: 可能存在重复键 'runs-on'",
+        "第 230 行: 可能存在重复键 'needs'",
+        "第 231 行: 可能存在重复键 'if'",
+        "第 233 行: 可能存在重复键 'steps'",
+        "第 235 行: 可能存在重复键 'uses'",
+        "第 236 行: 可能存在重复键 'with'",
+        "第 237 行: 可能存在重复键 'fetch-depth'",
+        "第 240 行: 可能存在重复键 'uses'",
+        "第 241 行: 可能存在重复键 'with'",
+        "第 242 行: 可能存在重复键 'node-version'",
+        "第 243 行: 可能存在重复键 'cache'",
+        "第 246 行: 可能存在重复键 'run'",
+        "第 249 行: 可能存在重复键 'run'",
+        "第 252 行: 可能存在重复键 'run'",
+        "第 255 行: 可能存在重复键 'run'",
+        "第 261 行: 可能存在重复键 'run'",
+        "第 277 行: 可能存在重复键 'env'",
+        "第 279 行: 可能存在重复键 'run'",
+        "第 284 行: 可能存在重复键 'name'",
+        "第 285 行: 可能存在重复键 'runs-on'",
+        "第 287 行: 可能存在重复键 'steps'",
+        "第 289 行: 可能存在重复键 'uses'",
+        "第 292 行: 可能存在重复键 'uses'",
+        "第 293 行: 可能存在重复键 'with'",
+        "第 294 行: 可能存在重复键 'node-version'",
+        "第 295 行: 可能存在重复键 'cache'",
+        "第 298 行: 可能存在重复键 'uses'",
+        "第 299 行: 可能存在重复键 'with'",
+        "第 300 行: 可能存在重复键 'python-version'",
+        "第 301 行: 可能存在重复键 'cache'",
+        "第 304 行: 可能存在重复键 'run'",
+        "第 307 行: 可能存在重复键 'run'",
+        "第 310 行: 可能存在重复键 'run'",
+        "第 315 行: 可能存在重复键 'run'",
+        "第 323 行: 可能存在重复键 'run'",
+        "第 343 行: 可能存在重复键 'run'",
+        "第 356 行: 可能存在重复键 'run'",
+        "第 399 行: 可能存在重复键 'uses'",
+        "第 400 行: 可能存在重复键 'with'",
+        "第 401 行: 可能存在重复键 'name'",
+        "第 402 行: 可能存在重复键 'path'",
+        "第 409 行: 可能存在重复键 'retention-days'",
+        "第 412 行: 可能存在重复键 'name'",
+        "第 413 行: 可能存在重复键 'runs-on'",
+        "第 414 行: 可能存在重复键 'needs'",
+        "第 415 行: 可能存在重复键 'if'",
+        "第 417 行: 可能存在重复键 'steps'",
+        "第 419 行: 可能存在重复键 'run'",
+        "第 433 行: 可能存在重复键 'echo \"❌ Quality gate failed'",
+        "第 443 行: 可能存在重复键 'echo \"⚠️  Warning'",
+        "第 449 行: 可能存在重复键 'if'",
+        "第 450 行: 可能存在重复键 'uses'",
+        "第 451 行: 可能存在重复键 'with'",
+        "第 501 行: 可能存在重复键 'owner'",
+        "第 502 行: 可能存在重复键 'repo'",
+        "第 504 行: 可能存在重复键 'body'"
+      ],
+      "errors": []
+    },
+    "workflows/deploy.yml": {
+      "path": "workflows/deploy.yml",
+      "isValid": true,
+      "message": "语法正确",
+      "warnings": [
+        "第 19 行: 可能存在重复键 'description'",
+        "第 20 行: 可能存在重复键 'required'",
+        "第 21 行: 可能存在重复键 'default'",
+        "第 22 行: 可能存在重复键 'type'",
+        "第 23 行: 可能存在重复键 'options'",
+        "第 28 行: 可能存在重复键 'description'",
+        "第 29 行: 可能存在重复键 'required'",
+        "第 30 行: 可能存在重复键 'default'",
+        "第 31 行: 可能存在重复键 'type'",
+        "第 33 行: 可能存在重复键 'description'",
+        "第 34 行: 可能存在重复键 'required'",
+        "第 35 行: 可能存在重复键 'type'",
+        "第 45 行: 可能存在重复键 'environment'",
+        "第 47 行: 可能存在重复键 'deployment_strategy'",
+        "第 61 行: 可能存在重复键 'id'",
+        "第 62 行: 可能存在重复键 'run'",
+        "第 77 行: 可能存在重复键 'id'",
+        "第 78 行: 可能存在重复键 'run'",
+        "第 90 行: 可能存在重复键 'runs-on'",
+        "第 93 行: 可能存在重复键 'steps'",
+        "第 98 行: 可能存在重复键 'run'",
+        "第 110 行: 可能存在重复键 'run'",
+        "第 144 行: 可能存在重复键 'run'",
+        "第 163 行: 可能存在重复键 'needs'",
+        "第 164 行: 可能存在重复键 'if'",
+        "第 165 行: 可能存在重复键 'runs-on'",
+        "第 166 行: 可能存在重复键 'environment'",
+        "第 168 行: 可能存在重复键 'steps'",
+        "第 170 行: 可能存在重复键 'uses'",
+        "第 173 行: 可能存在重复键 'uses'",
+        "第 178 行: 可能存在重复键 'run'",
+        "第 184 行: 可能存在重复键 'run'",
+        "第 213 行: 可能存在重复键 'run'",
+        "第 223 行: 可能存在重复键 '\"https'",
+        "第 224 行: 可能存在重复键 '\"https'",
+        "第 225 行: 可能存在重复键 '\"https'",
+        "第 247 行: 可能存在重复键 'run'",
+        "第 267 行: 可能存在重复键 'needs'",
+        "第 268 行: 可能存在重复键 'if'",
+        "第 269 行: 可能存在重复键 'runs-on'",
+        "第 270 行: 可能存在重复键 'environment'",
+        "第 272 行: 可能存在重复键 'steps'",
+        "第 274 行: 可能存在重复键 'uses'",
+        "第 277 行: 可能存在重复键 'uses'",
+        "第 278 行: 可能存在重复键 'with'",
+        "第 279 行: 可能存在重复键 'version'",
+        "第 282 行: 可能存在重复键 'run'",
+        "第 288 行: 可能存在重复键 'run'",
+        "第 306 行: 可能存在重复键 'run'",
+        "第 364 行: 可能存在重复键 'if'",
+        "第 365 行: 可能存在重复键 'run'",
+        "第 392 行: 可能存在重复键 'run'",
+        "第 397 行: 可能存在重复键 '\"https'",
+        "第 398 行: 可能存在重复键 '\"https'",
+        "第 399 行: 可能存在重复键 '\"https'",
+        "第 425 行: 可能存在重复键 'run'",
+        "第 440 行: 可能存在重复键 'if'",
+        "第 441 行: 可能存在重复键 'runs-on'",
+        "第 442 行: 可能存在重复键 'environment'",
+        "第 444 行: 可能存在重复键 'steps'",
+        "第 446 行: 可能存在重复键 'uses'",
+        "第 449 行: 可能存在重复键 'uses'",
+        "第 450 行: 可能存在重复键 'with'",
+        "第 451 行: 可能存在重复键 'version'",
+        "第 454 行: 可能存在重复键 'run'",
+        "第 464 行: 可能存在重复键 'run'",
+        "第 484 行: 可能存在重复键 'needs'",
+        "第 485 行: 可能存在重复键 'if'",
+        "第 486 行: 可能存在重复键 'runs-on'",
+        "第 488 行: 可能存在重复键 'steps'",
+        "第 490 行: 可能存在重复键 'run'",
+        "第 503 行: 可能存在重复键 'run'",
+        "第 513 行: 可能存在重复键 'run'",
+        "第 537 行: 可能存在重复键 'uses'",
+        "第 538 行: 可能存在重复键 'with'"
+      ],
+      "errors": []
+    },
+    "workflows/docker-build.yml": {
+      "path": "workflows/docker-build.yml",
+      "isValid": true,
+      "message": "语法正确",
+      "warnings": [
+        "第 14 行: 可能存在重复键 'branches'",
+        "第 15 行: 可能存在重复键 'paths'",
+        "第 33 行: 可能存在重复键 'description'",
+        "第 34 行: 可能存在重复键 'required'",
+        "第 35 行: 可能存在重复键 'default'",
+        "第 36 行: 可能存在重复键 'type'",
+        "第 61 行: 可能存在重复键 'uses'",
+        "第 63 行: 可能存在重复键 'with'",
+        "第 99 行: 可能存在重复键 'runs-on'",
+        "第 110 行: 可能存在重复键 'dockerfile'",
+        "第 111 行: 可能存在重复键 'context'",
+        "第 112 行: 可能存在重复键 'build-args'",
+        "第 116 行: 可能存在重复键 'dockerfile'",
+        "第 117 行: 可能存在重复键 'context'",
+        "第 118 行: 可能存在重复键 'build-args'",
+        "第 122 行: 可能存在重复键 'dockerfile'",
+        "第 123 行: 可能存在重复键 'context'",
+        "第 124 行: 可能存在重复键 'build-args'",
+        "第 128 行: 可能存在重复键 'dockerfile'",
+        "第 129 行: 可能存在重复键 'context'",
+        "第 130 行: 可能存在重复键 'build-args'",
+        "第 134 行: 可能存在重复键 'dockerfile'",
+        "第 135 行: 可能存在重复键 'context'",
+        "第 136 行: 可能存在重复键 'build-args'",
+        "第 140 行: 可能存在重复键 'dockerfile'",
+        "第 141 行: 可能存在重复键 'context'",
+        "第 142 行: 可能存在重复键 'build-args'",
+        "第 147 行: 可能存在重复键 'steps'",
+        "第 149 行: 可能存在重复键 'uses'",
+        "第 150 行: 可能存在重复键 'with'",
+        "第 151 行: 可能存在重复键 'fetch-depth'",
+        "第 154 行: 可能存在重复键 'uses'",
+        "第 155 行: 可能存在重复键 'with'",
+        "第 160 行: 可能存在重复键 'uses'",
+        "第 161 行: 可能存在重复键 'with'",
+        "第 167 行: 可能存在重复键 'id'",
+        "第 168 行: 可能存在重复键 'uses'",
+        "第 169 行: 可能存在重复键 'with'",
+        "第 180 行: 可能存在重复键 'id'",
+        "第 199 行: 可能存在重复键 'uses'",
+        "第 200 行: 可能存在重复键 'with'",
+        "第 204 行: 可能存在重复键 'tags'",
+        "第 212 行: 可能存在重复键 'if'",
+        "第 213 行: 可能存在重复键 'uses'",
+        "第 214 行: 可能存在重复键 'with'",
+        "第 220 行: 可能存在重复键 'if'",
+        "第 221 行: 可能存在重复键 'uses'",
+        "第 222 行: 可能存在重复键 'with'",
+        "第 227 行: 可能存在重复键 'if'",
+        "第 228 行: 可能存在重复键 'run'",
+        "第 244 行: 可能存在重复键 'if'",
+        "第 245 行: 可能存在重复键 'uses'",
+        "第 246 行: 可能存在重复键 'with'",
+        "第 252 行: 可能存在重复键 'needs'",
+        "第 253 行: 可能存在重复键 'if'",
+        "第 254 行: 可能存在重复键 'runs-on'",
+        "第 255 行: 可能存在重复键 'steps'",
+        "第 257 行: 可能存在重复键 'uses'",
+        "第 258 行: 可能存在重复键 'with'",
+        "第 260 行: 可能存在重复键 'fetch-depth'",
+        "第 263 行: 可能存在重复键 'uses'",
+        "第 264 行: 可能存在重复键 'with'",
+        "第 266 行: 可能存在重复键 'path'",
+        "第 270 行: 可能存在重复键 'run'",
+        "第 303 行: 可能存在重复键 'run'",
+        "第 321 行: 可能存在重复键 'needs'",
+        "第 322 行: 可能存在重复键 'if'",
+        "第 323 行: 可能存在重复键 'runs-on'",
+        "第 324 行: 可能存在重复键 'steps'",
+        "第 326 行: 可能存在重复键 'id'",
+        "第 327 行: 可能存在重复键 'run'",
+        "第 335 行: 可能存在重复键 'run'"
+      ],
+      "errors": []
+    },
+    "workflows/notifications.yml": {
+      "path": "workflows/notifications.yml",
+      "isValid": true,
+      "message": "语法正确",
+      "warnings": [
+        "第 14 行: 可能存在重复键 'types'",
+        "第 16 行: 可能存在重复键 'types'",
+        "第 18 行: 可能存在重复键 'types'",
+        "第 36 行: 可能存在重复键 'description'",
+        "第 37 行: 可能存在重复键 'required'",
+        "第 38 行: 可能存在重复键 'type'",
+        "第 40 行: 可能存在重复键 'description'",
+        "第 41 行: 可能存在重复键 'required'",
+        "第 42 行: 可能存在重复键 'default'",
+        "第 43 行: 可能存在重复键 'type'",
+        "第 59 行: 可能存在重复键 'notification_type'",
+        "第 108 行: 可能存在重复键 'runs-on'",
+        "第 111 行: 可能存在重复键 'outputs'",
+        "第 113 行: 可能存在重复键 'steps'",
+        "第 120 行: 可能存在重复键 'id'",
+        "第 123 行: 可能存在重复键 'run'",
+        "第 204 行: 可能存在重复键 'runs-on'",
+        "第 205 行: 可能存在重复键 'needs'",
+        "第 206 行: 可能存在重复键 'if'",
+        "第 207 行: 可能存在重复键 'steps'",
+        "第 209 行: 可能存在重复键 'env'",
+        "第 219 行: 可能存在重复键 'run'",
+        "第 236 行: 可能存在重复键 'return ''",
+        "第 238 行: 可能存在重复键 'return ''",
+        "第 240 行: 可能存在重复键 'return ''",
+        "第 244 行: 可能存在重复键 'return ''",
+        "第 246 行: 可能存在重复键 'return ''",
+        "第 247 行: 可能存在重复键 'else'",
+        "第 248 行: 可能存在重复键 'return ''",
+        "第 269 行: 可能存在重复键 '{'title''",
+        "第 270 行: 可能存在重复键 '{'title''",
+        "第 271 行: 可能存在重复键 '{'title''",
+        "第 272 行: 可能存在重复键 '{'title''",
+        "第 273 行: 可能存在重复键 '{'title''",
+        "第 301 行: 可能存在重复键 ''text''",
+        "第 302 行: 可能存在重复键 ''attachments''",
+        "第 303 行: 可能存在重复键 ''color''",
+        "第 304 行: 可能存在重复键 ''fields''",
+        "第 305 行: 可能存在重复键 '{'title''",
+        "第 306 行: 可能存在重复键 '{'title''",
+        "第 307 行: 可能存在重复键 '{'title''",
+        "第 308 行: 可能存在重复键 '{'title''",
+        "第 309 行: 可能存在重复键 '{'title''",
+        "第 311 行: 可能存在重复键 ''footer''",
+        "第 312 行: 可能存在重复键 ''ts''",
+        "第 322 行: 可能存在重复键 ''text''",
+        "第 323 行: 可能存在重复键 ''attachments''",
+        "第 324 行: 可能存在重复键 ''color''",
+        "第 325 行: 可能存在重复键 ''fields''",
+        "第 326 行: 可能存在重复键 '{'title''",
+        "第 327 行: 可能存在重复键 '{'title''",
+        "第 328 行: 可能存在重复键 '{'title''",
+        "第 330 行: 可能存在重复键 ''footer''",
+        "第 331 行: 可能存在重复键 ''ts''",
+        "第 340 行: 可能存在重复键 ''text''",
+        "第 341 行: 可能存在重复键 ''attachments''",
+        "第 342 行: 可能存在重复键 ''color''",
+        "第 343 行: 可能存在重复键 ''fields''",
+        "第 344 行: 可能存在重复键 '{'title''",
+        "第 345 行: 可能存在重复键 '{'title''",
+        "第 347 行: 可能存在重复键 ''footer''",
+        "第 348 行: 可能存在重复键 ''ts''",
+        "第 372 行: 可能存在重复键 'else'",
+        "第 380 行: 可能存在重复键 'runs-on'",
+        "第 381 行: 可能存在重复键 'needs'",
+        "第 382 行: 可能存在重复键 'if'",
+        "第 383 行: 可能存在重复键 'steps'",
+        "第 385 行: 可能存在重复键 'env'",
+        "第 386 行: 可能存在重复键 'NOTIFICATION_TYPE'",
+        "第 387 行: 可能存在重复键 'WORKFLOW_NAME'",
+        "第 388 行: 可能存在重复键 'WORKFLOW_STATUS'",
+        "第 389 行: 可能存在重复键 'BRANCH'",
+        "第 390 行: 可能存在重复键 'COMMIT_SHA'",
+        "第 391 行: 可能存在重复键 'AUTHOR'",
+        "第 392 行: 可能存在重复键 'ENVIRONMENT'",
+        "第 393 行: 可能存在重复键 'WORKFLOW_DATA'",
+        "第 394 行: 可能存在重复键 'run'",
+        "第 523 行: 可能存在重复键 'if notification_type == 'workflow_completion''",
+        "第 554 行: 可能存在重复键 'elif notification_type == 'daily_summary''",
+        "第 561 行: 可能存在重复键 'top_workflows = sorted(workflows.items(), key=lambda x'",
+        "第 590 行: 可能存在重复键 'else'",
+        "第 602 行: 可能存在重复键 'runs-on'",
+        "第 603 行: 可能存在重复键 'needs'",
+        "第 604 行: 可能存在重复键 'if'",
+        "第 605 行: 可能存在重复键 'steps'",
+        "第 607 行: 可能存在重复键 'env'",
+        "第 608 行: 可能存在重复键 'GITHUB_TOKEN'",
+        "第 609 行: 可能存在重复键 'PR_NUMBER'",
+        "第 610 行: 可能存在重复键 'WORKFLOW_NAME'",
+        "第 611 行: 可能存在重复键 'WORKFLOW_STATUS'",
+        "第 612 行: 可能存在重复键 'COMMIT_SHA'",
+        "第 613 行: 可能存在重复键 'run'",
+        "第 620 行: 可能存在重复键 'def get_status_emoji(status)'",
+        "第 621 行: 可能存在重复键 'if status == 'success''",
+        "第 623 行: 可能存在重复键 'elif status == 'failure''",
+        "第 625 行: 可能存在重复键 'elif status == 'cancelled''",
+        "第 627 行: 可能存在重复键 'else'",
+        "第 672 行: 可能存在重复键 'else'",
+        "第 679 行: 可能存在重复键 'runs-on'",
+        "第 680 行: 可能存在重复键 'needs'",
+        "第 681 行: 可能存在重复键 'if'",
+        "第 682 行: 可能存在重复键 'steps'",
+        "第 684 行: 可能存在重复键 'uses'",
+        "第 685 行: 可能存在重复键 'with'",
+        "第 687 行: 可能存在重复键 'fetch-depth'",
+        "第 690 行: 可能存在重复键 'env'",
+        "第 691 行: 可能存在重复键 'WORKFLOW_DATA'",
+        "第 692 行: 可能存在重复键 'run'",
+        "第 710 行: 可能存在重复键 'else'",
+        "第 757 行: 可能存在重复键 'uses'",
+        "第 758 行: 可能存在重复键 'with'",
+        "第 766 行: 可能存在重复键 'runs-on'",
+        "第 767 行: 可能存在重复键 'needs'",
+        "第 768 行: 可能存在重复键 'if'",
+        "第 769 行: 可能存在重复键 'steps'",
+        "第 771 行: 可能存在重复键 'run'"
+      ],
+      "errors": []
+    },
+    "workflows/performance-monitoring.yml": {
+      "path": "workflows/performance-monitoring.yml",
+      "isValid": true,
+      "message": "语法正确",
+      "warnings": [
+        "第 18 行: 可能存在重复键 'description'",
+        "第 19 行: 可能存在重复键 'required'",
+        "第 20 行: 可能存在重复键 'default'",
+        "第 21 行: 可能存在重复键 'type'",
+        "第 23 行: 可能存在重复键 'description'",
+        "第 24 行: 可能存在重复键 'required'",
+        "第 25 行: 可能存在重复键 'default'",
+        "第 26 行: 可能存在重复键 'type'",
+        "第 27 行: 可能存在重复键 'options'",
+        "第 33 行: 可能存在重复键 'description'",
+        "第 34 行: 可能存在重复键 'required'",
+        "第 35 行: 可能存在重复键 'default'",
+        "第 36 行: 可能存在重复键 'type'",
+        "第 46 行: 可能存在重复键 'environment'",
+        "第 47 行: 可能存在重复键 'test_duration'",
+        "第 48 行: 可能存在重复键 'load_pattern'",
+        "第 69 行: 可能存在重复键 'runs-on'",
+        "第 75 行: 可能存在重复键 'steps'",
+        "第 80 行: 可能存在重复键 'uses'",
+        "第 86 行: 可能存在重复键 'uses'",
+        "第 87 行: 可能存在重复键 'with'",
+        "第 89 行: 可能存在重复键 'cache'",
+        "第 92 行: 可能存在重复键 'run'",
+        "第 100 行: 可能存在重复键 'id'",
+        "第 101 行: 可能存在重复键 'run'",
+        "第 114 行: 可能存在重复键 'echo \"service_url=https'",
+        "第 118 行: 可能存在重复键 'echo \"service_url=https'",
+        "第 122 行: 可能存在重复键 'echo \"service_url=https'",
+        "第 130 行: 可能存在重复键 'echo \"service_url=https'",
+        "第 134 行: 可能存在重复键 'echo \"service_url=https'",
+        "第 138 行: 可能存在重复键 'echo \"service_url=https'",
+        "第 142 行: 可能存在重复键 'echo \"service_url=https'",
+        "第 150 行: 可能存在重复键 'run'",
+        "第 198 行: 可能存在重复键 ''status_code''",
+        "第 199 行: 可能存在重复键 ''response_time''",
+        "第 200 行: 可能存在重复键 ''success''",
+        "第 202 行: 可能存在重复键 ''timestamp''",
+        "第 248 行: 可能存在重复键 'return {'error''",
+        "第 277 行: 可能存在重复键 ''test_duration''",
+        "第 332 行: 可能存在重复键 'run'",
+        "第 347 行: 可能存在重复键 'uses'",
+        "第 348 行: 可能存在重复键 'with'",
+        "第 354 行: 可能存在重复键 'needs'",
+        "第 355 行: 可能存在重复键 'runs-on'",
+        "第 356 行: 可能存在重复键 'strategy'",
+        "第 357 行: 可能存在重复键 'matrix'",
+        "第 359 行: 可能存在重复键 'fail-fast'",
+        "第 361 行: 可能存在重复键 'steps'",
+        "第 363 行: 可能存在重复键 'uses'",
+        "第 366 行: 可能存在重复键 'uses'",
+        "第 367 行: 可能存在重复键 'with'",
+        "第 368 行: 可能存在重复键 'node-version'",
+        "第 369 行: 可能存在重复键 'cache'",
+        "第 372 行: 可能存在重复键 'run'",
+        "第 376 行: 可能存在重复键 'id'",
+        "第 377 行: 可能存在重复键 'run'",
+        "第 389 行: 可能存在重复键 'echo \"app_url=https'",
+        "第 392 行: 可能存在重复键 'echo \"app_url=https'",
+        "第 399 行: 可能存在重复键 'echo \"app_url=https'",
+        "第 402 行: 可能存在重复键 'echo \"app_url=https'",
+        "第 405 行: 可能存在重复键 'echo \"app_url=https'",
+        "第 412 行: 可能存在重复键 'run'",
+        "第 432 行: 可能存在重复键 '\"categories'",
+        "第 433 行: 可能存在重复键 '\"categories'",
+        "第 434 行: 可能存在重复键 '\"categories'",
+        "第 446 行: 可能存在重复键 'run'",
+        "第 451 行: 可能存在重复键 'echo \"URL'",
+        "第 535 行: 可能存在重复键 'uses'",
+        "第 536 行: 可能存在重复键 'with'",
+        "第 537 行: 可能存在重复键 'name'",
+        "第 538 行: 可能存在重复键 'path'",
+        "第 539 行: 可能存在重复键 'retention-days'",
+        "第 542 行: 可能存在重复键 'uses'",
+        "第 543 行: 可能存在重复键 'with'",
+        "第 544 行: 可能存在重复键 'name'",
+        "第 545 行: 可能存在重复键 'path'",
+        "第 546 行: 可能存在重复键 'retention-days'",
+        "第 549 行: 可能存在重复键 'needs'",
+        "第 550 行: 可能存在重复键 'runs-on'",
+        "第 552 行: 可能存在重复键 'steps'",
+        "第 554 行: 可能存在重复键 'uses'",
+        "第 557 行: 可能存在重复键 'uses'",
+        "第 558 行: 可能存在重复键 'with'",
+        "第 559 行: 可能存在重复键 'node-version'",
+        "第 560 行: 可能存在重复键 'cache'",
+        "第 563 行: 可能存在重复键 'run'",
+        "第 568 行: 可能存在重复键 'run'",
+        "第 658 行: 可能存在重复键 'name'",
+        "第 659 行: 可能存在重复键 'totalTime'",
+        "第 660 行: 可能存在重复键 'steps'",
+        "第 661 行: 可能存在重复键 'navigation'",
+        "第 662 行: 可能存在重复键 'formFilling'",
+        "第 663 行: 可能存在重复键 'submission'",
+        "第 696 行: 可能存在重复键 'name'",
+        "第 697 行: 可能存在重复键 'totalTime'",
+        "第 698 行: 可能存在重复键 'steps'",
+        "第 699 行: 可能存在重复键 'navigation'",
+        "第 737 行: 可能存在重复键 'name'",
+        "第 738 行: 可能存在重复键 'totalTime'",
+        "第 739 行: 可能存在重复键 'steps'",
+        "第 742 行: 可能存在重复键 'submission'",
+        "第 752 行: 可能存在重复键 'run'",
+        "第 761 行: 可能存在重复键 'export BASE_URL=\"https'",
+        "第 771 行: 可能存在重复键 'uses'",
+        "第 772 行: 可能存在重复键 'with'",
+        "第 773 行: 可能存在重复键 'name'",
+        "第 774 行: 可能存在重复键 'path'",
+        "第 775 行: 可能存在重复键 'retention-days'",
+        "第 778 行: 可能存在重复键 'needs'",
+        "第 780 行: 可能存在重复键 'runs-on'",
+        "第 782 行: 可能存在重复键 'steps'",
+        "第 784 行: 可能存在重复键 'uses'",
+        "第 787 行: 可能存在重复键 'uses'",
+        "第 788 行: 可能存在重复键 'with'",
+        "第 789 行: 可能存在重复键 'python-version'",
+        "第 790 行: 可能存在重复键 'cache'",
+        "第 793 行: 可能存在重复键 'uses'",
+        "第 794 行: 可能存在重复键 'with'",
+        "第 797 行: 可能存在重复键 'path'",
+        "第 800 行: 可能存在重复键 'run'",
+        "第 807 行: 可能存在重复键 'run'",
+        "第 811 行: 可能存在重复键 'run'",
+        "第 826 行: 可能存在重复键 ''timestamp''",
+        "第 891 行: 可能存在重复键 ''component''",
+        "第 892 行: 可能存在重复键 ''metric''",
+        "第 893 行: 可能存在重复键 ''current''",
+        "第 894 行: 可能存在重复键 ''baseline''",
+        "第 895 行: 可能存在重复键 ''change_percent''",
+        "第 907 行: 可能存在重复键 ''component''",
+        "第 908 行: 可能存在重复键 ''metric''",
+        "第 909 行: 可能存在重复键 ''current''",
+        "第 910 行: 可能存在重复键 ''baseline''",
+        "第 911 行: 可能存在重复键 ''change_percent''",
+        "第 915 行: 可能存在重复键 ''component''",
+        "第 916 行: 可能存在重复键 ''metric''",
+        "第 917 行: 可能存在重复键 ''current''",
+        "第 918 行: 可能存在重复键 ''baseline''",
+        "第 919 行: 可能存在重复键 ''change_percent''",
+        "第 965 行: 可能存在重复键 'for service, data in results['backend'].items()'",
+        "第 969 行: 可能存在重复键 'for app, data in results['frontend'].items()'",
+        "第 970 行: 可能存在重复键 'if 'metrics' in data and 'lighthouse' in data['metrics']'",
+        "第 1023 行: 可能存在重复键 'if __name__ == \"__main__\"'",
+        "第 1056 行: 可能存在重复键 'run'",
+        "第 1065 行: 可能存在重复键 'run'",
+        "第 1122 行: 可能存在重复键 'if analysis['regressions']'",
+        "第 1131 行: 可能存在重复键 'if __name__ == \"__main__\"'",
+        "第 1143 行: 可能存在重复键 'uses'",
+        "第 1144 行: 可能存在重复键 'with'",
+        "第 1145 行: 可能存在重复键 'name'",
+        "第 1146 行: 可能存在重复键 'path'",
+        "第 1149 行: 可能存在重复键 'retention-days'",
+        "第 1153 行: 可能存在重复键 'uses'",
+        "第 1154 行: 可能存在重复键 'with'",
+        "第 1186 行: 可能存在重复键 'owner'",
+        "第 1187 行: 可能存在重复键 'repo'",
+        "第 1189 行: 可能存在重复键 'body'",
+        "第 1197 行: 可能存在重复键 'needs'",
+        "第 1198 行: 可能存在重复键 'if'",
+        "第 1199 行: 可能存在重复键 'runs-on'",
+        "第 1201 行: 可能存在重复键 'steps'",
+        "第 1203 行: 可能存在重复键 'uses'",
+        "第 1204 行: 可能存在重复键 'with'",
+        "第 1208 行: 可能存在重复键 'uses'",
+        "第 1209 行: 可能存在重复键 'with'",
+        "第 1210 行: 可能存在重复键 'pattern'",
+        "第 1211 行: 可能存在重复键 'merge-multiple'",
+        "第 1212 行: 可能存在重复键 'path'",
+        "第 1215 行: 可能存在重复键 'run'",
+        "第 1237 行: 可能存在重复键 ''throughput''",
+        "第 1262 行: 可能存在重复键 'with open(file, 'r') as f'",
+        "第 1279 行: 可能存在重复键 'if baseline'",
+        "第 1305 行: 可能存在重复键 'if baseline'",
+        "第 1313 行: 可能存在重复键 'run'"
+      ],
+      "errors": []
+    },
+    "workflows/test-report.yml": {
+      "path": "workflows/test-report.yml",
+      "isValid": true,
+      "message": "语法正确",
+      "warnings": [
+        "第 21 行: 可能存在重复键 'uses'",
+        "第 26 行: 可能存在重复键 'uses'",
+        "第 27 行: 可能存在重复键 'with'",
+        "第 57 行: 可能存在重复键 'run'",
+        "第 152 行: 可能存在重复键 'tests'",
+        "第 153 行: 可能存在重复键 'coverage'",
+        "第 195 行: 可能存在重复键 'margin'",
+        "第 202 行: 可能存在重复键 'background'",
+        "第 204 行: 可能存在重复键 'padding'",
+        "第 208 行: 可能存在重复键 'margin'",
+        "第 212 行: 可能存在重复键 'margin'",
+        "第 219 行: 可能存在重复键 'padding'",
+        "第 220 行: 可能存在重复键 'background'",
+        "第 223 行: 可能存在重复键 'background'",
+        "第 224 行: 可能存在重复键 'padding'",
+        "第 225 行: 可能存在重复键 'border-radius'",
+        "第 226 行: 可能存在重复键 'text-align'",
+        "第 227 行: 可能存在重复键 'box-shadow'",
+        "第 230 行: 可能存在重复键 'margin'",
+        "第 231 行: 可能存在重复键 'color'",
+        "第 234 行: 可能存在重复键 'font-size'",
+        "第 236 行: 可能存在重复键 'margin'",
+        "第 243 行: 可能存在重复键 'padding'",
+        "第 249 行: 可能存在重复键 'color'",
+        "第 254 行: 可能存在重复键 'display'",
+        "第 255 行: 可能存在重复键 'grid-template-columns'",
+        "第 256 行: 可能存在重复键 'gap'",
+        "第 260 行: 可能存在重复键 'background'",
+        "第 262 行: 可能存在重复键 'border-radius'",
+        "第 263 行: 可能存在重复键 'padding'",
+        "第 266 行: 可能存在重复键 'margin'",
+        "第 267 行: 可能存在重复键 'color'",
+        "第 270 行: 可能存在重复键 'display'",
+        "第 272 行: 可能存在重复键 'margin-bottom'",
+        "第 275 行: 可能存在重复键 'background'",
+        "第 276 行: 可能存在重复键 'border-radius'",
+        "第 278 行: 可能存在重复键 'overflow'",
+        "第 279 行: 可能存在重复键 'margin-top'",
+        "第 282 行: 可能存在重复键 'height'",
+        "第 283 行: 可能存在重复键 'background'",
+        "第 287 行: 可能存在重复键 'background'",
+        "第 288 行: 可能存在重复键 'color'",
+        "第 289 行: 可能存在重复键 'padding'",
+        "第 290 行: 可能存在重复键 'text-align'",
+        "第 293 行: 可能存在重复键 'display'",
+        "第 294 行: 可能存在重复键 'padding'",
+        "第 295 行: 可能存在重复键 'border-radius'",
+        "第 296 行: 可能存在重复键 'font-size'",
+        "第 297 行: 可能存在重复键 'font-weight'",
+        "第 354 行: 可能存在重复键 '<div class=\"coverage-fill\" style=\"width'",
+        "第 369 行: 可能存在重复键 '<span>通过'",
+        "第 370 行: 可能存在重复键 '<span>失败'",
+        "第 371 行: 可能存在重复键 '<span>跳过'",
+        "第 414 行: 可能存在重复键 'uses'",
+        "第 415 行: 可能存在重复键 'with'",
+        "第 423 行: 可能存在重复键 'uses'",
+        "第 424 行: 可能存在重复键 'with'",
+        "第 431 行: 可能存在重复键 'if'",
+        "第 432 行: 可能存在重复键 'uses'",
+        "第 433 行: 可能存在重复键 'with'",
+        "第 434 行: 可能存在重复键 'script'"
+      ],
+      "errors": []
+    },
+    "workflows/test.yml": {
+      "path": "workflows/test.yml",
+      "isValid": true,
+      "message": "语法正确",
+      "warnings": [
+        "第 7 行: 可能存在重复键 'branches'",
+        "第 26 行: 可能存在重复键 'description'",
+        "第 27 行: 可能存在重复键 'required'",
+        "第 28 行: 可能存在重复键 'default'",
+        "第 29 行: 可能存在重复键 'type'",
+        "第 30 行: 可能存在重复键 'options'",
+        "第 34 行: 可能存在重复键 'description'",
+        "第 35 行: 可能存在重复键 'required'",
+        "第 36 行: 可能存在重复键 'default'",
+        "第 37 行: 可能存在重复键 'type'",
+        "第 72 行: 可能存在重复键 'uses'",
+        "第 73 行: 可能存在重复键 'with'",
+        "第 78 行: 可能存在重复键 'uses'",
+        "第 79 行: 可能存在重复键 'with'",
+        "第 86 行: 可能存在重复键 'run'",
+        "第 89 行: 可能存在重复键 'run'",
+        "第 92 行: 可能存在重复键 'run'",
+        "第 95 行: 可能存在重复键 'run'",
+        "第 98 行: 可能存在重复键 'run'",
+        "第 103 行: 可能存在重复键 'uses'",
+        "第 105 行: 可能存在重复键 'with'",
+        "第 114 行: 可能存在重复键 'name'",
+        "第 115 行: 可能存在重复键 'runs-on'",
+        "第 116 行: 可能存在重复键 'timeout-minutes'",
+        "第 129 行: 可能存在重复键 'options'",
+        "第 138 行: 可能存在重复键 'image'",
+        "第 139 行: 可能存在重复键 'options'",
+        "第 144 行: 可能存在重复键 'ports'",
+        "第 147 行: 可能存在重复键 'steps'",
+        "第 149 行: 可能存在重复键 'uses'",
+        "第 152 行: 可能存在重复键 'uses'",
+        "第 153 行: 可能存在重复键 'with'",
+        "第 155 行: 可能存在重复键 'cache'",
+        "第 159 行: 可能存在重复键 'run'",
+        "第 165 行: 可能存在重复键 'working-directory'",
+        "第 166 行: 可能存在重复键 'run'",
+        "第 168 行: 可能存在重复键 'env'",
+        "第 172 行: 可能存在重复键 'working-directory'",
+        "第 173 行: 可能存在重复键 'run'",
+        "第 183 行: 可能存在重复键 'env'",
+        "第 184 行: 可能存在重复键 'DATABASE_URL'",
+        "第 188 行: 可能存在重复键 'uses'",
+        "第 189 行: 可能存在重复键 'with'",
+        "第 192 行: 可能存在重复键 'name'",
+        "第 196 行: 可能存在重复键 'uses'",
+        "第 197 行: 可能存在重复键 'if'",
+        "第 198 行: 可能存在重复键 'with'",
+        "第 199 行: 可能存在重复键 'name'",
+        "第 200 行: 可能存在重复键 'path'",
+        "第 203 行: 可能存在重复键 'retention-days'",
+        "第 207 行: 可能存在重复键 'name'",
+        "第 208 行: 可能存在重复键 'runs-on'",
+        "第 209 行: 可能存在重复键 'timeout-minutes'",
+        "第 210 行: 可能存在重复键 'needs'",
+        "第 212 行: 可能存在重复键 'strategy'",
+        "第 213 行: 可能存在重复键 'matrix'",
+        "第 216 行: 可能存在重复键 'steps'",
+        "第 218 行: 可能存在重复键 'uses'",
+        "第 221 行: 可能存在重复键 'uses'",
+        "第 222 行: 可能存在重复键 'with'",
+        "第 223 行: 可能存在重复键 'node-version'",
+        "第 224 行: 可能存在重复键 'cache'",
+        "第 227 行: 可能存在重复键 'uses'",
+        "第 228 行: 可能存在重复键 'with'",
+        "第 229 行: 可能存在重复键 'version'",
+        "第 232 行: 可能存在重复键 'working-directory'",
+        "第 233 行: 可能存在重复键 'run'",
+        "第 236 行: 可能存在重复键 'working-directory'",
+        "第 237 行: 可能存在重复键 'run'",
+        "第 243 行: 可能存在重复键 'env'",
+        "第 247 行: 可能存在重复键 'uses'",
+        "第 248 行: 可能存在重复键 'with'",
+        "第 249 行: 可能存在重复键 'file'",
+        "第 250 行: 可能存在重复键 'flags'",
+        "第 251 行: 可能存在重复键 'name'",
+        "第 252 行: 可能存在重复键 'fail_ci_if_error'",
+        "第 255 行: 可能存在重复键 'uses'",
+        "第 256 行: 可能存在重复键 'if'",
+        "第 257 行: 可能存在重复键 'with'",
+        "第 258 行: 可能存在重复键 'name'",
+        "第 259 行: 可能存在重复键 'path'",
+        "第 262 行: 可能存在重复键 'retention-days'",
+        "第 266 行: 可能存在重复键 'name'",
+        "第 267 行: 可能存在重复键 'runs-on'",
+        "第 268 行: 可能存在重复键 'timeout-minutes'",
+        "第 269 行: 可能存在重复键 'needs'",
+        "第 272 行: 可能存在重复键 'services'",
+        "第 273 行: 可能存在重复键 'postgres'",
+        "第 274 行: 可能存在重复键 'image'",
+        "第 275 行: 可能存在重复键 'env'",
+        "第 276 行: 可能存在重复键 'POSTGRES_PASSWORD'",
+        "第 277 行: 可能存在重复键 'POSTGRES_DB'",
+        "第 278 行: 可能存在重复键 'options'",
+        "第 283 行: 可能存在重复键 'ports'",
+        "第 286 行: 可能存在重复键 'redis'",
+        "第 287 行: 可能存在重复键 'image'",
+        "第 288 行: 可能存在重复键 'options'",
+        "第 293 行: 可能存在重复键 'ports'",
+        "第 297 行: 可能存在重复键 'image'",
+        "第 298 行: 可能存在重复键 'env'",
+        "第 301 行: 可能存在重复键 'options'",
+        "第 306 行: 可能存在重复键 'ports'",
+        "第 309 行: 可能存在重复键 'steps'",
+        "第 311 行: 可能存在重复键 'uses'",
+        "第 314 行: 可能存在重复键 'uses'",
+        "第 315 行: 可能存在重复键 'with'",
+        "第 316 行: 可能存在重复键 'python-version'",
+        "第 317 行: 可能存在重复键 'cache'",
+        "第 320 行: 可能存在重复键 'uses'",
+        "第 321 行: 可能存在重复键 'with'",
+        "第 322 行: 可能存在重复键 'node-version'",
+        "第 323 行: 可能存在重复键 'cache'",
+        "第 326 行: 可能存在重复键 'uses'",
+        "第 327 行: 可能存在重复键 'with'",
+        "第 328 行: 可能存在重复键 'version'",
+        "第 331 行: 可能存在重复键 'run'",
+        "第 341 行: 可能存在重复键 'run'",
+        "第 343 行: 可能存在重复键 'env'",
+        "第 344 行: 可能存在重复键 'DATABASE_URL'",
+        "第 345 行: 可能存在重复键 'REDIS_URL'",
+        "第 348 行: 可能存在重复键 'run'",
+        "第 358 行: 可能存在重复键 'curl -f http'",
+        "第 359 行: 可能存在重复键 'env'",
+        "第 360 行: 可能存在重复键 'DATABASE_URL'",
+        "第 361 行: 可能存在重复键 'REDIS_URL'",
+        "第 364 行: 可能存在重复键 'run'",
+        "第 372 行: 可能存在重复键 'env'",
+        "第 373 行: 可能存在重复键 'DATABASE_URL'",
+        "第 374 行: 可能存在重复键 'REDIS_URL'",
+        "第 379 行: 可能存在重复键 'uses'",
+        "第 380 行: 可能存在重复键 'with'",
+        "第 381 行: 可能存在重复键 'file'",
+        "第 382 行: 可能存在重复键 'flags'",
+        "第 383 行: 可能存在重复键 'name'",
+        "第 384 行: 可能存在重复键 'fail_ci_if_error'",
+        "第 387 行: 可能存在重复键 'uses'",
+        "第 388 行: 可能存在重复键 'if'",
+        "第 389 行: 可能存在重复键 'with'",
+        "第 390 行: 可能存在重复键 'name'",
+        "第 391 行: 可能存在重复键 'path'",
+        "第 394 行: 可能存在重复键 'retention-days'",
+        "第 398 行: 可能存在重复键 'name'",
+        "第 399 行: 可能存在重复键 'runs-on'",
+        "第 400 行: 可能存在重复键 'timeout-minutes'",
+        "第 401 行: 可能存在重复键 'needs'",
+        "第 402 行: 可能存在重复键 'if'",
+        "第 404 行: 可能存在重复键 'strategy'",
+        "第 405 行: 可能存在重复键 'matrix'",
+        "第 409 行: 可能存在重复键 'services'",
+        "第 410 行: 可能存在重复键 'postgres'",
+        "第 411 行: 可能存在重复键 'image'",
+        "第 412 行: 可能存在重复键 'env'",
+        "第 413 行: 可能存在重复键 'POSTGRES_PASSWORD'",
+        "第 414 行: 可能存在重复键 'POSTGRES_DB'",
+        "第 415 行: 可能存在重复键 'options'",
+        "第 420 行: 可能存在重复键 'ports'",
+        "第 423 行: 可能存在重复键 'redis'",
+        "第 424 行: 可能存在重复键 'image'",
+        "第 425 行: 可能存在重复键 'options'",
+        "第 430 行: 可能存在重复键 'ports'",
+        "第 433 行: 可能存在重复键 'steps'",
+        "第 435 行: 可能存在重复键 'uses'",
+        "第 438 行: 可能存在重复键 'uses'",
+        "第 439 行: 可能存在重复键 'with'",
+        "第 440 行: 可能存在重复键 'python-version'",
+        "第 441 行: 可能存在重复键 'cache'",
+        "第 444 行: 可能存在重复键 'uses'",
+        "第 445 行: 可能存在重复键 'with'",
+        "第 446 行: 可能存在重复键 'node-version'",
+        "第 447 行: 可能存在重复键 'cache'",
+        "第 450 行: 可能存在重复键 'uses'",
+        "第 451 行: 可能存在重复键 'with'",
+        "第 452 行: 可能存在重复键 'version'",
+        "第 455 行: 可能存在重复键 'run'",
+        "第 464 行: 可能存在重复键 'run'",
+        "第 468 行: 可能存在重复键 'run'",
+        "第 470 行: 可能存在重复键 'env'",
+        "第 471 行: 可能存在重复键 'DATABASE_URL'",
+        "第 472 行: 可能存在重复键 'REDIS_URL'",
+        "第 475 行: 可能存在重复键 'run'",
+        "第 489 行: 可能存在重复键 'curl -f http'",
+        "第 490 行: 可能存在重复键 'curl -f http'",
+        "第 491 行: 可能存在重复键 'env'",
+        "第 492 行: 可能存在重复键 'DATABASE_URL'",
+        "第 493 行: 可能存在重复键 'REDIS_URL'",
+        "第 496 行: 可能存在重复键 'run'",
+        "第 502 行: 可能存在重复键 'env'",
+        "第 503 行: 可能存在重复键 'CI'",
+        "第 507 行: 可能存在重复键 'uses'",
+        "第 508 行: 可能存在重复键 'if'",
+        "第 509 行: 可能存在重复键 'with'",
+        "第 510 行: 可能存在重复键 'name'",
+        "第 511 行: 可能存在重复键 'path'",
+        "第 514 行: 可能存在重复键 'retention-days'",
+        "第 517 行: 可能存在重复键 'uses'",
+        "第 518 行: 可能存在重复键 'if'",
+        "第 519 行: 可能存在重复键 'with'",
+        "第 520 行: 可能存在重复键 'name'",
+        "第 521 行: 可能存在重复键 'path'",
+        "第 522 行: 可能存在重复键 'retention-days'",
+        "第 526 行: 可能存在重复键 'name'",
+        "第 527 行: 可能存在重复键 'runs-on'",
+        "第 528 行: 可能存在重复键 'timeout-minutes'",
+        "第 529 行: 可能存在重复键 'needs'",
+        "第 530 行: 可能存在重复键 'if'",
+        "第 532 行: 可能存在重复键 'services'",
+        "第 533 行: 可能存在重复键 'postgres'",
+        "第 534 行: 可能存在重复键 'image'",
+        "第 535 行: 可能存在重复键 'env'",
+        "第 536 行: 可能存在重复键 'POSTGRES_PASSWORD'",
+        "第 537 行: 可能存在重复键 'POSTGRES_DB'",
+        "第 538 行: 可能存在重复键 'options'",
+        "第 543 行: 可能存在重复键 'ports'",
+        "第 546 行: 可能存在重复键 'redis'",
+        "第 547 行: 可能存在重复键 'image'",
+        "第 548 行: 可能存在重复键 'options'",
+        "第 553 行: 可能存在重复键 'ports'",
+        "第 556 行: 可能存在重复键 'steps'",
+        "第 558 行: 可能存在重复键 'uses'",
+        "第 561 行: 可能存在重复键 'uses'",
+        "第 562 行: 可能存在重复键 'with'",
+        "第 563 行: 可能存在重复键 'python-version'",
+        "第 564 行: 可能存在重复键 'cache'",
+        "第 567 行: 可能存在重复键 'uses'",
+        "第 568 行: 可能存在重复键 'with'",
+        "第 569 行: 可能存在重复键 'node-version'",
+        "第 570 行: 可能存在重复键 'cache'",
+        "第 573 行: 可能存在重复键 'uses'",
+        "第 574 行: 可能存在重复键 'with'",
+        "第 575 行: 可能存在重复键 'version'",
+        "第 578 行: 可能存在重复键 'run'",
+        "第 586 行: 可能存在重复键 'run'",
+        "第 595 行: 可能存在重复键 'run'",
+        "第 597 行: 可能存在重复键 'env'",
+        "第 598 行: 可能存在重复键 'DATABASE_URL'",
+        "第 599 行: 可能存在重复键 'REDIS_URL'",
+        "第 602 行: 可能存在重复键 'run'",
+        "第 612 行: 可能存在重复键 'curl -f http'",
+        "第 613 行: 可能存在重复键 'env'",
+        "第 614 行: 可能存在重复键 'DATABASE_URL'",
+        "第 615 行: 可能存在重复键 'REDIS_URL'",
+        "第 618 行: 可能存在重复键 'run'",
+        "第 622 行: 可能存在重复键 'env'",
+        "第 623 行: 可能存在重复键 'API_BASE_URL'",
+        "第 627 行: 可能存在重复键 'run'",
+        "第 632 行: 可能存在重复键 'if'",
+        "第 633 行: 可能存在重复键 'run'"
+      ],
+      "errors": []
+    },
+    "workflows/update-badges.yml": {
+      "path": "workflows/update-badges.yml",
+      "isValid": true,
+      "message": "语法正确",
+      "warnings": [
+        "第 29 行: 可能存在重复键 'description'",
+        "第 30 行: 可能存在重复键 'required'",
+        "第 31 行: 可能存在重复键 'default'",
+        "第 32 行: 可能存在重复键 'type'",
+        "第 58 行: 可能存在重复键 'badge_types'",
+        "第 88 行: 可能存在重复键 'id'",
+        "第 89 行: 可能存在重复键 'run'",
+        "第 119 行: 可能存在重复键 'id'",
+        "第 120 行: 可能存在重复键 'run'",
+        "第 159 行: 可能存在重复键 'name'",
+        "第 160 行: 可能存在重复键 'runs-on'",
+        "第 163 行: 可能存在重复键 'outputs'",
+        "第 169 行: 可能存在重复键 'steps'",
+        "第 171 行: 可能存在重复键 'uses'",
+        "第 174 行: 可能存在重复键 'uses'",
+        "第 175 行: 可能存在重复键 'with'",
+        "第 180 行: 可能存在重复键 'uses'",
+        "第 181 行: 可能存在重复键 'with'",
+        "第 183 行: 可能存在重复键 'cache'",
+        "第 186 行: 可能存在重复键 'run'",
+        "第 190 行: 可能存在重复键 'id'",
+        "第 191 行: 可能存在重复键 'run'",
+        "第 209 行: 可能存在重复键 'id'",
+        "第 210 行: 可能存在重复键 'run'",
+        "第 235 行: 可能存在重复键 'id'",
+        "第 236 行: 可能存在重复键 'run'",
+        "第 251 行: 可能存在重复键 'id'",
+        "第 252 行: 可能存在重复键 'run'",
+        "第 272 行: 可能存在重复键 'name'",
+        "第 273 行: 可能存在重复键 'runs-on'",
+        "第 274 行: 可能存在重复键 'needs'",
+        "第 275 行: 可能存在重复键 'if'",
+        "第 277 行: 可能存在重复键 'steps'",
+        "第 279 行: 可能存在重复键 'uses'",
+        "第 280 行: 可能存在重复键 'with'",
+        "第 281 行: 可能存在重复键 'token'",
+        "第 284 行: 可能存在重复键 'uses'",
+        "第 285 行: 可能存在重复键 'with'",
+        "第 286 行: 可能存在重复键 'python-version'",
+        "第 287 行: 可能存在重复键 'cache'",
+        "第 290 行: 可能存在重复键 'run'",
+        "第 294 行: 可能存在重复键 'run'",
+        "第 308 行: 可能存在重复键 'run'",
+        "第 325 行: 可能存在重复键 'run'"
+      ],
+      "errors": []
+    }
+  }
+}

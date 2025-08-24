@@ -8,10 +8,10 @@ import { ServiceError, ServiceErrorType } from '../types/ServiceError';
  * 简单日志接口
  */
 interface SimpleLogger {
-  debug(message: string, metadata?: any): void;
-  info(message: string, metadata?: any): void;
-  warn(message: string, metadata?: any): void;
-  error(message: string, metadata?: any): void;
+  debug(message: string, metadata?: Record<string, unknown>): void;
+  info(message: string, metadata?: Record<string, unknown>): void;
+  warn(message: string, metadata?: Record<string, unknown>): void;
+  error(message: string, metadata?: Record<string, unknown>): void;
 }
 
 /**
@@ -20,21 +20,25 @@ interface SimpleLogger {
 class SimpleLoggerImpl implements SimpleLogger {
   constructor(private serviceName: string, private debugEnabled: boolean = false) {}
 
-  debug(message: string, metadata?: any): void {
+  debug(message: string, metadata?: Record<string, unknown>): void {
     if (this.debugEnabled) {
+      // eslint-disable-next-line no-console
       console.debug(`[${this.serviceName}] DEBUG: ${message}`, metadata || '');
     }
   }
 
-  info(message: string, metadata?: any): void {
+  info(message: string, metadata?: Record<string, unknown>): void {
+    // eslint-disable-next-line no-console
     console.info(`[${this.serviceName}] INFO: ${message}`, metadata || '');
   }
 
-  warn(message: string, metadata?: any): void {
+  warn(message: string, metadata?: Record<string, unknown>): void {
+    // eslint-disable-next-line no-console
     console.warn(`[${this.serviceName}] WARN: ${message}`, metadata || '');
   }
 
-  error(message: string, metadata?: any): void {
+  error(message: string, metadata?: Record<string, unknown>): void {
+    // eslint-disable-next-line no-console
     console.error(`[${this.serviceName}] ERROR: ${message}`, metadata || '');
   }
 }
@@ -51,7 +55,7 @@ export abstract class BaseService extends EventEmitter implements IService {
   protected readonly serviceName: string;
   protected readonly version: string;
   protected startTime: Date;
-  protected metrics: Map<string, any> = new Map();
+  protected metrics: Map<string, unknown> = new Map();
 
   constructor(config: ServiceConfig, serviceName: string, version = '1.0.0') {
     super();
@@ -153,7 +157,7 @@ export abstract class BaseService extends EventEmitter implements IService {
   /**
    * 检查服务健康状态
    */
-  async healthCheck(): Promise<{ status: 'healthy' | 'unhealthy'; details?: any }> {
+  async healthCheck(): Promise<{ status: 'healthy' | 'unhealthy'; details?: Record<string, unknown> }> {
     try {
       if (!this.isInitialized || this.isDestroyed) {
         return {
@@ -218,14 +222,14 @@ export abstract class BaseService extends EventEmitter implements IService {
   /**
    * 获取服务指标
    */
-  getMetrics(): Record<string, any> {
+  getMetrics(): Record<string, unknown> {
     return Object.fromEntries(this.metrics);
   }
 
   /**
    * 设置指标
    */
-  protected setMetric(key: string, value: any): void {
+  protected setMetric(key: string, value: unknown): void {
     this.metrics.set(key, value);
     this.emit('metric', { key, value });
   }
@@ -235,7 +239,7 @@ export abstract class BaseService extends EventEmitter implements IService {
    */
   protected incrementMetric(key: string, increment = 1): void {
     const current = this.metrics.get(key) || 0;
-    this.setMetric(key, current + increment);
+    this.setMetric(key, (current as number) + increment);
   }
 
   /**
@@ -358,10 +362,11 @@ export abstract class BaseService extends EventEmitter implements IService {
   protected async withCache<T>(
     key: string,
     operation: () => Promise<T>,
-    ttl = 5 * 60 * 1000 // 5分钟
+    _ttl = 5 * 60 * 1000 // 5分钟
   ): Promise<T> {
     // 这里可以集成缓存服务
     // 暂时直接执行操作
+    // TODO: 实现缓存逻辑，使用 key 和 _ttl 参数
     return operation();
   }
 
@@ -374,7 +379,7 @@ export abstract class BaseService extends EventEmitter implements IService {
     await this.defaultOnDestroy();
   }
 
-  protected async onHealthCheck(): Promise<any> {
+  protected async onHealthCheck(): Promise<Record<string, unknown>> {
     return await this.defaultOnHealthCheck();
   }
 
@@ -387,13 +392,13 @@ export abstract class BaseService extends EventEmitter implements IService {
     // 默认销毁逻辑
   }
 
-  protected async defaultOnHealthCheck(): Promise<any> {
+  protected async defaultOnHealthCheck(): Promise<Record<string, unknown>> {
     // 默认健康检查逻辑
     return {};
   }
 
   // 静态方法
-  static isService(obj: any): obj is BaseService {
+  static isService(obj: unknown): obj is BaseService {
     return obj instanceof BaseService;
   }
 
@@ -443,13 +448,13 @@ export function ServiceMethod(options: {
   cacheTTL?: number;
 } = {}) {
   return function (
-    target: any,
+    target: unknown,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;
     
-    descriptor.value = async function (this: BaseService, ...args: any[]) {
+    descriptor.value = async function (this: BaseService, ...args: unknown[]) {
       this.ensureInitialized();
       
       const startTime = Date.now();
@@ -469,7 +474,7 @@ export function ServiceMethod(options: {
         }
         
         // 应用超时
-        let result: any;
+        let result: unknown;
         if (options.timeout) {
           result = await this.withTimeout(operation(), options.timeout);
         } else {

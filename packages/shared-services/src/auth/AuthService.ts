@@ -1,9 +1,9 @@
 import { BaseService } from '../base/BaseService';
 import { IService } from '../interfaces/IService';
-import { ServiceError, NotFoundError, ValidationError, AuthenticationError, AuthorizationError, handleUnknownError, ServiceErrorType } from '../types/ServiceError';
+import { ServiceError, AuthenticationError, AuthorizationError, handleUnknownError, ServiceErrorType } from '../types/ServiceError';
 import { AuthConfig } from '../types/ServiceConfig';
 
-import { User, TokenPair, LoginRequest, RegisterRequest, LoginResponse, AuthUser } from '@phoenixcoder/shared-types';
+import { TokenPair, LoginRequest, RegisterRequest, AuthUser, Permission, UserRole } from '@phoenixcoder/shared-types';
 import { ApiClient } from '@phoenixcoder/shared-utils';
 import { EventEmitter } from 'eventemitter3';
 
@@ -14,8 +14,8 @@ export interface AuthState {
   isAuthenticated: boolean;
   user: AuthUser | null;
   token: TokenPair | null;
-  permissions: string[];
-  roles: string[];
+  permissions: Permission[];
+  roles: UserRole[];
 }
 
 /**
@@ -86,12 +86,12 @@ export class AuthService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       const response = await this.apiClient.get('/auth/health');
-      return response.status === 200;
+      return { success: response.status === 200, status: 'healthy' };
     } catch (error: unknown) {
-      return false;
+      return { success: false, status: 'unhealthy', error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -101,7 +101,7 @@ export class AuthService extends BaseService implements IService {
   async login(credentials: LoginRequest): Promise<{ user: AuthUser; token: TokenPair }> {
     try {
       const response = await this.apiClient.post('/auth/login', credentials);
-      const { user, token } = response.data;
+      const { user, token } = response.data as { user: AuthUser; token: TokenPair };
 
       await this.setAuthState({
         isAuthenticated: true,
@@ -129,7 +129,7 @@ export class AuthService extends BaseService implements IService {
   async register(data: RegisterRequest): Promise<{ user: AuthUser; token: TokenPair }> {
     try {
       const response = await this.apiClient.post('/auth/register', data);
-      const { user, token } = response.data;
+      const { user, token } = response.data as { user: AuthUser; token: TokenPair };
 
       await this.setAuthState({
         isAuthenticated: true,
@@ -163,6 +163,7 @@ export class AuthService extends BaseService implements IService {
       }
     } catch (error: unknown) {
       // 忽略登出错误，继续清理本地状态
+      // eslint-disable-next-line no-console
       console.warn('Logout request failed:', error);
     } finally {
       await this.clearAuthState();
@@ -183,7 +184,7 @@ export class AuthService extends BaseService implements IService {
         refreshToken: this.authState.token.refreshToken
       });
       
-      const newToken = response.data.token;
+      const newToken = (response.data as { token: TokenPair }).token;
       
       await this.setAuthState({
         ...this.authState,
@@ -229,14 +230,18 @@ export class AuthService extends BaseService implements IService {
    * 检查权限
    */
   hasPermission(permission: string): boolean {
-    return this.authState.permissions.includes(permission);
+    return this.authState.permissions.some(p => 
+      typeof p === 'string' ? p === permission : p.name === permission
+    );
   }
 
   /**
    * 检查角色
    */
   hasRole(role: string): boolean {
-    return this.authState.roles.includes(role);
+    return this.authState.roles.some(r => 
+      typeof r === 'string' ? r === role : r.name === role
+    );
   }
 
   /**
@@ -284,7 +289,7 @@ export class AuthService extends BaseService implements IService {
   /**
    * 监听认证事件
    */
-  override on<T extends string | symbol>(event: T, fn: (...args: any[]) => void, context?: any): this {
+  override on<T extends string | symbol>(event: T, fn: (...args: unknown[]) => void, context?: unknown): this {
     return super.on(event, fn, context);
   }
 
@@ -292,13 +297,13 @@ export class AuthService extends BaseService implements IService {
    * 监听认证事件（类型安全版本）
    */
   onAuthEvent<K extends keyof AuthEvents>(event: K, listener: (...args: Parameters<AuthEvents[K]>) => void): void {
-    this.eventEmitter.on(event, listener as any);
+    this.eventEmitter.on(event, listener as (...args: unknown[]) => void);
   }
 
   /**
    * 移除认证事件监听
    */
-  override off<T extends string | symbol>(event: T, fn?: ((...args: any[]) => void) | undefined, context?: any, once?: boolean | undefined): this {
+  override off<T extends string | symbol>(event: T, fn?: ((...args: unknown[]) => void) | undefined, context?: unknown, once?: boolean | undefined): this {
     return super.off(event, fn, context, once);
   }
 
@@ -306,7 +311,7 @@ export class AuthService extends BaseService implements IService {
    * 移除认证事件监听（类型安全版本）
    */
   offAuthEvent<K extends keyof AuthEvents>(event: K, listener: (...args: Parameters<AuthEvents[K]>) => void): void {
-    this.eventEmitter.off(event, listener as any);
+    this.eventEmitter.off(event, listener as (...args: unknown[]) => void);
   }
 
   /**
@@ -378,6 +383,7 @@ export class AuthService extends BaseService implements IService {
         }
       }
     } catch (error: unknown) {
+      // eslint-disable-next-line no-console
       console.warn('Failed to restore auth state:', error);
       await this.clearAuthState();
     }
@@ -403,6 +409,7 @@ export class AuthService extends BaseService implements IService {
         try {
           await this.refreshToken();
         } catch (error: unknown) {
+          // eslint-disable-next-line no-console
           console.error('Auto refresh token failed:', error);
         }
       }, refreshTime);
@@ -416,8 +423,9 @@ export class AuthService extends BaseService implements IService {
     // 请求拦截器 - 自动添加认证头
     this.apiClient.addRequestInterceptor((config) => {
       if (this.authState.token?.accessToken) {
-        config.headers = config.headers || {};
-        config.headers.Authorization = `Bearer ${this.authState.token.accessToken}`;
+        const headers = (config as any).headers || {};
+        headers.Authorization = `Bearer ${this.authState.token.accessToken}`;
+        (config as any).headers = headers;
       }
       return config;
     });

@@ -41,6 +41,7 @@ export interface NotificationQueryParams {
   endDate?: Date;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  [key: string]: unknown;
 }
 
 /**
@@ -53,9 +54,9 @@ export interface NotificationCreateData {
   content: string;
   channel?: NotificationChannel[];
   priority?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   templateId?: string;
-  templateData?: Record<string, any>;
+  templateData?: Record<string, unknown>;
   scheduledAt?: Date;
   expiresAt?: Date;
   actionUrl?: string;
@@ -73,9 +74,9 @@ export interface BatchNotificationCreateData {
   content: string;
   channel?: NotificationChannel[];
   priority?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   templateId?: string;
-  templateData?: Record<string, any>;
+  templateData?: Record<string, unknown>;
   scheduledAt?: Date;
   expiresAt?: Date;
   actionUrl?: string;
@@ -193,7 +194,7 @@ export interface NotificationEvents {
   'notification:error': (error: ServiceError) => void;
   'notification:batch-read': (data: { notificationIds: string[]; userId: string }) => void;
   'notification:deleted': (data: { notificationId: string }) => void;
-  'notification:user-notifications-fetched': (data: { userId: string; notifications: Notification[]; params: any }) => void;
+  'notification:user-notifications-fetched': (data: { userId: string; notifications: Notification[]; params: unknown }) => void;
   'notification:unread-count-fetched': (data: { userId: string; count: number }) => void;
 }
 
@@ -259,12 +260,13 @@ export class NotificationService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       const response = await this.apiClient.get('/notifications/health');
-      return response.status === 200;
+      const isHealthy = response.status === 200;
+      return { success: isHealthy, status: isHealthy ? 'healthy' : 'unhealthy', httpStatus: response.status };
     } catch (error: unknown) {
-      return false;
+      return { success: false, status: 'unhealthy', error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -314,7 +316,7 @@ export class NotificationService extends BaseService implements IService {
       // 移除不存在的事件
       return notification;
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'response' in error && (error as any).response?.status === 404) {
+      if (error && typeof error === 'object' && 'response' in error && (error as { response?: { status?: number } }).response?.status === 404) {
         throw new NotFoundError(`通知 ${notificationId} 不存在`, 'notification', 'NotificationService');
       }
       const serviceError = new ServiceError({
@@ -347,7 +349,8 @@ export class NotificationService extends BaseService implements IService {
       return notification;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'NotificationService', 'createNotification', ServiceErrorType.DATA);
-      if (serviceError.details?.response?.status === 400) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('通知数据验证失败', [{ field: 'notificationData', message: '通知数据验证失败', code: 'INVALID_NOTIFICATION_DATA' }], 'NotificationService');
       }
       serviceError.message = '创建通知失败';
@@ -373,7 +376,8 @@ export class NotificationService extends BaseService implements IService {
       return notifications;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'NotificationService', 'createBatchNotifications', ServiceErrorType.DATA);
-      if (serviceError.details?.response?.status === 400) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('批量通知数据验证失败', [{ field: 'batchData', message: '批量通知数据验证失败', code: 'INVALID_BATCH_DATA' }], 'NotificationService');
       }
       serviceError.message = '批量创建通知失败';
@@ -399,7 +403,8 @@ export class NotificationService extends BaseService implements IService {
       return result;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'NotificationService', 'sendNotification', ServiceErrorType.EXTERNAL_SERVICE);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`通知 ${notificationId} 不存在`, 'notification', 'NotificationService');
       }
       serviceError.message = '发送通知失败';
@@ -422,7 +427,8 @@ export class NotificationService extends BaseService implements IService {
       // this.emit(SERVICE_EVENTS.NOTIFICATION_READ, { notificationId, userId });
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'NotificationService', 'markAsRead', ServiceErrorType.DATA);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`通知 ${notificationId} 不存在`, 'notification', 'NotificationService');
       }
       serviceError.message = '标记通知已读失败';
@@ -446,7 +452,8 @@ export class NotificationService extends BaseService implements IService {
       this.eventEmitter.emit('notification:batch-read', { notificationIds, userId });
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'NotificationService', 'markBatchAsRead', ServiceErrorType.DATA);
-      if (serviceError.details?.response?.status === 400) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('批量标记已读数据验证失败', [{ field: 'notificationIds', message: '批量标记已读数据验证失败', code: 'INVALID_BATCH_READ_DATA' }], 'NotificationService');
       }
       serviceError.message = '批量标记通知已读失败';
@@ -468,7 +475,8 @@ export class NotificationService extends BaseService implements IService {
       this.eventEmitter.emit('notification:deleted', { notificationId });
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'NotificationService', 'deleteNotification', ServiceErrorType.DATA);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`通知 ${notificationId} 不存在`, 'notification', 'NotificationService');
       }
       serviceError.message = '删除通知失败';
@@ -508,7 +516,7 @@ export class NotificationService extends BaseService implements IService {
   async getUnreadCount(userId: string): Promise<number> {
     try {
       const response = await this.apiClient.get(`/users/${userId}/notifications/unread-count`);
-      const count = response.data.count as number;
+      const count = (response.data as { count: number }).count;
       
       this.eventEmitter.emit('notification:unread-count-fetched', { userId, count });
       return count;
@@ -537,7 +545,8 @@ export class NotificationService extends BaseService implements IService {
       return template;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'NotificationService', 'createTemplate', ServiceErrorType.DATA);
-      if (serviceError.details?.response?.status === 400) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('通知模板数据验证失败', [{ field: 'templateData', message: '通知模板数据验证失败', code: 'TEMPLATE_VALIDATION_ERROR' }], 'NotificationService');
       }
       serviceError.message = '创建通知模板失败';
@@ -563,10 +572,11 @@ export class NotificationService extends BaseService implements IService {
       return template;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'NotificationService', 'updateTemplate', ServiceErrorType.DATA);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`通知模板 ${templateId} 不存在`, 'notificationTemplate', 'NotificationService');
       }
-      if (serviceError.details?.response?.status === 400) {
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('通知模板更新数据验证失败', [{ field: 'updateData', message: '通知模板更新数据验证失败', code: 'TEMPLATE_UPDATE_VALIDATION_ERROR' }], 'NotificationService');
       }
       serviceError.message = '更新通知模板失败';
@@ -589,7 +599,8 @@ export class NotificationService extends BaseService implements IService {
       // this.emit(SERVICE_EVENTS.NOTIFICATION_TEMPLATE_DELETED, { templateId });
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'NotificationService', 'deleteTemplate', ServiceErrorType.DATA);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`通知模板 ${templateId} 不存在`, 'notificationTemplate', 'NotificationService');
       }
       serviceError.message = '删除通知模板失败';
@@ -621,7 +632,8 @@ export class NotificationService extends BaseService implements IService {
       return template;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'NotificationService', 'getTemplate', ServiceErrorType.DATA);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`通知模板 ${templateId} 不存在`, 'notificationTemplate', 'NotificationService');
       }
       serviceError.message = '获取通知模板失败';
@@ -677,7 +689,8 @@ export class NotificationService extends BaseService implements IService {
       return preferences;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'NotificationService', 'getUserPreferences', ServiceErrorType.DATA);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'NotificationService');
       }
       serviceError.message = '获取用户通知偏好失败';
@@ -703,10 +716,11 @@ export class NotificationService extends BaseService implements IService {
       return updatedPreferences;
     } catch (error: unknown) {
       const serviceError = handleUnknownError(error, 'NotificationService', 'updateUserPreferences', ServiceErrorType.DATA);
-      if (serviceError.details?.response?.status === 404) {
+      const httpDetails = serviceError.details as { response?: { status: number } } | undefined;
+      if (httpDetails?.response?.status === 404) {
         throw new NotFoundError(`用户 ${userId} 不存在`, 'user', 'NotificationService');
       }
-      if (serviceError.details?.response?.status === 400) {
+      if (httpDetails?.response?.status === 400) {
         throw new ValidationError('通知偏好数据验证失败', [{ field: 'preferences', message: '通知偏好数据验证失败', code: 'PREFERENCES_VALIDATION_ERROR' }], 'NotificationService');
       }
       serviceError.message = '更新用户通知偏好失败';
@@ -804,7 +818,7 @@ export class NotificationService extends BaseService implements IService {
   /**
    * 监听通知事件
    */
-  override on<T extends string | symbol>(event: T, fn: (...args: any[]) => void, context?: any): this {
+  override on<T extends string | symbol>(event: T, fn: (...args: unknown[]) => void, context?: unknown): this {
     return super.on(event, fn, context);
   }
 
@@ -812,13 +826,13 @@ export class NotificationService extends BaseService implements IService {
    * 监听通知事件（类型安全版本）
    */
   onNotificationEvent<K extends keyof NotificationEvents>(event: K, listener: NotificationEvents[K]): void {
-    this.eventEmitter.on(event, listener as any);
+    this.eventEmitter.on(event, listener as (...args: unknown[]) => void);
   }
 
   /**
    * 移除通知事件监听
    */
-  override off<T extends string | symbol>(event: T, fn?: ((...args: any[]) => void) | undefined, context?: any, once?: boolean | undefined): this {
+  override off<T extends string | symbol>(event: T, fn?: ((...args: unknown[]) => void) | undefined, context?: unknown, once?: boolean | undefined): this {
     return super.off(event, fn, context, once);
   }
 
@@ -826,7 +840,7 @@ export class NotificationService extends BaseService implements IService {
    * 移除通知事件监听（类型安全版本）
    */
   offNotificationEvent<K extends keyof NotificationEvents>(event: K, listener: NotificationEvents[K]): void {
-    this.eventEmitter.off(event, listener as any);
+    this.eventEmitter.off(event, listener as (...args: unknown[]) => void);
   }
 
   /**
@@ -850,6 +864,7 @@ export class NotificationService extends BaseService implements IService {
           const data = JSON.parse(event.data);
           this.handleWebSocketMessage(data);
         } catch (error: unknown) {
+          // eslint-disable-next-line no-console
           console.error('WebSocket message parse error:', error instanceof Error ? error.message : String(error));
         }
       };
@@ -860,10 +875,12 @@ export class NotificationService extends BaseService implements IService {
       };
       
       this.webSocketConnection.onerror = (error) => {
+        // eslint-disable-next-line no-console
         console.error('WebSocket error:', error);
         // this.emit(SERVICE_EVENTS.WEBSOCKET_ERROR, { error });
       };
     } catch (error: unknown) {
+      // eslint-disable-next-line no-console
       console.error('WebSocket connection error:', error instanceof Error ? error.message : String(error));
     }
   }
@@ -871,21 +888,22 @@ export class NotificationService extends BaseService implements IService {
   /**
    * 处理WebSocket消息
    */
-  private handleWebSocketMessage(data: any): void {
+  private handleWebSocketMessage(data: Record<string, unknown>): void {
     switch (data.type) {
       case 'notification:delivered':
-        this.eventEmitter.emit('notification:delivered', data.notificationId, data.channel);
+        this.eventEmitter.emit('notification:delivered', data.notificationId as string, data.channel as NotificationChannel);
         break;
       case 'notification:read':
-        this.eventEmitter.emit('notification:read', data.notificationId, data.userId);
+        this.eventEmitter.emit('notification:read', data.notificationId as string, data.userId as string);
         break;
       case 'notification:clicked':
-        this.eventEmitter.emit('notification:clicked', data.notificationId, data.userId);
+        this.eventEmitter.emit('notification:clicked', data.notificationId as string, data.userId as string);
         break;
       case 'notification:failed':
-        this.eventEmitter.emit('notification:failed', data.notificationId, data.error);
+        this.eventEmitter.emit('notification:failed', data.notificationId as string, data.error as string);
         break;
       default:
+        // eslint-disable-next-line no-console
         console.warn('Unknown WebSocket message type:', data.type);
     }
   }

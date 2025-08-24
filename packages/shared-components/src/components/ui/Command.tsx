@@ -108,7 +108,7 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
       }
 
       const items = new Map();
-      let count = 0;
+      const count = 0;
 
       // This would be implemented with actual filtering logic
       // For now, we'll just track the structure

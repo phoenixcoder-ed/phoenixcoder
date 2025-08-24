@@ -27,7 +27,7 @@ export interface ModalContextType {
 // Modal 状态类型
 export interface ModalState {
   id: string;
-  component: React.ComponentType<any>;
-  props?: Record<string, any>;
+  component: React.ComponentType<Record<string, unknown>>;
+  props?: Record<string, unknown>;
   size?: ModalSize;
 }

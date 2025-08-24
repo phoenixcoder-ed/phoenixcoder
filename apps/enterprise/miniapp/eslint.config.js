@@ -4,6 +4,26 @@ import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 
 export default [
+    {
+        ignores: [
+            // 构建输出
+            'dist/',
+            'build/',
+            '.taro/',
+            // 依赖
+            'node_modules/',
+            // 配置文件
+            '*.config.js',
+            '*.config.ts',
+            'vite.config.js',
+            'vitest.config.ts',
+            // 生成的文件
+            'src/assets/font-icons/',
+            // 临时文件
+            '.DS_Store',
+            '*.log',
+        ],
+    },
     eslint.configs.recommended,
     {
         files: ['**/*.{js,jsx,ts,tsx}'],

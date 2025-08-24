@@ -15,7 +15,7 @@ export interface UserInfo {
   email?: string;
   roles: string[];
   permissions: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   lastLogin?: Date;
   loginCount?: number;
   isActive?: boolean;
@@ -32,7 +32,7 @@ export interface AuthToken {
   issuedAt: Date;
   userId: string;
   scopes?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -70,7 +70,7 @@ export interface PermissionResult {
   reason?: string;
   requiredPermissions?: string[];
   userPermissions?: string[];
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 /**
@@ -85,7 +85,7 @@ export interface SecurityAuditLog {
   result: 'success' | 'failure' | 'warning';
   ipAddress?: string;
   userAgent?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
 }
 
@@ -155,7 +155,7 @@ export interface SecurityEvents {
   'permission:granted': (userId: string, permission: string, resource?: string) => void;
   'permission:denied': (userId: string, permission: string, resource?: string) => void;
   'security:incident': (incident: SecurityAuditLog) => void;
-  'security:scan': (results: any) => void;
+  'security:scan': (results: Record<string, unknown>) => void;
   'token:created': (token: AuthToken) => void;
   'token:expired': (tokenId: string) => void;
   'token:revoked': (tokenId: string, reason?: string) => void;
@@ -250,17 +250,18 @@ export class SecurityService extends BaseService implements IService {
   /**
    * 健康检查
    */
-  protected override async onHealthCheck(): Promise<boolean> {
+  protected override async onHealthCheck(): Promise<Record<string, unknown>> {
     try {
       // 检查关键配置
       if (!this.securityConfig.encryptionKey || !this.securityConfig.jwtSecret) {
-        return false;
+        return { success: false, status: 'unhealthy', error: 'Missing encryption key or JWT secret' };
       }
       
       // 检查服务状态
-      return this.stats.riskLevel !== 'critical';
+      const isHealthy = this.stats.riskLevel !== 'critical';
+      return { success: isHealthy, status: isHealthy ? 'healthy' : 'unhealthy', riskLevel: this.stats.riskLevel };
     } catch (error) {
-      return false;
+      return { success: false, status: 'unhealthy', error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -364,7 +365,7 @@ export class SecurityService extends BaseService implements IService {
       }
       
       // 验证密码
-      const hashedPassword = user.metadata?.hashedPassword;
+      const hashedPassword = user.metadata?.hashedPassword as string;
       if (!hashedPassword || !await this.verifyPassword(credentials.password, hashedPassword)) {
         await this.recordFailedLogin(attemptKey, '密码错误');
         throw new ValidationError('用户名或密码错误', [{ field: 'credentials', message: '用户名或密码错误', code: 'INVALID_CREDENTIALS' }]);
@@ -561,7 +562,7 @@ export class SecurityService extends BaseService implements IService {
       
       // 验证旧密码
       const hashedPassword = user.metadata?.hashedPassword;
-      if (!hashedPassword || !await this.verifyPassword(oldPassword, hashedPassword)) {
+      if (!hashedPassword || !await this.verifyPassword(oldPassword, hashedPassword as string)) {
         throw new ValidationError('原密码错误', [{ field: 'currentPassword', message: '原密码错误', code: 'INVALID_PASSWORD' }]);
       }
       
@@ -571,7 +572,7 @@ export class SecurityService extends BaseService implements IService {
       // 检查密码历史（如果启用）
       if (this.securityConfig.passwordPolicy?.historyCount) {
         const passwordHistory = user.metadata?.passwordHistory || [];
-        for (const historicalPassword of passwordHistory) {
+        for (const historicalPassword of passwordHistory as string[]) {
           if (await this.verifyPassword(newPassword, historicalPassword)) {
             throw new ValidationError('不能使用最近使用过的密码', [{ field: 'newPassword', message: '不能使用最近使用过的密码', code: 'PASSWORD_REUSED' }]);
           }
@@ -583,8 +584,8 @@ export class SecurityService extends BaseService implements IService {
       
       // 更新密码历史
       if (this.securityConfig.passwordPolicy?.historyCount) {
-        const passwordHistory = user.metadata?.passwordHistory || [];
-        passwordHistory.unshift(hashedPassword);
+        const passwordHistory = (user.metadata?.passwordHistory as string[]) || [];
+        passwordHistory.unshift(hashedPassword as string);
         if (passwordHistory.length > this.securityConfig.passwordPolicy.historyCount) {
           passwordHistory.pop();
         }
@@ -865,7 +866,7 @@ export class SecurityService extends BaseService implements IService {
   /**
    * 监听安全事件
    */
-  override on<T extends string | symbol>(event: T, fn: (...args: any[]) => void, context?: any): this {
+  override on<T extends string | symbol>(event: T, fn: (...args: unknown[]) => void, context?: unknown): this {
     return super.on(event, fn, context);
   }
 
@@ -873,13 +874,13 @@ export class SecurityService extends BaseService implements IService {
    * 监听安全事件（类型安全版本）
    */
   onSecurityEvent<K extends keyof SecurityEvents>(event: K, listener: SecurityEvents[K]): void {
-    this.eventEmitter.on(event, listener as any);
+    this.eventEmitter.on(event, listener as (...args: unknown[]) => void);
   }
 
   /**
    * 移除安全事件监听
    */
-  override off<T extends string | symbol>(event: T, fn?: ((...args: any[]) => void) | undefined, context?: any, once?: boolean | undefined): this {
+  override off<T extends string | symbol>(event: T, fn?: ((...args: unknown[]) => void) | undefined, context?: unknown, once?: boolean | undefined): this {
     return super.off(event, fn, context, once);
   }
 
@@ -887,7 +888,7 @@ export class SecurityService extends BaseService implements IService {
    * 移除安全事件监听（类型安全版本）
    */
   offSecurityEvent<K extends keyof SecurityEvents>(event: K, listener: SecurityEvents[K]): void {
-    super.off(event as string, listener as any);
+    super.off(event as string, listener as (...args: unknown[]) => void);
   }
 
   /**
@@ -1036,7 +1037,7 @@ export class SecurityService extends BaseService implements IService {
   /**
    * 检查角色权限
    */
-  private checkRolePermissions(roles: string[], permission: string): boolean {
+  private checkRolePermissions(roles: string[], _permission: string): boolean {
     // 这里应该实现角色权限映射逻辑
     // 简化实现：admin角色拥有所有权限
     return roles.includes('admin');
@@ -1045,7 +1046,7 @@ export class SecurityService extends BaseService implements IService {
   /**
    * 验证双因素认证码
    */
-  private verifyTwoFactorCode(userId: string, code: string): boolean {
+  private verifyTwoFactorCode(_userId: string, _code: string): boolean {
     // 这里应该实现TOTP验证逻辑
     // 简化实现：总是返回true
     return true;

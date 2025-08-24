@@ -2,21 +2,6 @@ import createActions from '@/utils/actionHelper';
 import { Action } from 'redux-actions';
 import { GrowthPath, Challenge, Skill } from '@/redux/store/growth/types';
 
-// 声明模块以解决类型问题
-declare module '@/utils/actionHelper' {
-    function createActions(_actions: any): any;
-    export default createActions;
-}
-
-declare module 'redux-actions' {
-    export interface Action<T> {
-        type: string;
-        payload?: T;
-        error?: boolean;
-        meta?: any;
-    }
-}
-
 declare module '@/redux/store/growth/types' {
     export interface GrowthPath {
         id: string;
@@ -50,22 +35,22 @@ declare module '@/redux/store/growth/types' {
 }
 
 export interface GrowthActions {
-    fetchGrowthPath: () => Action<void>;
-    fetchGrowthPathSuccess: (_growthPath: GrowthPath) => Action<GrowthPath>;
-    fetchGrowthPathFailed: (_error: string) => Action<string>;
-    updateGrowthProgress: (_progress: number) => Action<number>;
-    fetchChallenges: () => Action<void>;
-    fetchChallengesSuccess: (_challenges: Challenge[]) => Action<Challenge[]>;
-    fetchChallengesFailed: (_error: string) => Action<string>;
-    fetchChallengeDetail: (_challengeId: string) => Action<string>;
+    fetchGrowthPath: () => Action<undefined>;
+    fetchGrowthPathSuccess: (_growthPath: GrowthPath) => Action<{ growthPath: GrowthPath }>;
+    fetchGrowthPathFailed: (_error: string) => Action<{ error: string }>;
+    updateGrowthProgress: (_progress: number) => Action<{ progress: number }>;
+    fetchChallenges: () => Action<undefined>;
+    fetchChallengesSuccess: (_challenges: Challenge[]) => Action<{ challenges: Challenge[] }>;
+    fetchChallengesFailed: (_error: string) => Action<{ error: string }>;
+    fetchChallengeDetail: (_challengeId: string) => Action<{ challengeId: string }>;
     updateChallengeProgress: (
         _challengeId: string,
         _progress: number,
     ) => Action<{ challengeId: string; progress: number }>;
-    completeChallenge: (_challengeId: string) => Action<string>;
-    fetchSkills: () => Action<void>;
-    fetchSkillsSuccess: (_skills: Skill[]) => Action<Skill[]>;
-    fetchSkillsFailed: (_error: string) => Action<string>;
+    completeChallenge: (_challengeId: string) => Action<{ challengeId: string }>;
+    fetchSkills: () => Action<undefined>;
+    fetchSkillsSuccess: (_skills: Skill[]) => Action<{ skills: Skill[] }>;
+    fetchSkillsFailed: (_error: string) => Action<{ error: string }>;
     updateSkillLevel: (_skillId: string, _level: number) => Action<{ skillId: string; level: number }>;
 }
 

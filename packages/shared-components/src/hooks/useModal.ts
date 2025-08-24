@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 
 interface ModalState {
   isOpen: boolean;
-  data?: any;
+  data?: unknown;
 }
 
 // 模态框管理 Hook
@@ -12,7 +12,7 @@ export function useModal(initialOpen: boolean = false) {
     data: undefined,
   });
 
-  const open = useCallback((data?: any) => {
+  const open = useCallback((data?: unknown) => {
     setState({ isOpen: true, data });
   }, []);
 
@@ -20,14 +20,14 @@ export function useModal(initialOpen: boolean = false) {
     setState({ isOpen: false, data: undefined });
   }, []);
 
-  const toggle = useCallback((data?: any) => {
+  const toggle = useCallback((data?: unknown) => {
     setState(prev => ({
       isOpen: !prev.isOpen,
       data: !prev.isOpen ? data : undefined,
     }));
   }, []);
 
-  const setData = useCallback((data: any) => {
+  const setData = useCallback((data: unknown) => {
     setState(prev => ({ ...prev, data }));
   }, []);
 
@@ -45,7 +45,7 @@ export function useModal(initialOpen: boolean = false) {
 export function useMultiModal() {
   const [modals, setModals] = useState<Record<string, ModalState>>({});
 
-  const openModal = useCallback((id: string, data?: any) => {
+  const openModal = useCallback((id: string, data?: unknown) => {
     setModals(prev => ({
       ...prev,
       [id]: { isOpen: true, data },
@@ -59,7 +59,7 @@ export function useMultiModal() {
     }));
   }, []);
 
-  const toggleModal = useCallback((id: string, data?: any) => {
+  const toggleModal = useCallback((id: string, data?: unknown) => {
     setModals(prev => {
       const current = prev[id] || { isOpen: false, data: undefined };
       return {
